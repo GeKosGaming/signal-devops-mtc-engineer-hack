@@ -16,6 +16,20 @@ def assess(samples: list[dict], *, minimum: int = 20, max_error_rate: float = 0.
     return result
 
 
+def require_stable_baseline(refs: list[dict]) -> None:
+    """Gateway API defaults group/kind on readback; compare Service references semantically."""
+    message = 'Run make deploy to restore the stable baseline before the destructive demo'
+    require(isinstance(refs, list) and len(refs) == 2, message)
+    allowed = {'name', 'port', 'weight', 'group', 'kind', 'namespace'}
+    require(all(isinstance(ref, dict) and set(ref) <= allowed for ref in refs), message)
+    expected = {'web-stable': 100, 'web-canary': 0}
+    require({ref.get('name') for ref in refs} == set(expected), message)
+    for ref in refs:
+        require(ref.get('group', '') == '' and ref.get('kind', 'Service') == 'Service'
+                and ref.get('namespace', APP) == APP and ref.get('port') == 8080
+                and ref.get('weight', 1) == expected[ref['name']], message)
+
+
 def routing_split(base: str, canary: int, *, samples: int | None = None) -> dict:
     """Exercise the weighted root route; each request opens a new HTTP connection."""
     require(0 <= canary <= 100, 'Invalid canary percentage')
@@ -129,8 +143,7 @@ def main() -> int:
             base=f'http://127.0.0.1:{hp}'
             if args.demo:
                 initial=get('httproute','web-main',APP)['spec']['rules'][0]['backendRefs']
-                require(initial==[{'name':'web-stable','port':8080,'weight':100},{'name':'web-canary','port':8080,'weight':0}],
-                        'Run make deploy to restore the baseline before the destructive demo')
+                require_stable_baseline(initial)
                 try:
                     report.check('90/10 weighted routing',lambda:split_proof(base))
                     inject(True)

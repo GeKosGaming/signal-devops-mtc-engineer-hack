@@ -95,6 +95,25 @@ class ProcessIsolation(unittest.TestCase):
 
 
 class CanaryGates(unittest.TestCase):
+    def baseline(self):
+        return [{'name': 'web-stable', 'port': 8080, 'weight': 100},
+                {'name': 'web-canary', 'port': 8080, 'weight': 0}]
+    def test_gateway_crd_readback_defaults_are_accepted(self):
+        actual = [{**ref, 'group': '', 'kind': 'Service'} for ref in self.baseline()]
+        canary.require_stable_baseline(actual)
+        canary.require_stable_baseline(list(reversed(actual)))
+    def test_explicit_same_namespace_is_semantically_the_baseline(self):
+        canary.require_stable_baseline([{**ref, 'namespace': runtime.APP} for ref in self.baseline()])
+    def test_foreign_namespace_or_group_or_kind_is_rejected(self):
+        for override in ({'namespace': 'another'}, {'group': 'other.io'}, {'kind': 'CustomBackend'}):
+            with self.subTest(override=override):
+                refs = self.baseline(); refs[0].update(override)
+                with self.assertRaises(runtime.CheckError): canary.require_stable_baseline(refs)
+    def test_baseline_does_not_ignore_filters_or_changed_weights(self):
+        for override in ({'filters': [{'type': 'RequestHeaderModifier'}]}, {'weight': 90}, {'name': 'other-service'}):
+            with self.subTest(override=override):
+                refs = self.baseline(); refs[0].update(override)
+                with self.assertRaises(runtime.CheckError): canary.require_stable_baseline(refs)
     def scrape_inventory(self):
         stamp = (dt.datetime.now(dt.timezone.utc)-dt.timedelta(seconds=1)).isoformat()
         definitions = [('prometheus', None), ('loki', None), ('gateway-probe', None), ('node', None),
