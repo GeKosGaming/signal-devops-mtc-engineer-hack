@@ -140,10 +140,14 @@ def routes_ready() -> dict:
 
 def weights(canary: int) -> dict:
     require(0 <= canary <= 100, 'Invalid canary percentage')
-    patch = [{'op': 'replace', 'path': '/spec/rules/0/backendRefs', 'value': [
-        {'name': 'web-stable', 'port': 8080, 'weight': 100-canary},
-        {'name': 'web-canary', 'port': 8080, 'weight': canary}]}]
-    k('-n', APP, 'patch', 'httproute', 'web-main', '--type=json', '--field-manager=signal', '-p', json.dumps(patch))
+    from render import gateway
+    # Update and Apply are separate SSA ownership entries even with the same
+    # manager name. Keep deployment and runtime route changes under one Apply.
+    route = next(x for x in gateway() if x['kind'] == 'HTTPRoute' and x['metadata']['name'] == 'web-main')
+    selected = {'web-stable': 100-canary, 'web-canary': canary}
+    for ref in route['spec']['rules'][0]['backendRefs']:
+        ref['weight'] = selected[ref['name']]
+    k('apply', '--server-side', '--field-manager=signal', '-f', '-', data=route)
     return retry(routes_ready, 60, 1)
 
 def percentile(values: list[float], p: float) -> float:

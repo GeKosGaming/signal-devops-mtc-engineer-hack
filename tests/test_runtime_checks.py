@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts'))
 import canary
 import log_delivery as delivery
+import render
 import runtime
 import verify
 
@@ -62,6 +63,40 @@ class ExternalTLS(unittest.TestCase):
         self.profile('kind')
         with patch.object(verify, 'http', return_value=response('canary')):
             with self.assertRaises(runtime.CheckError): verify.external_https()
+
+
+class RouteWeights(unittest.TestCase):
+    def test_each_stage_retains_apply_ownership_and_all_route_fields_except_weights(self):
+        baseline = next(x for x in render.gateway() if x['kind'] == 'HTTPRoute' and x['metadata']['name'] == 'web-main')
+        for weight in (0, 10, 25, 50, 100):
+            with self.subTest(weight=weight), patch.object(runtime, 'k') as cli, \
+                 patch.object(runtime, 'routes_ready', return_value={'current': True}) as ready, \
+                 patch.object(runtime, 'retry', side_effect=lambda fn, *args: fn()):
+                self.assertEqual(runtime.weights(weight), {'current': True})
+            cli.assert_called_once()
+            self.assertEqual(cli.call_args.args, ('apply', '--server-side', '--field-manager=signal', '-f', '-'))
+            self.assertFalse(any('force-conflicts' in arg or arg in ('patch', 'replace', 'update') for arg in cli.call_args.args))
+            payload = cli.call_args.kwargs['data']
+            refs = payload['spec']['rules'][0]['backendRefs']
+            self.assertEqual({ref['name']: ref['weight'] for ref in refs}, {'web-stable': 100-weight, 'web-canary': weight})
+            self.assertEqual({ref['port'] for ref in refs}, {8080})
+            # Normalize only the intended weights; compare complete documents,
+            # including matches, both listeners, timeouts, labels and hostname.
+            refs[0]['weight'], refs[1]['weight'] = 100, 0
+            self.assertEqual(payload, baseline)
+            ready.assert_called_once()
+    def test_foreign_apply_conflict_is_propagated_without_force_or_false_readiness(self):
+        with patch.object(runtime, 'k', side_effect=runtime.CheckError('conflict with foreign owner')) as cli, \
+             patch.object(runtime, 'routes_ready') as ready:
+            with self.assertRaisesRegex(runtime.CheckError, 'foreign owner'): runtime.weights(10)
+        cli.assert_called_once()
+        self.assertNotIn('--force-conflicts', cli.call_args.args)
+        ready.assert_not_called()
+    def test_invalid_weight_never_mutates_the_cluster(self):
+        for weight in (-1, 101):
+            with self.subTest(weight=weight), patch.object(runtime, 'k') as cli:
+                with self.assertRaises(runtime.CheckError): runtime.weights(weight)
+            cli.assert_not_called()
 
 
 class CounterProof(unittest.TestCase):

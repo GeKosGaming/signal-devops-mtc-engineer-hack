@@ -79,6 +79,8 @@ make verify
 
 Успешный `make canary` специально оставляет 100% canary; verifier baseline ожидает stable. При нормальном `make demo` canary и веса возвращаются. При SIGKILL/выключении VM Python finally не выполнится; это не промышленная гарантия rollback.
 
+Canary и deploy меняют полный `web-main` через Server-Side Apply с одинаковым manager `signal`. Императивный patch создаёт отдельное владение Update и может конфликтовать с последующим deploy. При конфликте с чужим manager сначала выяснить источник изменения; автоматическое `--force-conflicts` не применяется.
+
 ## Деактивация стенда
 
 kind: `kind delete cluster --name signal` удаляет этот Docker-кластер и его локальные данные. Для kubeadm-профиля предпочтительно удалить выделенную VM после сохранения нужных отчётов. Автоматической команды wipe/reset нет, чтобы случайный запуск не уничтожил кластер или storage.

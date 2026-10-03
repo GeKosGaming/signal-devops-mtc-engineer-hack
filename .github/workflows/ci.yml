@@ -40,6 +40,12 @@ jobs:
         run: make ci-acceptance
       - name: Reject a broken canary and measure recovery
         run: make demo
+      - name: Prove healthy canary and return to the deployed baseline
+        run: |
+          make canary
+          make deploy
+      - name: Prove buffered logging across a temporary Loki outage
+        run: make log-delivery
       - name: Final baseline verification
         run: make verify
       - name: Safe diagnostics (no Secrets or kubeconfig)
@@ -60,6 +66,7 @@ jobs:
           path: |
             evidence/ci/
             evidence/demo/
+            evidence/canary/
             evidence/runtime/
             evidence/log-delivery/
           retention-days: 14

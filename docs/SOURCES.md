@@ -27,5 +27,6 @@
 - Image Dockerfile: https://raw.githubusercontent.com/grafana/loki/v3.7.8/clients/cmd/fluentd/Dockerfile — база fluent/fluentd:v1.19-debian-1.
 - Fluentd parser: https://docs.fluentd.org/filter/parser — reserve_data/reserve_time/remove_key_name_field.
 - Grafana release: https://grafana.com/docs/grafana/latest/whatsnew/whats-new-in-v13-1/
+- Kubernetes Server-Side Apply: https://kubernetes.io/docs/reference/using-api/server-side-apply/ — владение полями и различие Apply/Update; canary и deploy используют один Apply manager для маршрута.
 
 Доступность веб-страницы релиза не равна проверенному image pull. Поэтому конкретные выбранные container tags требуют `make lock`, проверок выбранных контейнеров и настоящего deployment. Тестирование всех комбинаций не заявляется на основании одной таблицы совместимости.
