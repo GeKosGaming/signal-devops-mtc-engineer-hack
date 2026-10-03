@@ -2,6 +2,11 @@ name: Ubuntu kubeadm acceptance
 
 on:
   workflow_dispatch:
+    inputs:
+      package_submission:
+        description: Build the reviewed two-file submission after acceptance
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -30,6 +35,19 @@ jobs:
         run: make log-delivery
       - name: Final acceptance for this exact commit
         run: make acceptance
+      - name: Build the reviewed submission
+        if: inputs.package_submission
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          make package REPO_URL=https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack.git SURNAME=Коннов
+      - uses: actions/upload-artifact@v4
+        if: inputs.package_submission && success()
+        with:
+          name: submission-konnov-${{ github.sha }}
+          path: submission/Коннов.zip
+          if-no-files-found: error
+          retention-days: 30
       - name: Capture diagnostics without credentials
         if: failure()
         run: |

@@ -178,6 +178,11 @@ class AcceptanceProvenance(unittest.TestCase):
         script = (ROOT/'scripts/bootstrap-ubuntu.sh').read_text()
         self.assertIn('kubeletExtraArgs:\n    - name: node-ip\n      value: "$NODE_IP"', script)
 
+    def test_locked_kubernetes_packages_allow_newer_vm_tools_to_downgrade(self):
+        script = (ROOT/'scripts/bootstrap-ubuntu.sh').read_text()
+        locked_install = script.index('apt-get install -y --allow-change-held-packages --allow-downgrades')
+        self.assertLess(script.index('Existing cluster version $actual differs'), locked_install)
+
     def test_manifest_existence_check_uses_noninteractive_read_only_sudo(self):
         responses = [SimpleNamespace(returncode=0, stdout='kvm\n'),
                      SimpleNamespace(returncode=1, stdout='none\n'),

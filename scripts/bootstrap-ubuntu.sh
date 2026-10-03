@@ -42,7 +42,9 @@ curl --fail --location --retry 3 "https://pkgs.k8s.io/core:/stable:/v${KUBERNETE
 printf 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v%s/deb/ /\n' \
   "$KUBERNETES_MINOR" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y --allow-change-held-packages \
+# Dedicated VM images can already ship a newer kubectl. Installing the locked
+# trio must allow that explicit downgrade after the existing-cluster preflight.
+apt-get install -y --allow-change-held-packages --allow-downgrades \
   "kubelet=${KUBERNETES_VERSION}-1.1" "kubeadm=${KUBERNETES_VERSION}-1.1" "kubectl=${KUBERNETES_VERSION}-1.1"
 apt-mark hold kubelet kubeadm kubectl
 bash scripts/install-tools.sh
