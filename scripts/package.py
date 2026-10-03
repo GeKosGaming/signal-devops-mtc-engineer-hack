@@ -73,6 +73,20 @@ def accepted_commit() -> str:
         raise ValueError('Acceptance must refer to the submitted code commit; see docs/SUBMISSION.md')
     if environment.get('git_worktree_clean') is not True:
         raise ValueError('Acceptance must have run with a clean Git working tree')
+    safety_path=ROOT/'evidence/operations/report.json'
+    if not safety_path.is_file():raise ValueError('Run make operation-check before packaging')
+    safety=json.loads(safety_path.read_text(encoding='utf-8'))
+    required={'safe baseline before operation probes',
+              'concurrent mutations rejected before cluster changes',
+              'SIGTERM after actual faulty canary injection restores baseline',
+              'SIGINT during healthy promotion restores baseline',
+              'stable baseline after operation probes'}
+    checks=safety.get('checks',[])
+    if (safety.get('passed') is not True or not checks or not all(x.get('passed') is True for x in checks)
+            or not required <= {x.get('name') for x in checks}
+            or safety.get('environment',{}).get('git_commit')!=head
+            or safety.get('environment',{}).get('git_worktree_clean') is not True):
+        raise ValueError('Operation safety acceptance must pass for the clean submitted commit')
     dependencies(head)
     return head
 

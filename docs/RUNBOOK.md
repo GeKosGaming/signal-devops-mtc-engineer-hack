@@ -70,14 +70,64 @@ sudo du -sh /var/lib/signal-storage/* /var/lib/signal-fluentd
 
 Проверить исходный hostname, DNS, прокси, лимиты Docker Hub и точный тег. `make lock` должен завершиться полностью; частичный lock не сохраняется. Не менять на latest, не отключать TLS verification и не использовать неизвестный mirror. Любая замена версии требует повторного render/static/deploy/acceptance и обновления README/паспорта.
 
-## После canary / аварийно оборванной демонстрации
+## Общий lock: другая операция уже работает
+
+Bootstrap, kind/deploy и Python acceptance, canary/demo, log-delivery согласуют изменения через `.state/workflow.lock`. `Another SIGNAL operation is running.` означает, что второй процесс не получил kernel lock и не должен менять стенд. Дождаться завершения владельца или прервать именно его, затем изучить его отчёт и recovery marker. Не удалять lock-файл и не подставлять `SIGNAL_OPERATION_LOCK_FD`: inherited FD проверяется по настоящему файлу/дескриптору, а не по наличию переменной.
+
+```bash
+# Только проверка: команда сразу завершится ошибкой, если lock ещё занят.
+flock -n .state/workflow.lock -c true
+```
+
+Наличие `.state/workflow.lock` после завершения процесса нормально. Блокировка освобождается ядром после закрытия последнего владеющего дескриптора; дочерний deploy может ещё работать, даже если родитель завершён. Port-forward не получает этот lock. Другая рабочая копия и прямой `kubectl` не координируются этим механизмом. Standalone `make verify` пока не удерживает общий lock; запускать его после остановки изменяющих состояние операций, либо использовать в составе acceptance.
+
+## После canary / прерванного сценария
 
 ```bash
 make deploy
 make verify
 ```
 
-Успешный `make canary` специально оставляет 100% canary; verifier baseline ожидает stable. При нормальном `make demo` canary и веса возвращаются. При SIGKILL/выключении VM Python finally не выполнится; это не промышленная гарантия rollback.
+Успешный `make canary` специально оставляет 100% canary; verifier baseline ожидает stable. При нормальном `make demo` canary и веса возвращаются. Полученные до завершения операции `SIGINT` / `SIGTERM` вызывают попытку cleanup под тем же lock и проверку фактического baseline; прерванный сценарий завершается неуспешно даже после успешного восстановления. Для canary обработка позднего сигнала при удалении marker или записи отчёта также заканчивается восстановлением и FAIL, пока port-forward доступны. Повторные SIGINT/SIGTERM во время canary cleanup записываются, не прерывая его. После обработки marker и финальной записи отчёта canary-операция считается завершённой: сигнал при последующем закрытии forward только печатает сообщение и не отменяет уже успешные 100%. Прежние green отчёты не подтверждают новые обработчики: их runtime-проверка требует отдельного прогона текущего commit.
+
+При `SIGKILL`, выключении VM или недоступности API не считать rollback выполненным. Сначала дождаться завершения старых команд, проверить свободный lock, восстановить доступ к API и прочитать recovery marker. Canary marker описывает требуемый baseline; Loki marker содержит исходные UID и число реплик. Если Loki Deployment заменён, UID отличается или обнаружены чужие изменения, прекратить автоматическое восстановление и разобрать изменения вручную. Не удалять marker до проверки восстановленного объекта и пользовательского HTTP-ответа.
+
+Для canary штатный возврат к baseline — `make deploy`, затем `make verify`: это восстанавливает здоровую canary и маршрут stable 100%. Оставшийся `.state/canary-restore.json` запрещает новые canary/demo, но не мешает deploy. Deploy сам marker не удаляет. После остановки остальных операций прочитать его и выполнить:
+
+```bash
+cat .state/canary-restore.json
+make deploy && make verify && rm -- .state/canary-restore.json
+```
+
+При ошибке deploy/verify последняя команда не выполняется: сохранить marker и диагностировать отчёт. Если оба marker остались одновременно, сначала восстановить Loki, затем canary: полная проверка требует доступного Loki и здорового приложения.
+
+Для прерванного Loki-опыта прочитать `.state/log-delivery-restore.json` и сравнить UID `Deployment/loki`. Следующая ручная процедура использует существующий guarded restore: под общим lock она проверяет UID и число реплик, разрешает scale только из 0 в сохранённое значение с `--current-replicas=0`, ждёт rollout и повторно проверяет UID/replicas. Если реплики уже равны baseline, scale не нужен; другое значение отвергается. Marker удаляется только после полной проверки HTTP, метрик и поиска логов:
+
+```bash
+cat .state/log-delivery-restore.json
+python3 - <<'PY'
+import json, sys
+sys.path.insert(0, 'scripts')
+from operations import operation_lock
+from log_delivery import restore_loki
+from runtime import ROOT, require, run
+with operation_lock(ROOT):
+    marker = ROOT / '.state/log-delivery-restore.json'
+    baseline = json.loads(marker.read_text(encoding='utf-8'))
+    require(isinstance(baseline.get('uid'), str) and baseline['uid'], 'Invalid saved Loki UID')
+    require(type(baseline.get('replicas')) is int and baseline['replicas'] >= 1,
+            'Invalid saved Loki replica count')
+    restore_loki(baseline)
+    print(run([sys.executable, 'scripts/verify.py'], timeout=900))
+    marker.unlink()
+PY
+```
+
+Это явное действие оператора, а не фоновая recovery CLI. Не заменять UID в marker и не подставлять желаемое число реплик, чтобы обойти отказ. Если Loki восстановлен, но полная проверка не проходит из-за оставшейся faulty canary, сохранить Loki marker, восстановить canary по предыдущей процедуре и повторить проверку. Удалять каждый marker только после успешной проверки.
+
+### Проверка самого протокола прерываний
+
+После baseline `make deploy && make verify` на выделенном Linux-стенде выполнить `make operation-check`. Он отвергает настоящие конкурирующие deploy/canary/log-delivery/acceptance, проверяет неизменность конфигурации, посылает SIGTERM PID после faulty injection и SIGINT группе процессов здорового продвижения. Успех требует FAIL прерванного дочернего отчёта, записанный сигнал, проверенный stable/canary HTTP baseline, удалённый canary marker и свободный lock. Результат находится в `evidence/operations/report.json`; для сдачи он должен совпадать с чистым HEAD финального acceptance. Отказ API и прерывания Loki этот протокол не проверяет; предыдущие зелёные отчёты не являются его результатом.
 
 Canary и deploy меняют полный `web-main` через Server-Side Apply с одинаковым manager `signal`. Императивный patch создаёт отдельное владение Update и может конфликтовать с последующим deploy. При конфликте с чужим manager сначала выяснить источник изменения; автоматическое `--force-conflicts` не применяется.
 

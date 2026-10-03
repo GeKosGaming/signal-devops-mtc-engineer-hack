@@ -1,9 +1,11 @@
 from __future__ import annotations
 import datetime as dt
+import contextlib
 import json
 import os
 from pathlib import Path
 import re
+import signal
 import sys
 import tempfile
 import unittest
@@ -30,6 +32,9 @@ class MemoryReport:
             result = fn(); self.data['checks'].append({'name': name, 'passed': True}); return result
         except Exception as exc:
             self.data['checks'].append({'name': name, 'passed': False, 'error': str(exc)})
+    def save(self):
+        self.data['passed'] = bool(self.data['checks']) and all(x['passed'] for x in self.data['checks'])
+        return self.data['passed']
 
 
 class ExternalTLS(unittest.TestCase):
@@ -208,6 +213,9 @@ class ProcessIsolation(unittest.TestCase):
 
 
 class CanaryGates(unittest.TestCase):
+    def setUp(self):
+        scope = patch.object(canary, 'get', return_value={'spec': {'rules': [{'backendRefs': self.baseline()}]}})
+        scope.start(); self.addCleanup(scope.stop)
     def fault(self, *, body='Injected canary failure\n', release='canary'):
         return {'status': 503, 'body': body, 'headers': {'x-release': release}, 'latency_ms': 1}
     def test_fault_observation_waits_for_actual_envoy_transition_and_records_responses(self):
@@ -340,6 +348,262 @@ class CanaryGates(unittest.TestCase):
             canary.fresh_canary_metrics(9090, 100)
         inventory.assert_called_once_with(9090, canary_after=100)
         self.assertIn('timestamp(nginx_up', query.call_args.args[1])
+
+
+class CanaryInterruption(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.report = MemoryReport()
+        self.events = []
+        self.state = {'weight': 0, 'broken': False, 'lock': False, 'forwards': 0}
+        self.scopes = contextlib.ExitStack(); self.addCleanup(self.scopes.close)
+        self.scopes.enter_context(patch.object(canary, 'ROOT', self.root))
+        self.scopes.enter_context(patch.object(canary, 'Report', return_value=self.report))
+        self.scopes.enter_context(patch.object(canary, 'operation_lock', self.lock))
+        self.scopes.enter_context(patch.object(canary, 'forward', self.forward))
+        self.scopes.enter_context(patch.object(canary, 'get', side_effect=self.get))
+        self.scopes.enter_context(patch.object(canary, 'targets', return_value={}))
+        self.scopes.enter_context(patch.object(canary, 'fresh_canary_metrics', return_value={'fresh': True}))
+        self.scopes.enter_context(patch.object(canary, 'retry', side_effect=lambda fn,*a,**kw:fn()))
+        self.scopes.enter_context(patch.object(canary, 'http', side_effect=self.request))
+        self.scopes.enter_context(patch.object(canary, 'recovery', return_value={'measured': True}))
+        self.original_handlers = {number: signal.getsignal(number) for number in (signal.SIGINT, signal.SIGTERM)}
+    @contextlib.contextmanager
+    def lock(self):
+        self.state['lock'] = True; self.events.append('lock acquired')
+        try: yield
+        finally:
+            self.events.append('lock released'); self.state['lock'] = False
+    @contextlib.contextmanager
+    def forward(self, *args):
+        self.assertTrue(self.state['lock'])
+        self.state['forwards'] += 1; self.events.append('forward opened')
+        try: yield 9090 if args[-1] == 9090 else 8080
+        finally:
+            self.events.append('forward closed'); self.state['forwards'] -= 1
+    def get(self, *args):
+        return {'spec': {'rules': [{'backendRefs': [
+            {'name': 'web-stable', 'port': 8080, 'weight': 100-self.state['weight']},
+            {'name': 'web-canary', 'port': 8080, 'weight': self.state['weight']}]}]}}
+    def request(self, url, **kwargs):
+        if url.endswith('/canary'):
+            if self.state['broken']:
+                return {'status': 503, 'body': 'Injected canary failure\n',
+                        'headers': {'x-release': 'canary'}, 'latency_ms': 1}
+            return response('canary')
+        return response('stable')
+    def weight(self, value):
+        self.assertTrue(self.state['lock'])
+        self.assertEqual(self.state['forwards'], 2)
+        self.events.append('weight '+str(value)); self.state['weight'] = value
+        return {'weight': value}
+    def inject(self, broken):
+        self.assertTrue(self.state['lock'])
+        self.assertEqual(self.state['forwards'], 2)
+        self.events.append('injection '+str(broken)); self.state['broken'] = broken
+    def send_signal(self, number):
+        # Invoke the real handler installed by main, at the API mutation boundary.
+        # The Linux integration test additionally delivers actual OS signals.
+        signal.getsignal(number)(number, None)
+    def run_main(self, demo=False):
+        with patch.object(sys, 'argv', ['canary.py']+(['--demo'] if demo else [])):
+            result = canary.main()
+        for number, previous in self.original_handlers.items():
+            self.assertIs(signal.getsignal(number), previous)
+        self.assertFalse(self.state['lock'])
+        self.assertEqual(self.state['forwards'], 0)
+        return result
+    def test_int_and_term_after_healthy_weight_mutation_restore_before_forwards_close(self):
+        for number in (signal.SIGINT, signal.SIGTERM):
+            with self.subTest(number=number):
+                self.report.data = {'checks': []}; self.events.clear()
+                def weight(value):
+                    result = self.weight(value)
+                    if value == 10: self.send_signal(number)
+                    return result
+                with patch.object(canary, 'weights', side_effect=weight):
+                    self.assertEqual(self.run_main(), 1)
+                self.assertEqual(self.state['weight'], 0)
+                self.assertTrue(self.report.data['canary_restoration']['passed'])
+                self.assertTrue(self.report.data['recovery_marker']['removed'])
+                self.assertFalse((self.root/'.state/canary-restore.json').exists())
+                self.assertEqual(self.report.data['interruptions'][0]['signal_number'], number)
+                self.assertFalse(self.report.data['passed'])
+                self.assertLess(self.events.index('weight 0'), self.events.index('forward closed'))
+    def test_demo_term_after_fault_reaches_data_plane_restores_config_and_route(self):
+        original = canary.observe_canary
+        def observe(base, report, *, broken, **kwargs):
+            result = original(base, report, broken=broken, **kwargs)
+            if broken: self.send_signal(signal.SIGTERM)
+            return result
+        with patch.object(canary, 'weights', side_effect=self.weight), \
+             patch.object(canary, 'inject', side_effect=self.inject), \
+             patch.object(canary, 'split_proof', return_value={'split': True}), \
+             patch.object(canary, 'observe_canary', side_effect=observe):
+            self.assertEqual(self.run_main(demo=True), 1)
+        self.assertFalse(self.state['broken'])
+        self.assertEqual(self.state['weight'], 0)
+        self.assertTrue(self.report.data['canary_restoration']['passed'])
+        self.assertEqual(self.report.data['canary_data_plane_transitions'][0]['response']['status'], 503)
+        self.assertLess(self.events.index('injection False'), self.events.index('forward closed'))
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+    def test_repeated_int_and_term_during_bounded_cleanup_do_not_abort_restoration(self):
+        def weight(value):
+            result = self.weight(value)
+            if value == 10: self.send_signal(signal.SIGINT)
+            if value == 0:
+                self.send_signal(signal.SIGTERM); self.send_signal(signal.SIGINT)
+            return result
+        with patch.object(canary, 'weights', side_effect=weight):
+            self.assertEqual(self.run_main(), 1)
+        self.assertEqual(self.state['weight'], 0)
+        self.assertEqual([x['during_cleanup'] for x in self.report.data['interruptions']], [False, True, True])
+        self.assertTrue(self.report.data['canary_restoration']['passed'])
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+    def test_failed_route_cleanup_is_fail_and_retains_recovery_marker(self):
+        def weight(value):
+            if value == 0: raise runtime.CheckError('Kubernetes API unavailable during restore')
+            self.weight(value); self.send_signal(signal.SIGTERM)
+        with patch.object(canary, 'weights', side_effect=weight):
+            self.assertEqual(self.run_main(), 1)
+        marker = self.root/'.state/canary-restore.json'
+        self.assertTrue(marker.exists())
+        self.assertEqual(json.loads(marker.read_text())['route'], {'stable': 100, 'canary': 0})
+        self.assertFalse(self.report.data['canary_restoration']['passed'])
+        self.assertFalse(self.report.data['recovery_marker']['removed'])
+        self.assertTrue(any(not x['passed'] and 'Kubernetes API unavailable' in x.get('error','')
+                            for x in self.report.data['checks']))
+    def test_failed_fault_cleanup_still_attempts_route_and_retains_marker(self):
+        def inject(broken):
+            if not broken: raise runtime.CheckError('healthy canary apply failed')
+            self.inject(broken); self.send_signal(signal.SIGTERM)
+        with patch.object(canary, 'weights', side_effect=self.weight), \
+             patch.object(canary, 'inject', side_effect=inject), \
+             patch.object(canary, 'split_proof', return_value={'split': True}):
+            self.assertEqual(self.run_main(demo=True), 1)
+        self.assertIn('weight 0', self.events)
+        self.assertFalse(self.report.data['canary_restoration']['passed'])
+        self.assertTrue((self.root/'.state/canary-restore.json').exists())
+    def test_successful_normal_promotion_keeps_one_hundred_percent_canary(self):
+        def promote(base, port, report, **kwargs):
+            self.weight(100)
+            report.check('healthy gate', lambda:{'passed': True})
+            return True
+        with patch.object(canary, 'weights', side_effect=self.weight), patch.object(canary, 'promote', side_effect=promote):
+            self.assertEqual(self.run_main(), 0)
+        self.assertEqual(self.state['weight'], 100)
+        self.assertNotIn('weight 0', self.events)
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+    def complete_promotion(self, base, port, report, **kwargs):
+        self.weight(100); report.check('healthy gate',lambda:{'passed': True}); return True
+    def test_signal_during_marker_removal_rolls_back_before_failed_report(self):
+        original = canary.clear_recovery
+        signalled = False
+        def clear(report, marker):
+            nonlocal signalled
+            result = original(report, marker)
+            if not signalled:
+                signalled = True; self.send_signal(signal.SIGTERM)
+            return result
+        with patch.object(canary,'promote',side_effect=self.complete_promotion), \
+             patch.object(canary,'weights',side_effect=self.weight), \
+             patch.object(canary,'clear_recovery',side_effect=clear):
+            self.assertEqual(self.run_main(),1)
+        self.assertEqual(self.state['weight'],0)
+        self.assertFalse(self.report.data['passed'])
+        self.assertTrue(self.report.data['canary_restoration']['passed'])
+        self.assertTrue(self.report.data['recovery_marker']['removed'])
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+        self.assertLess(self.events.index('weight 0'),self.events.index('forward closed'))
+    def test_signal_during_first_report_save_restores_and_rewrites_failed_outcome(self):
+        snapshots = []
+        def save():
+            self.assertTrue(self.state['lock']); self.assertEqual(self.state['forwards'],2)
+            result = MemoryReport.save(self.report)
+            snapshots.append({'passed':result,'weight':self.state['weight']})
+            if len(snapshots) == 1: self.send_signal(signal.SIGINT)
+            return result
+        with patch.object(canary,'promote',side_effect=self.complete_promotion), \
+             patch.object(canary,'weights',side_effect=self.weight), \
+             patch.object(self.report,'save',side_effect=save):
+            self.assertEqual(self.run_main(),1)
+        self.assertEqual(snapshots,[{'passed':True,'weight':100},{'passed':False,'weight':0}])
+        self.assertEqual(self.state['weight'],0)
+        self.assertTrue(self.report.data['canary_restoration']['passed'])
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+    def test_failed_late_rollback_retains_recreated_marker_and_failed_report(self):
+        saves = 0
+        def save():
+            nonlocal saves
+            result = MemoryReport.save(self.report); saves += 1
+            if saves == 1: self.send_signal(signal.SIGTERM)
+            return result
+        def weight(value):
+            if value == 0: raise runtime.CheckError('late rollback API unavailable')
+            return self.weight(value)
+        with patch.object(canary,'promote',side_effect=self.complete_promotion), \
+             patch.object(canary,'weights',side_effect=weight), patch.object(self.report,'save',side_effect=save):
+            self.assertEqual(self.run_main(),1)
+        self.assertFalse(self.report.data['passed'])
+        self.assertFalse(self.report.data['canary_restoration']['passed'])
+        self.assertTrue((self.root/'.state/canary-restore.json').exists())
+        self.assertFalse(self.report.data['recovery_marker']['removed'])
+    def test_signal_immediately_before_commit_is_reconciled_before_failed_exit(self):
+        signalled = False
+        block = getattr(signal,'SIG_BLOCK',0)
+        def mask(how,numbers):
+            nonlocal signalled
+            if how == block and not signalled:
+                signalled = True; self.send_signal(signal.SIGTERM)
+            return set()
+        with patch.object(canary,'promote',side_effect=self.complete_promotion), \
+             patch.object(canary,'weights',side_effect=self.weight), \
+             patch.object(signal,'SIG_BLOCK',block,create=True), \
+             patch.object(signal,'SIG_SETMASK',getattr(signal,'SIG_SETMASK',2),create=True), \
+             patch.object(signal,'pthread_sigmask',side_effect=mask,create=True):
+            self.assertEqual(self.run_main(),1)
+        self.assertEqual(self.state['weight'],0)
+        self.assertFalse(self.report.data['passed'])
+        self.assertTrue(self.report.data['canary_restoration']['passed'])
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+    def test_signal_after_commit_while_forward_closes_keeps_successful_promotion(self):
+        @contextlib.contextmanager
+        def forward(*args):
+            with self.forward(*args) as port:
+                try: yield port
+                finally: self.send_signal(signal.SIGTERM)
+        with patch.object(canary,'promote',side_effect=self.complete_promotion), \
+             patch.object(canary,'weights',side_effect=self.weight), patch.object(canary,'forward',side_effect=forward):
+            self.assertEqual(self.run_main(),0)
+        self.assertEqual(self.state['weight'],100)
+        self.assertTrue(self.report.data['passed'])
+        self.assertFalse(self.report.data.get('interruptions'))
+    def test_nonbaseline_start_never_mutates_or_creates_marker(self):
+        self.state['weight'] = 100
+        with patch.object(canary, 'weights') as weights, patch.object(canary, 'inject') as inject:
+            self.assertEqual(self.run_main(), 1)
+        weights.assert_not_called(); inject.assert_not_called()
+        self.assertFalse((self.root/'.state/canary-restore.json').exists())
+    def test_existing_marker_stops_before_mutation_and_is_preserved(self):
+        marker = self.root/'.state/canary-restore.json'; marker.parent.mkdir(); marker.write_text('unresolved')
+        with patch.object(canary, 'weights') as weights, patch.object(canary, 'inject') as inject:
+            self.assertEqual(self.run_main(), 1)
+        weights.assert_not_called(); inject.assert_not_called()
+        self.assertEqual(marker.read_text(), 'unresolved')
+    def test_lock_conflict_exits_without_forward_mutation_or_report_overwrite(self):
+        with patch.object(canary, 'operation_lock', side_effect=canary.OperationLockError('Another SIGNAL operation is running.')), \
+             patch.object(canary, 'Report') as report, patch.object(canary, 'forward') as forward, \
+             patch.object(canary, 'weights') as weights:
+            self.assertEqual(self.run_main(), 1)
+        report.assert_not_called(); forward.assert_not_called(); weights.assert_not_called()
+    def test_system_exit_is_not_converted_into_gate_rejection(self):
+        with patch.object(canary, 'weights', side_effect=SystemExit(7)) as weights:
+            with self.assertRaises(SystemExit) as raised:
+                canary.promote('http://gateway', 9090, self.report)
+        self.assertEqual(raised.exception.code, 7)
+        self.assertEqual(weights.call_count, 1)
+        self.assertNotIn('gate_rejection', self.report.data)
 
 
 class LogOutage(unittest.TestCase):

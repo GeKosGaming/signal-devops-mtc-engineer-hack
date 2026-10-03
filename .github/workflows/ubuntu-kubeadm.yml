@@ -33,6 +33,8 @@ jobs:
         run: sudo bash scripts/bootstrap-ubuntu.sh --dedicated-node
       - name: Prove the baseline and an unchanged redeployment
         run: make acceptance
+      - name: Prove actual operation contention and signal recovery
+        run: python3 scripts/operation_acceptance.py --run
       - name: Reject faulty canary and measure replica recovery
         run: make demo
       - name: Prove all healthy canary stages and restore the stable baseline
@@ -82,5 +84,6 @@ jobs:
             evidence/canary/
             evidence/log-delivery/
             evidence/runtime/
+            evidence/operations/
             evidence/ubuntu-diagnostics/
           retention-days: 30

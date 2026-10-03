@@ -2,7 +2,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 export PATH := $(CURDIR)/.tools:$(PATH)
 export KUBECONFIG := $(CURDIR)/.state/kubeconfig
-.PHONY: help tools kind deploy render static verify demo canary log-delivery acceptance ci-acceptance ui lock vendor validate-containers package
+.PHONY: help tools kind deploy render static verify demo canary log-delivery operation-check acceptance ci-acceptance ui lock vendor validate-containers package
 help:
 	@printf '%s\n' 'SIGNAL — run on a dedicated Ubuntu 24.04 amd64 VM.' 'Cluster: sudo bash scripts/bootstrap-ubuntu.sh --dedicated-node' 'Then: make deploy && make verify && make acceptance' 'Alternative local CI cluster: make kind' 'Other targets: static render demo canary ui lock vendor validate-containers package'
 tools:
@@ -24,6 +24,8 @@ canary:
 	python3 scripts/canary.py
 log-delivery:
 	python3 scripts/log_delivery.py --run
+operation-check:
+	python3 scripts/operation_acceptance.py --run
 acceptance:
 	python3 scripts/acceptance.py
 ci-acceptance:

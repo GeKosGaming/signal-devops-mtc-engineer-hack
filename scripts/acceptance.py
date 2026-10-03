@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Ubuntu/kubeadm acceptance plus redeploy invariants. No invented PASS results."""
 from __future__ import annotations
-import argparse, hashlib, json, os, platform, re, subprocess
+import argparse, hashlib, json, os, platform, re, subprocess, sys
 from runtime import *
+from operations import OperationLockError, operation_lock
 
 
 def fingerprint() -> dict:
@@ -67,9 +68,8 @@ def validate_kubeadm_provenance(nodes: dict, configuration: dict, host: dict, ve
             'kubelet':info['kubeletVersion'], 'kubeadm_configuration_matches':True}
 
 
-def main() -> int:
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--ci',action='store_true',help='kind smoke only, cannot confirm Ubuntu kubeadm acceptance')
-    a=p.parse_args();r=Report('Redeploy/Ubuntu acceptance' if not a.ci else 'kind CI redeploy smoke','evidence/acceptance' if not a.ci else 'evidence/ci')
+def run_acceptance(a: argparse.Namespace) -> int:
+    r=Report('Redeploy/Ubuntu acceptance' if not a.ci else 'kind CI redeploy smoke','evidence/acceptance' if not a.ci else 'evidence/ci')
     env=r.data['environment']
     try:
         def platform():
@@ -101,5 +101,16 @@ def main() -> int:
         r.check('acceptance execution',lambda:require(False,str(exc)))
     r.data['ubuntu_24_04_kubeadm_confirmed']=not a.ci and bool(r.data['checks']) and all(x['passed'] for x in r.data['checks'])
     return 0 if r.save() else 1
+
+
+def main() -> int:
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--ci',action='store_true',help='kind smoke only, cannot confirm Ubuntu kubeadm acceptance')
+    args=p.parse_args()
+    try:
+        with operation_lock(ROOT):
+            return run_acceptance(args)
+    except OperationLockError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
 if __name__=='__main__': raise SystemExit(main())

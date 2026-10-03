@@ -38,6 +38,8 @@ jobs:
         run: make validate-containers
       - name: Deploy, prove behavior and check redeploy invariants
         run: make ci-acceptance
+      - name: Prove actual operation contention and signal recovery
+        run: python3 scripts/operation_acceptance.py --run
       - name: Reject a broken canary and measure recovery
         run: make demo
       - name: Prove healthy canary and return to the deployed baseline
@@ -69,4 +71,5 @@ jobs:
             evidence/canary/
             evidence/runtime/
             evidence/log-delivery/
+            evidence/operations/
           retention-days: 14

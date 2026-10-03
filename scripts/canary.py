@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Small, observable canary controller for the demo, not a replacement for Argo Rollouts."""
 from __future__ import annotations
-import argparse, contextlib, json, time, uuid
+import argparse, contextlib, json, os, signal, sys, time, uuid
 from runtime import *
 from verify import hello, targets
+from operations import operation_lock, OperationLockError
 
 
 def assess(samples: list[dict], *, minimum: int = 20, max_error_rate: float = 0.01, max_p95_ms: float = 500) -> dict:
@@ -18,7 +19,7 @@ def assess(samples: list[dict], *, minimum: int = 20, max_error_rate: float = 0.
 
 def require_stable_baseline(refs: list[dict]) -> None:
     """Gateway API defaults group/kind on readback; compare Service references semantically."""
-    message = 'Run make deploy to restore the stable baseline before the destructive demo'
+    message = 'Run make deploy to restore the stable baseline before canary operations'
     require(isinstance(refs, list) and len(refs) == 2, message)
     allowed = {'name', 'port', 'weight', 'group', 'kind', 'namespace'}
     require(all(isinstance(ref, dict) and set(ref) <= allowed for ref in refs), message)
@@ -70,8 +71,132 @@ def fresh_canary_metrics(pp: int, after: float) -> dict:
     return {'after_unix': after, 'targets': inventory, 'health': health, 'sample_timestamps': freshness}
 
 
+@contextlib.contextmanager
+def controlled_interruptions(report: Report, *, cleanup: bool = False):
+    """Handle INT/TERM; during bounded cleanup record further signals without aborting it."""
+    previous = {number: signal.getsignal(number) for number in (signal.SIGINT, signal.SIGTERM)}
+    def interrupted(number, frame):
+        name = signal.Signals(number).name
+        if getattr(report, '_canary_committed', False):
+            # The final outcome is durable and cleanup is complete. A signal while
+            # closing forwards must not turn a completed promotion into a failure.
+            print(f'{name} received after canary operation committed', flush=True)
+            return
+        report.data.setdefault('interruptions', []).append(
+            {'signal_number': number, 'signal_name': name, 'during_cleanup': cleanup})
+        if not cleanup:
+            raise KeyboardInterrupt(f'{name} received; attempting canary restoration')
+    try:
+        for number in previous: signal.signal(number, interrupted)
+        yield
+    finally:
+        for number, handler in previous.items(): signal.signal(number, handler)
+
+
+def begin_recovery(report: Report, *, demo: bool) -> Path:
+    marker = ROOT/'.state/canary-restore.json'
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with marker.open('x', encoding='utf-8') as handle:
+            json.dump({'operation': 'fault demo' if demo else 'healthy promotion',
+                       'restore': 'make deploy && make verify',
+                       'route': {'stable': 100, 'canary': 0}, 'canary_configuration': 'healthy'}, handle)
+            handle.flush(); os.fsync(handle.fileno())
+    except FileExistsError as exc:
+        raise CheckError('Unresolved canary recovery marker: '+str(marker)+
+                         '. Restore and verify the baseline before removing this marker.') from exc
+    report.data['recovery_marker'] = {'path': str(marker), 'removed': False}
+    return marker
+
+
+def clear_recovery(report: Report, marker: Path) -> dict:
+    marker.unlink()
+    report.data['recovery_marker']['removed'] = True
+    return report.data['recovery_marker']
+
+
+def restore_baseline(base: str, report: Report, *, restore_canary: bool = False) -> bool:
+    """Attempt every cleanup step while forwards and the operation lock remain alive."""
+    restoration = {'passed': False, 'restore_canary_configuration': restore_canary}
+    report.data['canary_restoration'] = restoration
+    with controlled_interruptions(report, cleanup=True):
+        first = len(report.data['checks'])
+        if restore_canary:
+            def restore_config():
+                inject(False)
+                return {'configuration': 'healthy'}
+            report.check('restore healthy canary manifests', restore_config)
+        report.check('rollback to stable 100%', lambda: weights(0))
+        report.check('stable root traffic after rollback', lambda:retry(lambda:routing_split(base,0),30,1))
+        if restore_canary:
+            report.check('canary configuration restored', lambda:observe_canary(base,report,broken=False))
+        checks = report.data['checks'][first:]
+        restoration['checks'] = checks
+        restoration['passed'] = len(checks) == (4 if restore_canary else 2) and all(x['passed'] for x in checks)
+    return restoration['passed']
+
+
+def finalize_report(base: str, report: Report) -> int:
+    """Reconcile signals during marker removal/report writes before committing the outcome."""
+    def reconcile():
+        interrupted = bool(report.data.get('interruptions'))
+        failed = any(not x['passed'] for x in report.data['checks'])
+        if (interrupted or failed) and 'canary_restoration' not in report.data:
+            # Normal promotion may have removed its marker before this late signal.
+            # Recreate recovery evidence before attempting the final rollback.
+            marker = ROOT/'.state/canary-restore.json'
+            if not marker.exists():
+                report.check('late interruption recovery marker', lambda:begin_recovery(report,demo=False))
+            if restore_baseline(base,report) and marker.exists():
+                report.check('late interruption recovery marker cleared',lambda:clear_recovery(report,marker))
+        if interrupted and not any(x['name'] == 'controlled interruption' for x in report.data['checks']):
+            report.check('controlled interruption',lambda:require(False,'Canary operation interrupted: '+json.dumps(report.data['interruptions'])))
+
+    with controlled_interruptions(report, cleanup=True):
+        reconcile()
+        try:
+            passed = report.save()
+        except (Exception, KeyboardInterrupt) as exc:
+            report.check('canary report finalization',lambda:require(False,str(exc) or 'KeyboardInterrupt'))
+            passed = False
+        # A handler invoked during save may have recorded a new interruption after
+        # the report calculated "passed". Keep forwards alive, restore, then rewrite.
+        if ((report.data.get('interruptions') and
+             not any(x['name'] == 'controlled interruption' for x in report.data['checks'])) or
+            (not passed and 'canary_restoration' not in report.data)):
+            reconcile()
+            try:
+                passed = report.save()
+            except (Exception, KeyboardInterrupt) as exc:
+                print('Cannot save final canary report: '+(str(exc) or 'KeyboardInterrupt'),file=sys.stderr)
+                passed = False
+        # This is the commit point: marker handling, any required restoration and
+        # the final report write are complete. Block actual OS signal delivery while
+        # making this last decision; pending signals are then post-commit signals.
+        numbers = (signal.SIGINT,signal.SIGTERM)
+        while True:
+            blocked = signal.pthread_sigmask(signal.SIG_BLOCK,numbers) if hasattr(signal,'pthread_sigmask') else None
+            try:
+                unreported = (report.data.get('interruptions') and
+                              not any(x['name'] == 'controlled interruption' for x in report.data['checks']))
+                if not unreported:
+                    report._canary_committed = True
+                    return 0 if passed and not report.data.get('interruptions') else 1
+            finally:
+                if blocked is not None: signal.pthread_sigmask(signal.SIG_SETMASK,blocked)
+            # At most one additional reconciliation: it adds the failed interruption
+            # check, so further signals cannot leave an unsafe successful promotion.
+            reconcile()
+            try:
+                passed = report.save()
+            except (Exception, KeyboardInterrupt) as exc:
+                print('Cannot save final canary report: '+(str(exc) or 'KeyboardInterrupt'),file=sys.stderr)
+                passed = False
+
+
 def promote(base: str, pp: int, report: Report, *, max_p95_ms: float=500) -> bool:
     """On any failed gate, route back to stable and verify a real request, not just a patch."""
+    require_stable_baseline(get('httproute','web-main',APP)['spec']['rules'][0]['backendRefs'])
     try:
         retry(lambda:targets(pp),90)
         for weight in (10,25,50,100):
@@ -86,20 +211,23 @@ def promote(base: str, pp: int, report: Report, *, max_p95_ms: float=500) -> boo
                                           'evidence':{**measurement,'cohort_proof_id':proof,
                                                       'weighted_root_route': split, 'fresh_canary_metrics': telemetry}})
         return True
+    except KeyboardInterrupt:
+        restore_baseline(base, report)
+        raise
     except Exception as exc:
         report.data['gate_rejection']=str(exc)
-        report.check('rollback to stable 100%', lambda: weights(0))
-        report.check('stable root traffic after rollback',lambda:retry(lambda:routing_split(base,0),30,1))
+        restore_baseline(base, report)
         return False
 
 
-def split_proof(base: str) -> dict:
+def split_proof(base: str, report: Report | None = None) -> dict:
     try:
         weights(10)
         return retry(lambda:routing_split(base,10,samples=400),60,1)
     finally:
-        weights(0)
-        retry(lambda:routing_split(base,0),30,1)
+        with controlled_interruptions(report, cleanup=True) if report is not None else contextlib.nullcontext():
+            weights(0)
+            retry(lambda:routing_split(base,0),30,1)
 
 
 def inject(broken: bool) -> None:
@@ -168,33 +296,56 @@ def main() -> int:
     p.add_argument('--demo',action='store_true',help='Inject a deliberate HTTP 503 in the canary only, then restore it')
     p.add_argument('--p95-ms',type=float,default=500)
     args=p.parse_args()
-    report=Report('Canary failure drill' if args.demo else 'Canary promotion','evidence/demo' if args.demo else 'evidence/canary')
     try:
-        with contextlib.ExitStack() as stack:
-            hp=stack.enter_context(forward(EDGE,'signal-gateway',80));pp=stack.enter_context(forward(OBS,'prometheus',9090))
-            base=f'http://127.0.0.1:{hp}'
-            if args.demo:
-                initial=get('httproute','web-main',APP)['spec']['rules'][0]['backendRefs']
-                require_stable_baseline(initial)
+        with operation_lock():
+            report=Report('Canary failure drill' if args.demo else 'Canary promotion','evidence/demo' if args.demo else 'evidence/canary')
+            with controlled_interruptions(report):
                 try:
-                    report.check('90/10 weighted routing',lambda:split_proof(base))
-                    inject(True)
-                    observed=report.check('injected fault observed through Envoy Gateway',
-                                          lambda:observe_canary(base,report,broken=True))
-                    require(observed is not None, 'Fault injection did not reach the data plane within the deadline')
-                    accepted=promote(base,pp,report,max_p95_ms=args.p95_ms)
-                    report.check('bad canary was rejected',lambda:require(not accepted and report.data.get('gate_rejection','').startswith('Canary gate rejected:'),'Expected HTTP canary gate rejection did not occur'))
-                finally:
-                    # The intentionally modified canary is restored even if a gate, connection or assertion fails.
-                    try: inject(False)
-                    finally: weights(0)
-                report.check('canary configuration restored',lambda:observe_canary(base,report,broken=False))
-                report.check('single-Pod recovery measured',lambda:recovery(base))
-            else:
-                accepted=promote(base,pp,report,max_p95_ms=args.p95_ms)
-                report.check('promotion completed',lambda:require(accepted,'Canary promotion rejected; stable rollback was attempted'))
-    except Exception as exc:
-        report.check('canary execution',lambda:require(False,str(exc)))
-    return 0 if report.save() else 1
+                    with contextlib.ExitStack() as stack:
+                        hp=stack.enter_context(forward(EDGE,'signal-gateway',80));pp=stack.enter_context(forward(OBS,'prometheus',9090))
+                        base=f'http://127.0.0.1:{hp}'
+                        require_stable_baseline(get('httproute','web-main',APP)['spec']['rules'][0]['backendRefs'])
+                        marker, accepted, restored = None, False, False
+                        try:
+                            # Finish marker creation before a signal can transfer control to cleanup.
+                            with controlled_interruptions(report, cleanup=True):
+                                marker = begin_recovery(report, demo=args.demo)
+                            require(not report.data.get('interruptions'), 'Interrupted before canary mutation')
+                            if args.demo:
+                                report.check('90/10 weighted routing',lambda:split_proof(base,report))
+                                inject(True)
+                                observed=report.check('injected fault observed through Envoy Gateway',
+                                                      lambda:observe_canary(base,report,broken=True))
+                                require(observed is not None, 'Fault injection did not reach the data plane within the deadline')
+                                accepted=promote(base,pp,report,max_p95_ms=args.p95_ms)
+                                report.check('bad canary was rejected',lambda:require(not accepted and report.data.get('gate_rejection','').startswith('Canary gate rejected:'),'Expected HTTP canary gate rejection did not occur'))
+                            else:
+                                accepted=promote(base,pp,report,max_p95_ms=args.p95_ms)
+                                report.check('promotion completed',lambda:require(accepted,'Canary promotion rejected; stable rollback was attempted'))
+                        finally:
+                            if marker is not None:
+                                if args.demo:
+                                    restored = restore_baseline(base,report,restore_canary=True)
+                                elif not accepted or report.data.get('interruptions'):
+                                    restoration = report.data.get('canary_restoration')
+                                    restored = restoration['passed'] if restoration is not None else restore_baseline(base,report)
+                                else:
+                                    # Successful healthy promotion intentionally retains 100% canary.
+                                    restored = True
+                                if restored:
+                                    with controlled_interruptions(report, cleanup=True):
+                                        report.check('recovery marker cleared',lambda:clear_recovery(report,marker))
+                        if args.demo and restored:
+                            report.check('single-Pod recovery measured',lambda:recovery(base))
+                        return finalize_report(base,report)
+                except (Exception, KeyboardInterrupt) as exc:
+                    report.check('canary execution',lambda:require(False,str(exc) or 'KeyboardInterrupt'))
+                with controlled_interruptions(report, cleanup=True):
+                    if report.data.get('interruptions'):
+                        report.check('controlled interruption',lambda:require(False,'Canary operation interrupted: '+json.dumps(report.data['interruptions'])))
+                    return 0 if report.save() else 1
+    except OperationLockError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
 if __name__=='__main__': raise SystemExit(main())

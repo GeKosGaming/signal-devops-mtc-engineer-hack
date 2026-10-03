@@ -28,7 +28,7 @@ class Packaging(unittest.TestCase):
         self.root=pathlib.Path(self.temp.name)
         self.patch_root=patch.object(package,'ROOT',self.root)
         self.patch_root.start();self.addCleanup(self.patch_root.stop)
-        for directory in ['config','vendor','docs','evidence/acceptance']:
+        for directory in ['config','vendor','docs','evidence/acceptance','evidence/operations']:
             (self.root/directory).mkdir(parents=True)
         self.original={'nginx':'docker.io/library/nginx:1.28.0-alpine'}
         self.lock={'nginx':self.original['nginx']+'@sha256:'+'b'*64}
@@ -41,6 +41,12 @@ class Packaging(unittest.TestCase):
         self.proof={'passed':True,'ubuntu_24_04_kubeadm_confirmed':True,
                     'environment':{'git_commit':HEAD,'git_worktree_clean':True}}
         self.write_json('evidence/acceptance/report.json',self.proof)
+        self.safety={'passed':True,'environment':{'git_commit':HEAD,'git_worktree_clean':True},
+                     'checks':[{'name':name,'passed':True} for name in [
+                         'safe baseline before operation probes','concurrent mutations rejected before cluster changes',
+                         'SIGTERM after actual faulty canary injection restores baseline',
+                         'SIGINT during healthy promotion restores baseline','stable baseline after operation probes']]}
+        self.write_json('evidence/operations/report.json',self.safety)
         self.passport=self.root/'docs/Паспорт.pdf';self.passport.write_bytes(b'%PDF-1.7\nfixture\n')
         self.committed={path.relative_to(self.root).as_posix():path.read_bytes()
                         for path in self.root.rglob('*') if path.is_file()}
@@ -118,6 +124,23 @@ class Packaging(unittest.TestCase):
             return package.accepted_commit()
 
     def test_clean_current_acceptance_passes(self):self.assertEqual(self.acceptance(),HEAD)
+
+    def test_missing_operation_safety_rejected(self):
+        (self.root/'evidence/operations/report.json').unlink()
+        with self.assertRaisesRegex(ValueError,'operation-check'):self.acceptance()
+
+    def test_failed_stale_dirty_or_incomplete_operation_safety_rejected(self):
+        import copy
+        for changed in ('failed','stale','dirty','incomplete','failed_check'):
+            with self.subTest(changed=changed):
+                proof=copy.deepcopy(self.safety)
+                if changed=='failed':proof['passed']=False
+                elif changed=='stale':proof['environment']['git_commit']='c'*40
+                elif changed=='dirty':proof['environment']['git_worktree_clean']=False
+                elif changed=='incomplete':proof['checks'].pop()
+                else:proof['checks'][0]['passed']=False
+                self.write_json('evidence/operations/report.json',proof)
+                with self.assertRaisesRegex(ValueError,'Operation safety acceptance'):self.acceptance()
 
     def test_old_acceptance_commit_rejected(self):
         self.proof['environment']['git_commit']='c'*40

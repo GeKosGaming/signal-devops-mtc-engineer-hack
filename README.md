@@ -3,7 +3,7 @@
 
 **Суть:** простой Nginx в Kubernetes, настоящий Gateway API, Prometheus и Fluentd → Loki. Вместо обещания «всё зелёное» — одна проверка, связывающая HTTP-запрос с метриками и найденным логом, и воспроизводимый эксперимент с отказом canary.
 
-> **Статус поставки.** Полная приёмка пройдена на **Ubuntu 24.04.5 LTS / kubeadm 1.35.9**: [протокол Actions](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784). Проверены выбранные контейнеры, HTTP/HTTPS Gateway, реальные targets/метрики, access/error-логи, NetworkPolicy, неизменный повторный deploy, отказ canary, все здоровые этапы canary и доставка логов после отказа Loki. Это лабораторный прогон одной VM. Итоговый архив для организатора - `Коннов.zip`; исходники находятся в публичном main.
+> **Статус поставки.** Предыдущая версия прошла полную приёмку на **Ubuntu 24.04.5 LTS / kubeadm 1.35.9**: [измеренный прогон `efa05ee`](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784) и [финальный прогон `d24163f`](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37142334186). Проверены HTTP/HTTPS Gateway, реальные метрики и логи, NetworkPolicy, повторный deploy, canary и доставка логов после отказа Loki. Новая ревизия добавляет общий lock и обработку прерываний; их успешная runtime-проверка пока **не заявлена**. Результаты и архив предыдущей версии не подтверждают эти изменения: до новой сдачи нужны свежие отчёты точного commit и новая упаковка.
 
 ## 1. Архитектура
 
@@ -173,12 +173,25 @@ Loki labels ограничены `project`, `namespace`, `app`, `pod`, `stream`.
 | `make canary` | здоровая canary 10→25→50→100%; при провале gate — попытка отката с проверкой настоящего HTTP |
 | `make acceptance` | настоящий локальный Ubuntu 24.04 + kubeadm 1.35.9; deploy дважды, verify до/после, неизменность UID Pod/PVC/Storage Job и публичных TLS-сертификатов |
 | `make log-delivery` | короткое отключение Loki, запросы с уникальными ID, восстановление, измеренные задержки/пропуски/дубли |
+| `make operation-check` | на отдельном Linux-стенде: отказ конкурирующих deploy/canary/log-delivery/acceptance до изменений; настоящий SIGTERM после faulty canary и SIGINT группе процессов здорового продвижения; FAIL прерванной операции, восстановленный HTTP baseline и освобождённый lock |
 
-`make demo` **намеренно меняет только демонстрационную canary и удаляет один Pod приложения**. Выполнять только на этом выделенном стенде. Веса восстанавливаются в `finally`; при недоступном Kubernetes API даже откат может не выполниться — это будет ошибкой, а не обещанием абсолютной защиты. После принудительного убийства процесса/VM сначала выполнить `make deploy && make verify`.
+`make demo` **намеренно меняет только демонстрационную canary и удаляет один Pod приложения**. `make log-delivery` временно останавливает Loki. Выполнять эти сценарии только на выделенном стенде. Полученные до завершения операции `SIGINT` / `SIGTERM` переводят прерванный сценарий в восстановление и не превращают его в PASS: при доступном API скрипт пытается вернуть baseline и проверяет фактическое состояние. При ошибке восстановления остаётся recovery marker; порядок ручного восстановления — `docs/RUNBOOK.md`.
+
+### Координация операций и прерывания
+
+Bootstrap, kind/deploy, canary/demo, log-delivery и acceptance используют общий Linux `flock` на `.state/workflow.lock`. Конкурирующая операция завершается сразу с сообщением `Another SIGNAL operation is running.`. Вложенный acceptance → deploy использует уже удерживаемый lock, а проверка унаследованного дескриптора подтверждает тот же файл и реальный kernel lock. Одна переменная окружения не даёт обхода блокировки. Lock удерживается до восстановления и записи отчёта.
+
+Область координации — одна рабочая копия на одном хосте. Прямой `kubectl`, другое checkout и действия внешних контроллеров этой блокировкой не координируются. Не удалять lock-файл для «снятия» занятого lock: сначала дождаться завершения владельца. Наличие файла само по себе не означает, что операция ещё работает.
+
+`SIGINT` / `SIGTERM` позволяют выполнить обработчик, но успешность восстановления зависит от API, фактического объекта и времени выполнения. `SIGKILL`, потеря VM и недоступность API не обеспечивают автоматический rollback. Recovery marker сохраняет данные для диагностики, а не выполняет восстановление самостоятельно. `.state/canary-restore.json` блокирует новые canary-операции до ручного восстановления здоровой canary и stable 100%; `.state/log-delivery-restore.json` хранит исходные UID и число реплик Loki. Удалять marker только после проверенного восстановления по `docs/RUNBOOK.md`.
+
+Для canary граница завершения наступает после обработки marker, необходимого восстановления и финальной записи отчёта, пока port-forward ещё открыты. Сигнал до этой границы, включая удаление marker или запись отчёта, требует восстановления и итогового FAIL. Повторные SIGINT/SIGTERM во время bounded cleanup записываются, но не прерывают его. Сигнал уже после завершения, при закрытии port-forward, только печатает сообщение: ранее завершённое успешное продвижение сохраняет 100% canary и свой PASS.
+
+`make operation-check` создаёт `evidence/operations/report.json`: он проверяет настоящие конкурирующие процессы и оба canary-прерывания на работающем Kubernetes. SIGINT направляется группе процесса оператора, SIGTERM — его PID; внешние команды запускаются в отдельных process sessions. Нужны доступный API, baseline stable 100% и отсутствие неразобранных markers. Прерванные дочерние сценарии обязаны сохранить FAIL, тогда как safety-протокол получает PASS только после проверки их восстановления. Сигналы Loki и отказ API этим протоколом не проверяются. Финальная упаковка требует успешный operations report того же чистого HEAD, что и Ubuntu acceptance; unit/process-тесты отдельно не заменяют этот отчёт.
 
 Gate проверяет каждый этап 10/25/50% выборкой из 200 запросов к основному маршруту (допуск четыре стандартных отклонения), а финальные 100% - 40 запросами. Дополнительно использует 30 запросов к **выделенному canary-пути**, проверяет ответ/версию, долю ошибок ≤1%, p95 ≤500 ms, не менее 20 samples и свежий scrape именно текущего canary Pod, выполненный после завершения когорты. При 30 samples этот порог допускает только 0 ошибок. 500 ms — демонстрационный бюджет, не заявленный пользовательский SLO. Это CLI-эксперимент, не непрерывный промышленный rollout-controller; он не заменяет Argo Rollouts/Flagger. После успешного `make canary` основной маршрут остаётся 100% canary; `make deploy` возвращает baseline 100% stable.
 
-Каждая проверка пишет `report.json` и автономный `report.html` в `evidence/runtime/`, `evidence/demo/`, `evidence/canary/`, `evidence/log-delivery/`, `evidence/acceptance/`. Содержатся реальные responses, PromQL/LogQL результаты, длительности, версия/образ, commit и ОС. Пустые метрики/логи и устаревшие conditions не считаются PASS. Факт успешного локального теста не преобразуется в факт успешного Kubernetes теста.
+Каждая проверка пишет `report.json` и автономный `report.html` в `evidence/runtime/`, `evidence/demo/`, `evidence/canary/`, `evidence/log-delivery/`, `evidence/operations/`, `evidence/acceptance/`. Содержатся реальные responses, PromQL/LogQL результаты, длительности, версия/образ, commit и ОС. Пустые метрики/логи и устаревшие conditions не считаются PASS. Факт успешного локального теста не преобразуется в факт успешного Kubernetes теста.
 
 ## 7. Надёжность и безопасность
 
@@ -202,7 +215,7 @@ make demo
 
 kind использует тот же Cilium и политики, но другой явно указанный Kubernetes patch — 1.35.8 из digest-pinned upstream node image. HTTP опубликован на `127.0.0.1:8080`, HTTPS — `127.0.0.1:8443`; в ручных curl заменить порты 30080/30443. Такой прогон **не заменяет** приоритетный kubeadm acceptance.
 
-`.github/workflows/ci.yml` выполняет static → image config validation → kind deploy/redeploy → отказ canary → здоровая canary и возврат deploy → отказ Loki → verification → artifacts. Полный [kind CI прошёл](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141475487) на измеренном commit. Только hosted ephemeral Ubuntu runner, read-only permissions, без `pull_request_target`, deployment secrets и production доступа. Kubernetes dry-run выполняется на настоящем API после установки CRD.
+`.github/workflows/ci.yml` выполняет static → image config validation → kind deploy/redeploy → operation-check → отказ canary → здоровая canary и возврат deploy → отказ Loki → verification → artifacts. Предыдущие [kind CI `efa05ee`](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141475487) и [финальный CI `d24163f`](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37142333088) прошли; они не подтверждают новые изменения lock/signal recovery. Только hosted ephemeral Ubuntu runner, read-only permissions, без `pull_request_target`, deployment secrets и production доступа. Kubernetes dry-run выполняется на настоящем API после установки CRD.
 
 ## 9. Структура и дальнейшие документы
 
@@ -229,10 +242,10 @@ docs/             architecture decisions, runbook, demo, submission, source refe
 
 ## Автоматическая приёмка на Ubuntu VM
 
-В Actions доступен `Ubuntu kubeadm acceptance` (ручной запуск). Он проверяет выбранные контейнеры настоящими инструментами, создаёт kubeadm-кластер на отдельной Ubuntu 24.04 VM, выполняет acceptance, отказ canary, восстановление Pod, короткий отказ Loki и финальный acceptance. Это отдельная проверка от kind CI. Отчёты публикуются как artifact, с привязкой к точному commit. Ошибка любого шага завершает workflow неуспешно.
+В Actions доступен `Ubuntu kubeadm acceptance` (ручной запуск). Он проверяет выбранные контейнеры настоящими инструментами, создаёт kubeadm-кластер на отдельной Ubuntu 24.04 VM, выполняет acceptance, operation-check, отказ canary, восстановление Pod, короткий отказ Loki и финальный acceptance. Это отдельная проверка от kind CI. Отчёты публикуются как artifact, с привязкой к точному commit. Ошибка любого шага завершает workflow неуспешно.
 
-### Измеренный протокол
+### Предыдущий измеренный протокол
 
 90/10: stable 361, canary 39 из 400. Восстановление Pod: 6.02 с, ошибок 0/50. После недоступности Loki найдено 20/20 ID; максимальная наблюдённая задержка 39.9 с; дополнительных видимых копий 0. Все этапы здоровой canary 10/25/50/100% прошли. Это измерения одного лабораторного прогона.
 
-Исходный подтверждённый commit: `efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec`. Отчёты доступны в [Actions](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784) и `evidence/published/`. После финализации документов приёмка повторяется для финального HEAD перед упаковкой. Конкретный commit и чистота рабочей копии всегда записаны в свежем `evidence/acceptance/report.json`.
+Исходный измеренный commit: `efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec`; финальный commit той версии `d24163f0ddc3bb079c79e5e39743b06018636f52` также прошёл отдельную приёмку. Эти отчёты сохраняются как история в [Actions](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784) и `evidence/published/`. Новые lock/signal recovery требуют самостоятельной проверки. После финализации новой версии приёмка повторяется для её финального HEAD перед упаковкой; конкретный commit и чистота рабочей копии записаны в свежем `evidence/acceptance/report.json`.

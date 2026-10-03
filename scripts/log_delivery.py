@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Explicit isolated-stand drill: pause Loki, issue real requests, measure log replay."""
 from __future__ import annotations
-import argparse, contextlib, json, signal, time, uuid
+import argparse, contextlib, json, signal, sys, time, uuid
 from runtime import *
 from verify import hello, logs
+from operations import OperationLockError, operation_lock
 
 
 def restore_loki(baseline: dict) -> None:
@@ -128,17 +129,7 @@ def drill(base: str, report: Report, *, count: int, pause_seconds: float, timeou
     return evidence
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--run', action='store_true', help='Explicitly permit scaling Loki down on this isolated stand')
-    parser.add_argument('--requests', type=int, default=20)
-    parser.add_argument('--pause-seconds', type=float, default=10)
-    parser.add_argument('--delivery-timeout', type=float, default=180)
-    args = parser.parse_args()
-    if not args.run:
-        parser.error('This optional outage drill requires --run on the isolated SIGNAL stand')
-    if not 1 <= args.requests <= 100 or not 1 <= args.pause_seconds <= 60 or not 10 <= args.delivery_timeout <= 600:
-        parser.error('Require 1..100 requests, 1..60 pause seconds and 10..600 delivery timeout seconds')
+def run_drill(args: argparse.Namespace) -> int:
     report = Report('Controlled Loki outage and observed log delivery', 'evidence/log-delivery')
     previous_handler = signal.getsignal(signal.SIGTERM)
     def interrupted(signum, frame):
@@ -154,6 +145,25 @@ def main() -> int:
     finally:
         signal.signal(signal.SIGTERM, previous_handler)
     return 0 if report.save() else 1
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--run', action='store_true', help='Explicitly permit scaling Loki down on this isolated stand')
+    parser.add_argument('--requests', type=int, default=20)
+    parser.add_argument('--pause-seconds', type=float, default=10)
+    parser.add_argument('--delivery-timeout', type=float, default=180)
+    args = parser.parse_args()
+    if not args.run:
+        parser.error('This optional outage drill requires --run on the isolated SIGNAL stand')
+    if not 1 <= args.requests <= 100 or not 1 <= args.pause_seconds <= 60 or not 10 <= args.delivery_timeout <= 600:
+        parser.error('Require 1..100 requests, 1..60 pause seconds and 10..600 delivery timeout seconds')
+    try:
+        with operation_lock(ROOT):
+            return run_drill(args)
+    except OperationLockError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
 
 if __name__ == '__main__':

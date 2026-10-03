@@ -22,8 +22,10 @@ def command_env() -> dict[str, str]:
     return env
 
 def run(args: list[str], *, data: Any = None, timeout: float = 90) -> str:
+    from operations import lock_pass_fds
     p = subprocess.run(args, input=None if data is None else json.dumps(data), text=True,
-                       capture_output=True, timeout=timeout, cwd=ROOT, env=command_env())
+                       capture_output=True, timeout=timeout, cwd=ROOT, env=command_env(),
+                       pass_fds=lock_pass_fds(ROOT), start_new_session=os.name=='posix')
     if p.returncode:
         raise CheckError(f'{args[0]} {args[1:]}: {p.stderr.strip()[-2500:]}')
     return p.stdout
@@ -55,9 +57,14 @@ def retry(fn: Callable[[], Any], timeout: float = 90, interval: float = 3) -> An
 def forward(ns: str, service: str, remote: int) -> Iterator[int]:
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0)); port = s.getsockname()[1]
+    env = command_env()
+    # A read-only forwarding process must not keep a mutation lock alive if
+    # its owning operator is forcibly killed.
+    env.pop('SIGNAL_OPERATION_LOCK_FD', None)
     p = subprocess.Popen(['kubectl', '-n', ns, 'port-forward', '--address=127.0.0.1',
                           f'service/{service}', f'{port}:{remote}'], stdout=subprocess.DEVNULL,
-                          stderr=subprocess.PIPE, text=True, env=command_env(), cwd=ROOT)
+                          stderr=subprocess.PIPE, text=True, env=env, cwd=ROOT,
+                          start_new_session=os.name=='posix')
     try:
         def ready() -> bool:
             require(p.poll() is None, 'Port-forward stopped before becoming ready')

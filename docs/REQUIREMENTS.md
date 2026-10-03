@@ -14,15 +14,17 @@
 | 3: Fluentd | CRI tail DaemonSet, persistent positions/buffer | настоящий control request + Loki query по proof_id |
 | 3: access/error logs | stdout JSON + stderr text, Loki filesystem TSDB | 200 access и 404 /missing с найденным error ID |
 | 4 / 15: структура/код | детерминированные manifests, stdlib, unit tests | `make static`, review config → generated snapshots |
-| 4: безопасность | non-root, read-only, drop capabilities, probes/PDB, Cilium policies | static tests + restricted cross-namespace Job |
+| 4: безопасность | Nginx non-root/read-only/drop capabilities, probes/PDB, Cilium policies; Fluentd uid 0 для CRI | static tests + restricted cross-namespace Job |
 | 4: секреты | локальная генерация, Kubernetes Secret, .gitignore | нет private data в manifests/Git; повторный deploy не ротирует |
 | 5 / 10: документация | README, ADR, runbook, demo, паспорт ≤4 стр. | быстрый запуск и проверка каждым указанным способом |
-| 5: CI/CD | `ci.yml`: static + kind; `ubuntu-kubeadm.yml`: отдельная Ubuntu VM | прошедший Ubuntu workflow, artifacts и точный commit; kind CI проверяется отдельно |
+| 5: CI/CD | `ci.yml`: static + kind; `ubuntu-kubeadm.yml`: отдельная Ubuntu VM | `efa05ee` / `d24163f` прошли; новая ревизия требует свежих artifacts и точного commit |
 | 5: Gateway extras | host/path/header, два backend, local-CA TLS, traffic splitting | `make verify`, `make demo`, `make canary` |
 | 5: observability extras | Grafana, blackbox, node metrics, alerts, finite retention | UI, query, reports; external notifications не заявлены |
 | 5: дополнительная особенность | fail-closed evidence, bad-canary rollback, Pod recovery drill | реальный `evidence/demo/report.json` |
 | 5: буфер логов при отказе | сохранение positions/buffer, короткая недоступность Loki и guarded restore | `make log-delivery`: уникальные ID, задержки, пропуски и наблюдаемые дубли |
-| Обязательная ОС | целевой Ubuntu 24.04 amd64 + kubeadm 1.35.9 | **подтверждено полным Ubuntu-прогоном**, флаг `ubuntu_24_04_kubeadm_confirmed` |
-| Формат сдачи | `scripts/package.py`, docs/SUBMISSION.md | два файла, публичный main, настоящий URL, размеры/страницы |
+| 5: координация операций | общий `.state/workflow.lock`, kernel flock, проверка inherited FD | `make operation-check`: настоящие конкуренты отвергаются без изменений; nested acceptance → deploy проверяется acceptance; новая runtime-проверка ожидается |
+| 5: восстановление после прерывания | canary `SIGINT` / `SIGTERM`, проверка baseline, recovery markers и ручной runbook | `make operation-check`: SIGTERM faulty demo и SIGINT группе healthy promotion, дочерний FAIL/сигнал, HTTP baseline, marker и lock; новая runtime-проверка ожидается |
+| Обязательная ОС | целевой Ubuntu 24.04 amd64 + kubeadm 1.35.9 | подтверждено для предыдущих `efa05ee` / `d24163f`; новая ревизия требует свежего `ubuntu_24_04_kubeadm_confirmed` |
+| Формат сдачи | `scripts/package.py`, docs/SUBMISSION.md | два файла, публичный main, URL, размеры/страницы, Ubuntu acceptance и operations report того же чистого HEAD |
 
-Оценка баллов не прогнозируется: наличие строки в матрице не гарантирует балл, если соответствующий эксперимент не проходит.
+Опубликованные измерения предыдущих `efa05ee` / `d24163f` сохраняются как история. Они не подтверждают новые common lock и signal recovery; отсутствие свежего отчёта не подменяется PASS. Оценка баллов не прогнозируется: наличие строки в матрице не гарантирует балл, если соответствующий эксперимент не проходит.
