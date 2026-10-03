@@ -50,6 +50,8 @@ jobs:
           kubectl get pods -A -o wide > evidence/ci/pods.txt 2>&1 || true
           kubectl get events -A --sort-by=.lastTimestamp > evidence/ci/events.txt 2>&1 || true
           kubectl -n envoy-gateway-system logs deployment/envoy-gateway --tail=200 > evidence/ci/controller.txt 2>&1 || true
+          kubectl -n signal-logging logs daemonset/fluentd --tail=200 > evidence/ci/fluentd-current.txt 2>&1 || true
+          kubectl -n signal-logging logs daemonset/fluentd --previous --tail=200 > evidence/ci/fluentd-previous.txt 2>&1 || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

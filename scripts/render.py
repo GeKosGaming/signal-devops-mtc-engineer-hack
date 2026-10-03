@@ -196,6 +196,7 @@ def apps(broken: bool) -> list[Obj]:
         exp = container('nginx-exporter', images()['nginx_exporter'], 9113,
                         args=['--nginx.scrape-uri=http://127.0.0.1:8081/stub_status'], cpu='10m',
                         memory='24Mi', limit='64Mi')
+        exp['ports'][0]['name'] = 'metrics'
         probe(exp, 9113, '/metrics')
         dep = deployment(name, APP, [nginx, exp], [
             {'name': 'config', 'configMap': {'name': name}}, {'name': 'tmp', 'emptyDir': {'sizeLimit': '64Mi'}}],
@@ -331,6 +332,9 @@ def logging() -> list[Obj]:
     c = container('fluentd', images()['fluentd'], 24220, memory='128Mi', limit='384Mi')
     c['command'] = ['fluentd']
     c['args'] = ['-c', '/fluentd/etc/fluent.conf', '-p', '/fluentd/plugins']
+    # Ruby rejects a world-writable emptyDir /tmp without the sticky bit.
+    # This root-owned hostPath also stores durable output buffers.
+    c['env'] = [{'name': 'TMPDIR', 'value': '/buffers'}]
     probe(c, 24220, '/api/plugins.json')
     c.pop('livenessProbe')  # A slow sink should not turn retries into a restart loop.
     mount(c, 'config', '/fluentd/etc/fluent.conf', 'fluent.conf')

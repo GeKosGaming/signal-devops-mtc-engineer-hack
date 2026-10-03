@@ -62,11 +62,18 @@ jobs:
           kubectl get events -A --sort-by=.lastTimestamp > evidence/ubuntu-diagnostics/events.txt 2>&1 || true
           kubectl -n envoy-gateway-system logs deployment/envoy-gateway --tail=200 > evidence/ubuntu-diagnostics/controller.txt 2>&1 || true
           kubectl -n signal-logging logs daemonset/fluentd --tail=100 > evidence/ubuntu-diagnostics/fluentd.txt 2>&1 || true
+          kubectl -n signal-logging logs daemonset/fluentd --previous --tail=100 > evidence/ubuntu-diagnostics/fluentd-previous.txt 2>&1 || true
           kubectl -n signal-observe logs deployment/loki --tail=100 > evidence/ubuntu-diagnostics/loki.txt 2>&1 || true
           sudo journalctl -u kubelet --no-pager -n 100 > evidence/ubuntu-diagnostics/kubelet.txt 2>&1 || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: signal-ubuntu-kubeadm-${{ github.sha }}
-          path: evidence/
+          path: |
+            evidence/acceptance/
+            evidence/demo/
+            evidence/canary/
+            evidence/log-delivery/
+            evidence/runtime/
+            evidence/ubuntu-diagnostics/
           retention-days: 30

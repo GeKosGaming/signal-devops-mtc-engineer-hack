@@ -450,7 +450,7 @@
                 ],
                 "ports": [
                   {
-                    "name": "http",
+                    "name": "metrics",
                     "containerPort": 9113
                   }
                 ],
@@ -726,7 +726,7 @@
                 ],
                 "ports": [
                   {
-                    "name": "http",
+                    "name": "metrics",
                     "containerPort": 9113
                   }
                 ],
@@ -2153,6 +2153,12 @@
                   "/fluentd/etc/fluent.conf",
                   "-p",
                   "/fluentd/plugins"
+                ],
+                "env": [
+                  {
+                    "name": "TMPDIR",
+                    "value": "/buffers"
+                  }
                 ],
                 "readinessProbe": {
                   "httpGet": {

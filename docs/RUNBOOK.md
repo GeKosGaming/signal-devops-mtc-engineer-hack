@@ -53,6 +53,8 @@ kubectl -n signal logs deployment/web-stable -c nginx --tail=20
 
 Разделить три точки: запись существует в приложении; Fluentd tail видит CRI файл и может писать buffer; Loki принимает batch и query смотрит нужный диапазон времени. Проверить часовую синхронизацию узла, метки namespace/app/stream, отсутствие старого proof_id. Проверять `make verify`, а не только stdout агента. Не удалять position/buffer как первое средство: это создаёт replay/дубли или потерю данных.
 
+Если Fluentd падает до запуска monitor API, посмотреть также `kubectl -n signal-logging logs daemonset/fluentd --previous`. Ruby отвергает world-writable `/tmp` без sticky bit; в проекте задан `TMPDIR=/buffers`, у root-owned каталога не должно быть записи для остальных пользователей. `make validate-containers` проверяет реальный запуск supervisor с read-only rootfs и drop ALL, а не только dry-run конфигурации.
+
 <a id="storage"></a>
 
 ## Диск заполнен
