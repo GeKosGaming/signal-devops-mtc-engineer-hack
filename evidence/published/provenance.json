@@ -1,0 +1,41 @@
+{
+  "ubuntu": {
+    "run_url": "https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784",
+    "source_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "files": [
+      "acceptance/after/report.html",
+      "acceptance/after/report.json",
+      "acceptance/before/report.html",
+      "acceptance/before/report.json",
+      "acceptance/os-package-versions.txt",
+      "acceptance/report.html",
+      "acceptance/report.json",
+      "canary/report.html",
+      "canary/report.json",
+      "demo/report.html",
+      "demo/report.json",
+      "log-delivery/report.html",
+      "log-delivery/report.json"
+    ]
+  },
+  "kind": {
+    "run_url": "https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141475487",
+    "source_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "files": [
+      "canary/report.html",
+      "canary/report.json",
+      "ci/after/report.html",
+      "ci/after/report.json",
+      "ci/before/report.html",
+      "ci/before/report.json",
+      "ci/report.html",
+      "ci/report.json",
+      "demo/report.html",
+      "demo/report.json",
+      "log-delivery/report.html",
+      "log-delivery/report.json",
+      "runtime/report.html",
+      "runtime/report.json"
+    ]
+  }
+}

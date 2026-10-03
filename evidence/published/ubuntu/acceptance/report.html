@@ -1,0 +1,251 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Redeploy/Ubuntu acceptance</title><style>body{font:16px system-ui;margin:3% auto;max-width:1200px;background:#111821;color:#e8edf3}h1{font-size:36px}table{width:100%;border-collapse:collapse}td,th{padding:16px;border-bottom:1px solid #425266;text-align:left;vertical-align:top}pre{white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;font-size:12px}.true{color:#9de5b0}.false{color:#ffaba6}small{color:#aab5c3}</style><h1>SIGNAL / PASS</h1><p>Redeploy/Ubuntu acceptance</p><small>Measured evidence, not a readiness claim based on Pod phase. No external scripts, fonts or telemetry.</small><pre>{
+  &quot;timestamp_utc&quot;: &quot;2026-10-03T17:48:37.476965+00:00&quot;,
+  &quot;os&quot;: {
+    &quot;PRETTY_NAME&quot;: &quot;Ubuntu 24.04.5 LTS&quot;,
+    &quot;NAME&quot;: &quot;Ubuntu&quot;,
+    &quot;VERSION_ID&quot;: &quot;24.04&quot;,
+    &quot;VERSION&quot;: &quot;24.04.5 LTS (Noble Numbat)&quot;,
+    &quot;VERSION_CODENAME&quot;: &quot;noble&quot;,
+    &quot;ID&quot;: &quot;ubuntu&quot;,
+    &quot;ID_LIKE&quot;: &quot;debian&quot;,
+    &quot;HOME_URL&quot;: &quot;https://www.ubuntu.com/&quot;,
+    &quot;SUPPORT_URL&quot;: &quot;https://help.ubuntu.com/&quot;,
+    &quot;BUG_REPORT_URL&quot;: &quot;https://bugs.launchpad.net/ubuntu/&quot;,
+    &quot;PRIVACY_POLICY_URL&quot;: &quot;https://www.ubuntu.com/legal/terms-and-policies/privacy-policy&quot;,
+    &quot;UBUNTU_CODENAME&quot;: &quot;noble&quot;,
+    &quot;LOGO&quot;: &quot;ubuntu-logo&quot;
+  },
+  &quot;git_commit&quot;: &quot;efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec&quot;,
+  &quot;git_worktree_clean&quot;: true,
+  &quot;profile&quot;: &quot;kubeadm&quot;
+}</pre><table><tr><th>Check</th><th>Result</th><th>Evidence</th></tr><tr><td>actual platform matches claimed platform</td><td class="true">PASS</td><td><pre>{
+  &quot;os&quot;: {
+    &quot;PRETTY_NAME&quot;: &quot;Ubuntu 24.04.5 LTS&quot;,
+    &quot;NAME&quot;: &quot;Ubuntu&quot;,
+    &quot;VERSION_ID&quot;: &quot;24.04&quot;,
+    &quot;VERSION&quot;: &quot;24.04.5 LTS (Noble Numbat)&quot;,
+    &quot;VERSION_CODENAME&quot;: &quot;noble&quot;,
+    &quot;ID&quot;: &quot;ubuntu&quot;,
+    &quot;ID_LIKE&quot;: &quot;debian&quot;,
+    &quot;HOME_URL&quot;: &quot;https://www.ubuntu.com/&quot;,
+    &quot;SUPPORT_URL&quot;: &quot;https://help.ubuntu.com/&quot;,
+    &quot;BUG_REPORT_URL&quot;: &quot;https://bugs.launchpad.net/ubuntu/&quot;,
+    &quot;PRIVACY_POLICY_URL&quot;: &quot;https://www.ubuntu.com/legal/terms-and-policies/privacy-policy&quot;,
+    &quot;UBUNTU_CODENAME&quot;: &quot;noble&quot;,
+    &quot;LOGO&quot;: &quot;ubuntu-logo&quot;
+  },
+  &quot;profile&quot;: &quot;kubeadm&quot;,
+  &quot;kubernetes&quot;: &quot;v1.35.9&quot;,
+  &quot;provenance&quot;: {
+    &quot;host&quot;: {
+      &quot;kernel&quot;: &quot;6.17.0-1022-azure&quot;,
+      &quot;architecture&quot;: &quot;x86_64&quot;,
+      &quot;virtualization&quot;: &quot;microsoft&quot;,
+      &quot;container&quot;: false,
+      &quot;wsl_environment&quot;: false,
+      &quot;ipv4&quot;: [
+        &quot;10.1.1.119&quot;,
+        &quot;10.244.0.105&quot;,
+        &quot;10.88.0.1&quot;,
+        &quot;127.0.0.1&quot;,
+        &quot;172.17.0.1&quot;
+      ],
+      &quot;owned_cluster_marker&quot;: true,
+      &quot;local_apiserver_manifest&quot;: true,
+      &quot;configured_node_ip&quot;: &quot;10.1.1.119&quot;
+    },
+    &quot;node&quot;: &quot;runnervm8df0l&quot;,
+    &quot;node_os&quot;: &quot;Ubuntu 24.04.5 LTS&quot;,
+    &quot;kubelet&quot;: &quot;v1.35.9&quot;,
+    &quot;kubeadm_configuration_matches&quot;: true
+  }
+}</pre></td></tr><tr><td>first deployment</td><td class="true">PASS</td><td><pre>{
+  &quot;output&quot;: &quot;\ndeployment.apps/alertmanager serverside-applied\nservice/alertmanager serverside-applied\ndeployment.apps/grafana serverside-applied\nservice/grafana serverside-applied\ndeployment.apps/blackbox serverside-applied\nservice/blackbox serverside-applied\nserviceaccount/prometheus serverside-applied\nclusterrole.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\ndaemonset.apps/node-exporter serverside-applied\nconfigmap/fluentd serverside-applied\ndaemonset.apps/fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/web-default-deny serverside-applied\nnetworkpolicy.networking.k8s.io/web-from-gateway serverside-applied\nnetworkpolicy.networking.k8s.io/web-metrics serverside-applied\nnetworkpolicy.networking.k8s.io/observe-ingress serverside-applied\nnetworkpolicy.networking.k8s.io/loki-from-fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/fluentd-minimum serverside-applied\nnetworkpolicy.networking.k8s.io/node-metrics serverside-applied\ndeployment \&quot;web-stable\&quot; successfully rolled out\ndeployment \&quot;web-canary\&quot; successfully rolled out\ndeployment \&quot;loki\&quot; successfully rolled out\ndeployment \&quot;prometheus\&quot; successfully rolled out\ndeployment \&quot;grafana\&quot; successfully rolled out\ndeployment \&quot;blackbox\&quot; successfully rolled out\ndeployment \&quot;alertmanager\&quot; successfully rolled out\ndaemon set \&quot;fluentd\&quot; successfully rolled out\ndaemon set \&quot;node-exporter\&quot; successfully rolled out\ngateway.gateway.networking.k8s.io/signal condition met\n\n[SIGNAL] Deployment completed. Now run make verify; deployment success alone is not acceptance.\n&quot;
+}</pre></td></tr><tr><td>baseline functional verification</td><td class="true">PASS</td><td><pre>{
+  &quot;output&quot;: &quot;PASS cluster version\nPASS GatewayClass accepted/current\nPASS Gateway accepted/programmed/current\nPASS both HTTPRoutes attached, current generation\nPASS HTTP exact response via Envoy Gateway\nPASS TLS validated with local CA, never insecure\nPASS path routing /canary\nPASS path routing /stable\nPASS header routing\nPASS unknown hostname rejected\nPASS external HTTP NodePort entrypoint\nPASS external HTTPS NodePort with verified CA and SNI\nPASS all required Prometheus targets actually up\nPASS real request counter increase\nPASS nonempty finite infrastructure and latency metrics\nPASS unique request proof issued\nPASS same request found in Fluentd -&gt; Loki access logs\nPASS real application error generated\nPASS error log collected by Fluentd -&gt; Loki\nPASS NetworkPolicy positive and negative controls\nPASS application still healthy after isolation test\nPASS runtime image inventory\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/acceptance/before/report.html\n&quot;
+}</pre></td></tr><tr><td>second deployment</td><td class="true">PASS</td><td><pre>{
+  &quot;output&quot;: &quot;\ndeployment.apps/alertmanager serverside-applied\nservice/alertmanager serverside-applied\ndeployment.apps/grafana serverside-applied\nservice/grafana serverside-applied\ndeployment.apps/blackbox serverside-applied\nservice/blackbox serverside-applied\nserviceaccount/prometheus serverside-applied\nclusterrole.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\ndaemonset.apps/node-exporter serverside-applied\nconfigmap/fluentd serverside-applied\ndaemonset.apps/fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/web-default-deny serverside-applied\nnetworkpolicy.networking.k8s.io/web-from-gateway serverside-applied\nnetworkpolicy.networking.k8s.io/web-metrics serverside-applied\nnetworkpolicy.networking.k8s.io/observe-ingress serverside-applied\nnetworkpolicy.networking.k8s.io/loki-from-fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/fluentd-minimum serverside-applied\nnetworkpolicy.networking.k8s.io/node-metrics serverside-applied\ndeployment \&quot;web-stable\&quot; successfully rolled out\ndeployment \&quot;web-canary\&quot; successfully rolled out\ndeployment \&quot;loki\&quot; successfully rolled out\ndeployment \&quot;prometheus\&quot; successfully rolled out\ndeployment \&quot;grafana\&quot; successfully rolled out\ndeployment \&quot;blackbox\&quot; successfully rolled out\ndeployment \&quot;alertmanager\&quot; successfully rolled out\ndaemon set \&quot;fluentd\&quot; successfully rolled out\ndaemon set \&quot;node-exporter\&quot; successfully rolled out\ngateway.gateway.networking.k8s.io/signal condition met\n\n[SIGNAL] Deployment completed. Now run make verify; deployment success alone is not acceptance.\n&quot;
+}</pre></td></tr><tr><td>idempotence: same Pods, PVCs and certificates</td><td class="true">PASS</td><td><pre>{
+  &quot;before&quot;: {
+    &quot;running_pods&quot;: [
+      [
+        &quot;envoy-gateway-system&quot;,
+        &quot;envoy-gateway-bf66cfbdb-4sxf9&quot;,
+        &quot;2e1149d9-e231-4413-aa2b-3b681e23541f&quot;
+      ],
+      [
+        &quot;envoy-gateway-system&quot;,
+        &quot;envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps&quot;,
+        &quot;30e9e2fa-f447-4941-8078-bcbf0e180a1b&quot;
+      ],
+      [
+        &quot;envoy-gateway-system&quot;,
+        &quot;envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8&quot;,
+        &quot;c374bd4f-f710-4368-b9f2-cf714ca505ef&quot;
+      ],
+      [
+        &quot;signal&quot;,
+        &quot;web-canary-7b8f84874d-9hdnm&quot;,
+        &quot;942626f1-7e18-4fa3-ad99-9a3518fe9b16&quot;
+      ],
+      [
+        &quot;signal&quot;,
+        &quot;web-stable-7488f7cd6b-96hqm&quot;,
+        &quot;80b58e30-2e9e-47bf-8bb7-c2ddf354156a&quot;
+      ],
+      [
+        &quot;signal&quot;,
+        &quot;web-stable-7488f7cd6b-mdw7k&quot;,
+        &quot;6241d770-cddf-4b10-9068-81f7752038fa&quot;
+      ],
+      [
+        &quot;signal-logging&quot;,
+        &quot;fluentd-lkgcf&quot;,
+        &quot;fddf89f7-96a8-49e9-8ba6-ddfd4e78d36a&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;alertmanager-6b7d77d876-2f6xz&quot;,
+        &quot;18552e34-3a1e-4180-96b2-d175e0fac13c&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;blackbox-5fb8fd75bc-26grm&quot;,
+        &quot;78e6f7b5-a54c-4ff6-9028-26a258c8cec8&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;grafana-74b57bf989-pv7kr&quot;,
+        &quot;d573fb61-c20b-4d28-ba12-2d3fcabf7560&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;loki-58c8b9bd86-zdk5n&quot;,
+        &quot;0d8a6be4-6710-4948-b6a6-e4ce2a791e16&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;prometheus-b7fccf6b5-zsg2q&quot;,
+        &quot;c521d3f8-85b4-4690-90be-030cb41506db&quot;
+      ],
+      [
+        &quot;signal-system&quot;,
+        &quot;node-exporter-wwdzp&quot;,
+        &quot;d0b5222b-4c3a-4142-88f8-fef28162658f&quot;
+      ]
+    ],
+    &quot;pvc_uids&quot;: [
+      [
+        &quot;alertmanager&quot;,
+        &quot;6749323b-97fd-454a-889a-ab45b1009b21&quot;
+      ],
+      [
+        &quot;grafana&quot;,
+        &quot;b785ad3c-7b8e-4831-9db8-09011ef3873c&quot;
+      ],
+      [
+        &quot;loki&quot;,
+        &quot;08942f7f-645b-4403-8367-16893102e49b&quot;
+      ],
+      [
+        &quot;prometheus&quot;,
+        &quot;8bd908f0-188a-4d7b-b3a3-391035c39820&quot;
+      ]
+    ],
+    &quot;storage_job_uid&quot;: &quot;ab803555-610a-4a78-8cf5-4dd185a1fa72&quot;,
+    &quot;ca_sha256&quot;: &quot;3f94ea8de3af134b8ef5663c8d585f1c86218ac529d9d4b2cb1edb10ba5cfdaf&quot;,
+    &quot;leaf_sha256&quot;: &quot;a23e6ac9dbfaff9b1ae37386836b10585c64092e72107d06c395a11393472d6a&quot;
+  },
+  &quot;after&quot;: {
+    &quot;running_pods&quot;: [
+      [
+        &quot;envoy-gateway-system&quot;,
+        &quot;envoy-gateway-bf66cfbdb-4sxf9&quot;,
+        &quot;2e1149d9-e231-4413-aa2b-3b681e23541f&quot;
+      ],
+      [
+        &quot;envoy-gateway-system&quot;,
+        &quot;envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps&quot;,
+        &quot;30e9e2fa-f447-4941-8078-bcbf0e180a1b&quot;
+      ],
+      [
+        &quot;envoy-gateway-system&quot;,
+        &quot;envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8&quot;,
+        &quot;c374bd4f-f710-4368-b9f2-cf714ca505ef&quot;
+      ],
+      [
+        &quot;signal&quot;,
+        &quot;web-canary-7b8f84874d-9hdnm&quot;,
+        &quot;942626f1-7e18-4fa3-ad99-9a3518fe9b16&quot;
+      ],
+      [
+        &quot;signal&quot;,
+        &quot;web-stable-7488f7cd6b-96hqm&quot;,
+        &quot;80b58e30-2e9e-47bf-8bb7-c2ddf354156a&quot;
+      ],
+      [
+        &quot;signal&quot;,
+        &quot;web-stable-7488f7cd6b-mdw7k&quot;,
+        &quot;6241d770-cddf-4b10-9068-81f7752038fa&quot;
+      ],
+      [
+        &quot;signal-logging&quot;,
+        &quot;fluentd-lkgcf&quot;,
+        &quot;fddf89f7-96a8-49e9-8ba6-ddfd4e78d36a&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;alertmanager-6b7d77d876-2f6xz&quot;,
+        &quot;18552e34-3a1e-4180-96b2-d175e0fac13c&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;blackbox-5fb8fd75bc-26grm&quot;,
+        &quot;78e6f7b5-a54c-4ff6-9028-26a258c8cec8&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;grafana-74b57bf989-pv7kr&quot;,
+        &quot;d573fb61-c20b-4d28-ba12-2d3fcabf7560&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;loki-58c8b9bd86-zdk5n&quot;,
+        &quot;0d8a6be4-6710-4948-b6a6-e4ce2a791e16&quot;
+      ],
+      [
+        &quot;signal-observe&quot;,
+        &quot;prometheus-b7fccf6b5-zsg2q&quot;,
+        &quot;c521d3f8-85b4-4690-90be-030cb41506db&quot;
+      ],
+      [
+        &quot;signal-system&quot;,
+        &quot;node-exporter-wwdzp&quot;,
+        &quot;d0b5222b-4c3a-4142-88f8-fef28162658f&quot;
+      ]
+    ],
+    &quot;pvc_uids&quot;: [
+      [
+        &quot;alertmanager&quot;,
+        &quot;6749323b-97fd-454a-889a-ab45b1009b21&quot;
+      ],
+      [
+        &quot;grafana&quot;,
+        &quot;b785ad3c-7b8e-4831-9db8-09011ef3873c&quot;
+      ],
+      [
+        &quot;loki&quot;,
+        &quot;08942f7f-645b-4403-8367-16893102e49b&quot;
+      ],
+      [
+        &quot;prometheus&quot;,
+        &quot;8bd908f0-188a-4d7b-b3a3-391035c39820&quot;
+      ]
+    ],
+    &quot;storage_job_uid&quot;: &quot;ab803555-610a-4a78-8cf5-4dd185a1fa72&quot;,
+    &quot;ca_sha256&quot;: &quot;3f94ea8de3af134b8ef5663c8d585f1c86218ac529d9d4b2cb1edb10ba5cfdaf&quot;,
+    &quot;leaf_sha256&quot;: &quot;a23e6ac9dbfaff9b1ae37386836b10585c64092e72107d06c395a11393472d6a&quot;
+  }
+}</pre></td></tr><tr><td>verification after redeploy</td><td class="true">PASS</td><td><pre>{
+  &quot;output&quot;: &quot;PASS cluster version\nPASS GatewayClass accepted/current\nPASS Gateway accepted/programmed/current\nPASS both HTTPRoutes attached, current generation\nPASS HTTP exact response via Envoy Gateway\nPASS TLS validated with local CA, never insecure\nPASS path routing /canary\nPASS path routing /stable\nPASS header routing\nPASS unknown hostname rejected\nPASS external HTTP NodePort entrypoint\nPASS external HTTPS NodePort with verified CA and SNI\nPASS all required Prometheus targets actually up\nPASS real request counter increase\nPASS nonempty finite infrastructure and latency metrics\nPASS unique request proof issued\nPASS same request found in Fluentd -&gt; Loki access logs\nPASS real application error generated\nPASS error log collected by Fluentd -&gt; Loki\nPASS NetworkPolicy positive and negative controls\nPASS application still healthy after isolation test\nPASS runtime image inventory\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/acceptance/after/report.html\n&quot;
+}</pre></td></tr></table></html>

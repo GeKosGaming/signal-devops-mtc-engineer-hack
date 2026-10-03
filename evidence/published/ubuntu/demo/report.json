@@ -1,0 +1,347 @@
+{
+  "name": "Canary failure drill",
+  "environment": {
+    "timestamp_utc": "2026-10-03T17:45:55.445597+00:00",
+    "os": {
+      "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+      "NAME": "Ubuntu",
+      "VERSION_ID": "24.04",
+      "VERSION": "24.04.5 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "UBUNTU_CODENAME": "noble",
+      "LOGO": "ubuntu-logo"
+    },
+    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_worktree_clean": true,
+    "profile": "kubeadm"
+  },
+  "checks": [
+    {
+      "name": "90/10 weighted routing",
+      "passed": true,
+      "evidence": {
+        "path": "/",
+        "samples": 400,
+        "counts": {
+          "stable": 361,
+          "canary": 39
+        },
+        "expected_canary_fraction": 0.1,
+        "actual_canary_fraction": 0.0975,
+        "tolerance": 0.060000000000000005,
+        "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+      },
+      "duration_seconds": 7.023
+    },
+    {
+      "name": "injected fault observed through Envoy Gateway",
+      "passed": true,
+      "evidence": {
+        "expected": "injected failure",
+        "attempts": [
+          {
+            "attempt": 1,
+            "response": {
+              "status": 503,
+              "body": "Injected canary failure\n",
+              "headers": {
+                "server": "nginx",
+                "date": "Sat, 03 Oct 2026 17:46:09 GMT",
+                "content-type": "text/plain",
+                "content-length": "24",
+                "x-release": "canary",
+                "x-proof-id": "c3da66eea102050d12ce7288016d5b7c",
+                "x-content-type-options": "nosniff",
+                "connection": "close"
+              },
+              "latency_ms": 4.559
+            }
+          }
+        ],
+        "response": {
+          "status": 503,
+          "body": "Injected canary failure\n",
+          "headers": {
+            "server": "nginx",
+            "date": "Sat, 03 Oct 2026 17:46:09 GMT",
+            "content-type": "text/plain",
+            "content-length": "24",
+            "x-release": "canary",
+            "x-proof-id": "c3da66eea102050d12ce7288016d5b7c",
+            "x-content-type-options": "nosniff",
+            "connection": "close"
+          },
+          "latency_ms": 4.559
+        },
+        "passed": true,
+        "elapsed_seconds": 0.024
+      },
+      "duration_seconds": 0.024
+    },
+    {
+      "name": "rollback to stable 100%",
+      "passed": true,
+      "evidence": {
+        "web-main": [
+          {
+            "listener": "http",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T17:46:19Z",
+                "message": "Route is accepted",
+                "observedGeneration": 5,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T17:46:19Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 5,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          },
+          {
+            "listener": "https",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T17:46:19Z",
+                "message": "Route is accepted",
+                "observedGeneration": 5,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T17:46:19Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 5,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          }
+        ],
+        "web-preview": [
+          {
+            "listener": "http",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "message": "Route is accepted",
+                "observedGeneration": 1,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 1,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          },
+          {
+            "listener": "https",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "message": "Route is accepted",
+                "observedGeneration": 1,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 1,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          }
+        ]
+      },
+      "duration_seconds": 0.142
+    },
+    {
+      "name": "stable root traffic after rollback",
+      "passed": true,
+      "evidence": {
+        "path": "/",
+        "samples": 40,
+        "counts": {
+          "stable": 40,
+          "canary": 0
+        },
+        "expected_canary_fraction": 0.0,
+        "actual_canary_fraction": 0.0,
+        "tolerance": 0,
+        "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+      },
+      "duration_seconds": 0.619
+    },
+    {
+      "name": "bad canary was rejected",
+      "passed": true,
+      "evidence": null,
+      "duration_seconds": 0.0
+    },
+    {
+      "name": "canary configuration restored",
+      "passed": true,
+      "evidence": {
+        "expected": "healthy canary",
+        "attempts": [
+          {
+            "attempt": 1,
+            "response": {
+              "status": 200,
+              "body": "Hello World!\n",
+              "headers": {
+                "server": "nginx",
+                "date": "Sat, 03 Oct 2026 17:46:25 GMT",
+                "content-type": "text/plain",
+                "content-length": "13",
+                "x-release": "canary",
+                "x-proof-id": "00c11e0cdf75351248895fa96f5cb93c",
+                "x-content-type-options": "nosniff",
+                "connection": "close"
+              },
+              "latency_ms": 2.956
+            }
+          }
+        ],
+        "response": {
+          "status": 200,
+          "body": "Hello World!\n",
+          "headers": {
+            "server": "nginx",
+            "date": "Sat, 03 Oct 2026 17:46:25 GMT",
+            "content-type": "text/plain",
+            "content-length": "13",
+            "x-release": "canary",
+            "x-proof-id": "00c11e0cdf75351248895fa96f5cb93c",
+            "x-content-type-options": "nosniff",
+            "connection": "close"
+          },
+          "latency_ms": 2.956
+        },
+        "passed": true,
+        "elapsed_seconds": 0.015
+      },
+      "duration_seconds": 0.015
+    },
+    {
+      "name": "single-Pod recovery measured",
+      "passed": true,
+      "evidence": {
+        "deleted_pod": "web-stable-7488f7cd6b-5vmg8",
+        "requests": 50,
+        "failed_requests": 0,
+        "elapsed_seconds": 6.02,
+        "interpretation": "Measured recovery on one node, not node-level high availability."
+      },
+      "duration_seconds": 6.074
+    }
+  ],
+  "passed": true,
+  "canary_data_plane_transitions": [
+    {
+      "expected": "injected failure",
+      "attempts": [
+        {
+          "attempt": 1,
+          "response": {
+            "status": 503,
+            "body": "Injected canary failure\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 17:46:09 GMT",
+              "content-type": "text/plain",
+              "content-length": "24",
+              "x-release": "canary",
+              "x-proof-id": "c3da66eea102050d12ce7288016d5b7c",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 4.559
+          }
+        }
+      ],
+      "response": {
+        "status": 503,
+        "body": "Injected canary failure\n",
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 03 Oct 2026 17:46:09 GMT",
+          "content-type": "text/plain",
+          "content-length": "24",
+          "x-release": "canary",
+          "x-proof-id": "c3da66eea102050d12ce7288016d5b7c",
+          "x-content-type-options": "nosniff",
+          "connection": "close"
+        },
+        "latency_ms": 4.559
+      },
+      "passed": true,
+      "elapsed_seconds": 0.024
+    },
+    {
+      "expected": "healthy canary",
+      "attempts": [
+        {
+          "attempt": 1,
+          "response": {
+            "status": 200,
+            "body": "Hello World!\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 17:46:25 GMT",
+              "content-type": "text/plain",
+              "content-length": "13",
+              "x-release": "canary",
+              "x-proof-id": "00c11e0cdf75351248895fa96f5cb93c",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 2.956
+          }
+        }
+      ],
+      "response": {
+        "status": 200,
+        "body": "Hello World!\n",
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 03 Oct 2026 17:46:25 GMT",
+          "content-type": "text/plain",
+          "content-length": "13",
+          "x-release": "canary",
+          "x-proof-id": "00c11e0cdf75351248895fa96f5cb93c",
+          "x-content-type-options": "nosniff",
+          "connection": "close"
+        },
+        "latency_ms": 2.956
+      },
+      "passed": true,
+      "elapsed_seconds": 0.015
+    }
+  ],
+  "gate_rejection": "Canary gate rejected: {\"samples\": 30, \"errors\": 30, \"error_rate\": 1.0, \"p95_ms\": 3.341, \"max_error_rate\": 0.01, \"max_p95_ms\": 500}"
+}

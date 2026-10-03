@@ -3,7 +3,7 @@
 
 **Суть:** простой Nginx в Kubernetes, настоящий Gateway API, Prometheus и Fluentd → Loki. Вместо обещания «всё зелёное» — одна проверка, связывающая HTTP-запрос с метриками и найденным логом, и воспроизводимый эксперимент с отказом canary.
 
-> **Статус поставки.** Репозиторий и сценарии реализованы; локальные тесты выполнены, протокол — `evidence/local-checks.json`. Полный запуск выбранных контейнеров, CI и kubeadm на Ubuntu 24.04 **не выполнен в среде подготовки**. Поддержка Ubuntu является целевым профилем, а не уже подтверждённым результатом. До сдачи обязательны `make acceptance`, просмотр отчёта и обновление паспорта фактическими результатами. Этот архив исходников — **не готовый архив для загрузки организатору**.
+> **Статус поставки.** Полная приёмка пройдена на **Ubuntu 24.04.5 LTS / kubeadm 1.35.9**: [протокол Actions](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784). Проверены выбранные контейнеры, HTTP/HTTPS Gateway, реальные targets/метрики, access/error-логи, NetworkPolicy, неизменный повторный deploy, отказ canary, все здоровые этапы canary и доставка логов после отказа Loki. Это лабораторный прогон одной VM. Итоговый архив для организатора - `Коннов.zip`; исходники находятся в публичном main.
 
 ## 1. Архитектура
 
@@ -34,7 +34,7 @@ flowchart LR
 
 | Компонент | Выбранная версия / способ |
 |---|---|
-| Ubuntu | 24.04 LTS, amd64; целевой профиль, E2E требует подтверждения |
+| Ubuntu | 24.04 LTS, amd64; протестировано на Ubuntu 24.04.5 LTS / kubeadm VM |
 | Kubernetes, kubeadm / kubelet / kubectl | 1.35.9; apt `1.35.9-1.1` |
 | containerd / runc | Ubuntu containerd 1.x либо уже установленный containerd.io 1.x/2.x на выделенной VM; явные схемы CRI config v2/v3/v4, фактические версии в `.state/os-package-versions.txt` |
 | Cilium | Helm chart 1.20.2, VXLAN, Kubernetes IPAM, kube-proxy сохранён |
@@ -176,7 +176,7 @@ Loki labels ограничены `project`, `namespace`, `app`, `pod`, `stream`.
 
 `make demo` **намеренно меняет только демонстрационную canary и удаляет один Pod приложения**. Выполнять только на этом выделенном стенде. Веса восстанавливаются в `finally`; при недоступном Kubernetes API даже откат может не выполниться — это будет ошибкой, а не обещанием абсолютной защиты. После принудительного убийства процесса/VM сначала выполнить `make deploy && make verify`.
 
-Gate проверяет каждый этап 10/25/50% выборкой из 200 запросов к основному маршруту (допуск четыре стандартных отклонения), а финальные 100% - 40 запросами. Дополнительно использует 30 запросов к **выделенному canary-пути**, проверяет ответ/версию, долю ошибок ≤1%, p95 ≤500 ms, не менее 20 samples и свежий scrape именно текущего canary Pod, выполненный после начала когорты. При 30 samples этот порог допускает только 0 ошибок. 500 ms — демонстрационный бюджет, не заявленный пользовательский SLO. Это CLI-эксперимент, не непрерывный промышленный rollout-controller; он не заменяет Argo Rollouts/Flagger. После успешного `make canary` основной маршрут остаётся 100% canary; `make deploy` возвращает baseline 100% stable.
+Gate проверяет каждый этап 10/25/50% выборкой из 200 запросов к основному маршруту (допуск четыре стандартных отклонения), а финальные 100% - 40 запросами. Дополнительно использует 30 запросов к **выделенному canary-пути**, проверяет ответ/версию, долю ошибок ≤1%, p95 ≤500 ms, не менее 20 samples и свежий scrape именно текущего canary Pod, выполненный после завершения когорты. При 30 samples этот порог допускает только 0 ошибок. 500 ms — демонстрационный бюджет, не заявленный пользовательский SLO. Это CLI-эксперимент, не непрерывный промышленный rollout-controller; он не заменяет Argo Rollouts/Flagger. После успешного `make canary` основной маршрут остаётся 100% canary; `make deploy` возвращает baseline 100% stable.
 
 Каждая проверка пишет `report.json` и автономный `report.html` в `evidence/runtime/`, `evidence/demo/`, `evidence/canary/`, `evidence/log-delivery/`, `evidence/acceptance/`. Содержатся реальные responses, PromQL/LogQL результаты, длительности, версия/образ, commit и ОС. Пустые метрики/логи и устаревшие conditions не считаются PASS. Факт успешного локального теста не преобразуется в факт успешного Kubernetes теста.
 
@@ -202,7 +202,7 @@ make demo
 
 kind использует тот же Cilium и политики, но другой явно указанный Kubernetes patch — 1.35.8 из digest-pinned upstream node image. HTTP опубликован на `127.0.0.1:8080`, HTTPS — `127.0.0.1:8443`; в ручных curl заменить порты 30080/30443. Такой прогон **не заменяет** приоритетный kubeadm acceptance.
 
-`.github/workflows/ci.yml` описывает static → image config validation → kind deploy/redeploy → canary drill → verification → artifacts. Только hosted ephemeral Ubuntu runner, read-only permissions, без `pull_request_target`, deployment secrets и production доступа. CI-файл включён; успешный GitHub Actions запуск в этой поставке **не заявлен**. Kubernetes dry-run выполняется на настоящем API после установки CRD, а не притворяется проверкой кастомных ресурсов обычным YAML lint.
+`.github/workflows/ci.yml` выполняет static → image config validation → kind deploy/redeploy → отказ canary → здоровая canary и возврат deploy → отказ Loki → verification → artifacts. Полный [kind CI прошёл](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141475487) на измеренном commit. Только hosted ephemeral Ubuntu runner, read-only permissions, без `pull_request_target`, deployment secrets и production доступа. Kubernetes dry-run выполняется на настоящем API после установки CRD.
 
 ## 9. Структура и дальнейшие документы
 
@@ -230,3 +230,9 @@ docs/             architecture decisions, runbook, demo, submission, source refe
 ## Автоматическая приёмка на Ubuntu VM
 
 В Actions доступен `Ubuntu kubeadm acceptance` (ручной запуск). Он проверяет выбранные контейнеры настоящими инструментами, создаёт kubeadm-кластер на отдельной Ubuntu 24.04 VM, выполняет acceptance, отказ canary, восстановление Pod, короткий отказ Loki и финальный acceptance. Это отдельная проверка от kind CI. Отчёты публикуются как artifact, с привязкой к точному commit. Ошибка любого шага завершает workflow неуспешно.
+
+### Измеренный протокол
+
+90/10: stable 361, canary 39 из 400. Восстановление Pod: 6.02 с, ошибок 0/50. После недоступности Loki найдено 20/20 ID; максимальная наблюдённая задержка 39.9 с; дополнительных видимых копий 0. Все этапы здоровой canary 10/25/50/100% прошли. Это измерения одного лабораторного прогона.
+
+Исходный подтверждённый commit: `efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec`. Отчёты доступны в [Actions](https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784) и `evidence/published/`. После финализации документов приёмка повторяется для финального HEAD перед упаковкой. Конкретный commit и чистота рабочей копии всегда записаны в свежем `evidence/acceptance/report.json`.

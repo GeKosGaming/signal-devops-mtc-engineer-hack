@@ -1,0 +1,833 @@
+{
+  "name": "Canary promotion",
+  "environment": {
+    "timestamp_utc": "2026-10-03T17:46:31.665107+00:00",
+    "os": {
+      "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+      "NAME": "Ubuntu",
+      "VERSION_ID": "24.04",
+      "VERSION": "24.04.5 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "UBUNTU_CODENAME": "noble",
+      "LOGO": "ubuntu-logo"
+    },
+    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_worktree_clean": true,
+    "profile": "kubeadm"
+  },
+  "checks": [
+    {
+      "name": "canary stage 10%",
+      "passed": true,
+      "evidence": {
+        "samples": 30,
+        "errors": 0,
+        "error_rate": 0.0,
+        "p95_ms": 4.933,
+        "max_error_rate": 0.01,
+        "max_p95_ms": 500,
+        "cohort_proof_id": "canary-108a58c47b624522b392e86ff84f12fb",
+        "weighted_root_route": {
+          "path": "/",
+          "samples": 200,
+          "counts": {
+            "stable": 179,
+            "canary": 21
+          },
+          "expected_canary_fraction": 0.1,
+          "actual_canary_fraction": 0.105,
+          "tolerance": 0.08485281374238571,
+          "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+        },
+        "fresh_canary_metrics": {
+          "after_unix": 1791049604.9638088,
+          "targets": {
+            "counts": {
+              "prometheus": 1,
+              "nginx": 3,
+              "envoy": 2,
+              "gateway-probe": 1,
+              "loki": 1,
+              "node": 1
+            },
+            "releases": {
+              "stable": 2,
+              "canary": 1
+            },
+            "targets": [
+              {
+                "labels": {
+                  "instance": "10.244.0.204:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:38.599022411Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.5:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:48.265934973Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "http://signal-gateway.envoy-gateway-system.svc.cluster.local/",
+                  "job": "gateway-probe"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:36.316584482Z",
+                "lastError": "",
+                "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
+              },
+              {
+                "labels": {
+                  "instance": "loki:3100",
+                  "job": "loki"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:45.377134895Z",
+                "lastError": "",
+                "scrapeUrl": "http://loki:3100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.133:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "release": "canary"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:50.039281152Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.106:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:43.638025521Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.106:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.201:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:35.395767333Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.201:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.51:9100",
+                  "job": "node",
+                  "namespace": "signal-system",
+                  "node": "runnervm8df0l",
+                  "pod": "node-exporter-wwdzp"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:38.683370565Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.51:9100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "localhost:9090",
+                  "job": "prometheus"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:38.698994564Z",
+                "lastError": "",
+                "scrapeUrl": "http://localhost:9090/metrics"
+              }
+            ]
+          },
+          "health": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "__name__": "nginx_up",
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049610.2,
+                    "1"
+                  ]
+                }
+              ]
+            }
+          },
+          "sample_timestamps": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049610.214,
+                    "1791049610.039"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "canary stage 25%",
+      "passed": true,
+      "evidence": {
+        "samples": 30,
+        "errors": 0,
+        "error_rate": 0.0,
+        "p95_ms": 6.131,
+        "max_error_rate": 0.01,
+        "max_p95_ms": 500,
+        "cohort_proof_id": "canary-18eee0354f264be0b53d2343e3ae11b8",
+        "weighted_root_route": {
+          "path": "/",
+          "samples": 200,
+          "counts": {
+            "stable": 151,
+            "canary": 49
+          },
+          "expected_canary_fraction": 0.25,
+          "actual_canary_fraction": 0.245,
+          "tolerance": 0.1224744871391589,
+          "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+        },
+        "fresh_canary_metrics": {
+          "after_unix": 1791049610.8303154,
+          "targets": {
+            "counts": {
+              "prometheus": 1,
+              "nginx": 3,
+              "envoy": 2,
+              "gateway-probe": 1,
+              "loki": 1,
+              "node": 1
+            },
+            "releases": {
+              "stable": 2,
+              "canary": 1
+            },
+            "targets": [
+              {
+                "labels": {
+                  "instance": "10.244.0.204:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:53.599022411Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.5:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:03.265934973Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "http://signal-gateway.envoy-gateway-system.svc.cluster.local/",
+                  "job": "gateway-probe"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:51.316584482Z",
+                "lastError": "",
+                "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
+              },
+              {
+                "labels": {
+                  "instance": "loki:3100",
+                  "job": "loki"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:00.377134895Z",
+                "lastError": "",
+                "scrapeUrl": "http://loki:3100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.201:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:05.395767333Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.201:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.133:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "release": "canary"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:05.039281152Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.106:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:58.638025521Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.106:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.51:9100",
+                  "job": "node",
+                  "namespace": "signal-system",
+                  "node": "runnervm8df0l",
+                  "pod": "node-exporter-wwdzp"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:53.683370565Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.51:9100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "localhost:9090",
+                  "job": "prometheus"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:46:53.698994564Z",
+                "lastError": "",
+                "scrapeUrl": "http://localhost:9090/metrics"
+              }
+            ]
+          },
+          "health": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "__name__": "nginx_up",
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049626.109,
+                    "1"
+                  ]
+                }
+              ]
+            }
+          },
+          "sample_timestamps": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049626.123,
+                    "1791049625.039"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "canary stage 50%",
+      "passed": true,
+      "evidence": {
+        "samples": 30,
+        "errors": 0,
+        "error_rate": 0.0,
+        "p95_ms": 3.624,
+        "max_error_rate": 0.01,
+        "max_p95_ms": 500,
+        "cohort_proof_id": "canary-e870a3c4310842ce9419a7a036b1d84b",
+        "weighted_root_route": {
+          "path": "/",
+          "samples": 200,
+          "counts": {
+            "stable": 100,
+            "canary": 100
+          },
+          "expected_canary_fraction": 0.5,
+          "actual_canary_fraction": 0.5,
+          "tolerance": 0.1414213562373095,
+          "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+        },
+        "fresh_canary_metrics": {
+          "after_unix": 1791049626.7339246,
+          "targets": {
+            "counts": {
+              "prometheus": 1,
+              "nginx": 3,
+              "envoy": 2,
+              "gateway-probe": 1,
+              "loki": 1,
+              "node": 1
+            },
+            "releases": {
+              "stable": 2,
+              "canary": 1
+            },
+            "targets": [
+              {
+                "labels": {
+                  "instance": "10.244.0.204:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:08.599022411Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.5:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:18.265934973Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "http://signal-gateway.envoy-gateway-system.svc.cluster.local/",
+                  "job": "gateway-probe"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:06.316584482Z",
+                "lastError": "",
+                "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
+              },
+              {
+                "labels": {
+                  "instance": "loki:3100",
+                  "job": "loki"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:15.377134895Z",
+                "lastError": "",
+                "scrapeUrl": "http://loki:3100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.201:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:05.395767333Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.201:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.133:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "release": "canary"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:20.039281152Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.106:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:13.638025521Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.106:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.51:9100",
+                  "job": "node",
+                  "namespace": "signal-system",
+                  "node": "runnervm8df0l",
+                  "pod": "node-exporter-wwdzp"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:08.683370565Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.51:9100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "localhost:9090",
+                  "job": "prometheus"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:08.698994564Z",
+                "lastError": "",
+                "scrapeUrl": "http://localhost:9090/metrics"
+              }
+            ]
+          },
+          "health": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "__name__": "nginx_up",
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049640.193,
+                    "1"
+                  ]
+                }
+              ]
+            }
+          },
+          "sample_timestamps": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049640.208,
+                    "1791049640.039"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "canary stage 100%",
+      "passed": true,
+      "evidence": {
+        "samples": 30,
+        "errors": 0,
+        "error_rate": 0.0,
+        "p95_ms": 3.492,
+        "max_error_rate": 0.01,
+        "max_p95_ms": 500,
+        "cohort_proof_id": "canary-c6e3cac4b22c479ab7dafadc1590719f",
+        "weighted_root_route": {
+          "path": "/",
+          "samples": 40,
+          "counts": {
+            "stable": 0,
+            "canary": 40
+          },
+          "expected_canary_fraction": 1.0,
+          "actual_canary_fraction": 1.0,
+          "tolerance": 0,
+          "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+        },
+        "fresh_canary_metrics": {
+          "after_unix": 1791049640.8491464,
+          "targets": {
+            "counts": {
+              "prometheus": 1,
+              "nginx": 3,
+              "envoy": 2,
+              "gateway-probe": 1,
+              "loki": 1,
+              "node": 1
+            },
+            "releases": {
+              "stable": 2,
+              "canary": 1
+            },
+            "targets": [
+              {
+                "labels": {
+                  "instance": "10.244.0.204:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:23.599022411Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.5:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:33.265934973Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+              },
+              {
+                "labels": {
+                  "instance": "http://signal-gateway.envoy-gateway-system.svc.cluster.local/",
+                  "job": "gateway-probe"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:21.316584482Z",
+                "lastError": "",
+                "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
+              },
+              {
+                "labels": {
+                  "instance": "loki:3100",
+                  "job": "loki"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:30.377134895Z",
+                "lastError": "",
+                "scrapeUrl": "http://loki:3100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.106:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:28.638025521Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.106:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.201:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:35.395767333Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.201:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.133:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "release": "canary"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:35.039281152Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.51:9100",
+                  "job": "node",
+                  "namespace": "signal-system",
+                  "node": "runnervm8df0l",
+                  "pod": "node-exporter-wwdzp"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:23.683370565Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.51:9100/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "localhost:9090",
+                  "job": "prometheus"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T17:47:23.698994564Z",
+                "lastError": "",
+                "scrapeUrl": "http://localhost:9090/metrics"
+              }
+            ]
+          },
+          "health": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "__name__": "nginx_up",
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049655.655,
+                    "1"
+                  ]
+                }
+              ]
+            }
+          },
+          "sample_timestamps": {
+            "status": "success",
+            "data": {
+              "resultType": "vector",
+              "result": [
+                {
+                  "metric": {
+                    "instance": "10.244.0.133:9113",
+                    "job": "nginx",
+                    "namespace": "signal",
+                    "node": "runnervm8df0l",
+                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "release": "canary"
+                  },
+                  "value": [
+                    1791049655.673,
+                    "1791049655.039"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "promotion completed",
+      "passed": true,
+      "evidence": null,
+      "duration_seconds": 0.0
+    }
+  ],
+  "passed": true
+}
