@@ -31,6 +31,10 @@ jobs:
         run: make acceptance
       - name: Reject faulty canary and measure replica recovery
         run: make demo
+      - name: Prove all healthy canary stages and restore the stable baseline
+        run: |
+          make canary
+          make deploy
       - name: Measure buffered log delivery after a temporary Loki outage
         run: make log-delivery
       - name: Final acceptance for this exact commit

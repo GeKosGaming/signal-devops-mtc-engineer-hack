@@ -241,7 +241,24 @@ runtime_type = 'io.containerd.runc.v2'
 
     def test_unknown_containerd_config_version_is_rejected(self):
         with self.assertRaisesRegex(RuntimeError, 'Unexpected.*version'):
-            self.configure('2', 'version = 4\n')
+            self.configure('2', 'version = 5\n')
+
+    def test_containerd23_config4_preserves_server_plugin_settings(self):
+        result = self.configure('2', '''version = 4
+disabled_plugins = []
+[plugins.'io.containerd.server.v1.grpc']
+address = '/run/containerd/containerd.sock'
+[plugins.'io.containerd.cri.v1.images'.pinned_images]
+sandbox = 'old-pause'
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.runc]
+runtime_type = 'io.containerd.runc.v2'
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.runc.options]
+SystemdCgroup = false
+''')
+        self.assertEqual(result['version'], 4)
+        self.assertEqual(result['plugins']['io.containerd.server.v1.grpc']['address'], '/run/containerd/containerd.sock')
+        self.assertEqual(result['plugins']['io.containerd.cri.v1.images']['pinned_images']['sandbox'], 'registry.k8s.io/pause:3.10.2')
+        self.assertTrue(result['plugins']['io.containerd.cri.v1.runtime']['containerd']['runtimes']['runc']['options']['SystemdCgroup'])
 
 
 if __name__ == '__main__':

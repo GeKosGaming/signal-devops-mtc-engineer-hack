@@ -36,7 +36,7 @@ flowchart LR
 |---|---|
 | Ubuntu | 24.04 LTS, amd64; целевой профиль, E2E требует подтверждения |
 | Kubernetes, kubeadm / kubelet / kubectl | 1.35.9; apt `1.35.9-1.1` |
-| containerd / runc | Ubuntu containerd 1.x либо уже установленный containerd.io 1.x/2.x на выделенной VM; явные схемы CRI config v2/v3, фактические версии в `.state/os-package-versions.txt` |
+| containerd / runc | Ubuntu containerd 1.x либо уже установленный containerd.io 1.x/2.x на выделенной VM; явные схемы CRI config v2/v3/v4, фактические версии в `.state/os-package-versions.txt` |
 | Cilium | Helm chart 1.20.2, VXLAN, Kubernetes IPAM, kube-proxy сохранён |
 | Helm | 3.20.2, бинарный SHA-256 фиксирован в `versions.env` |
 | Envoy Gateway | Helm chart v1.9.2; совместимая ветка Envoy Proxy задаётся самим контроллером |

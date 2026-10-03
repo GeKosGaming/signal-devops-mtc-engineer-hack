@@ -75,6 +75,7 @@ mkdir -p /etc/containerd
 runtime_version=$(containerd --version)
 [[ "$runtime_version" =~ (^|[[:space:]])v?([12])\.[0-9] ]] || die "Unsupported containerd version: $runtime_version. Only majors 1 and 2 have an explicit configuration path."
 runtime_major="${BASH_REMATCH[2]}"
+log "Configuring $runtime_version with its native defaults."
 containerd config default > .state/containerd.default.toml
 pause_image=$(kubeadm config images list --kubernetes-version "v$KUBERNETES_VERSION" | grep '/pause:')
 # Start from this binary's defaults, modify the major-specific CRI tables, and
@@ -86,9 +87,9 @@ from pathlib import Path
 major, pause, source, target = sys.argv[1:]
 raw = Path(source).read_text()
 original = tomllib.loads(raw)
-expected_version = 2 if major == '1' else 3
-if original.get('version') != expected_version:
-    raise RuntimeError('Unexpected containerd default config version; refusing to rewrite host config')
+supported_versions = (2,) if major == '1' else (3, 4)
+if original.get('version') not in supported_versions:
+    raise RuntimeError(f'Unexpected containerd default config version {original.get("version")}; expected {supported_versions}; refusing to rewrite host config')
 runtime_plugin = 'io.containerd.grpc.v1.cri' if major == '1' else 'io.containerd.cri.v1.runtime'
 original['plugins'][runtime_plugin]['containerd']['runtimes']['runc']
 if original.get('disabled_plugins'):
