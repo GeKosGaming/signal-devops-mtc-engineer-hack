@@ -8,14 +8,45 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import re
 import subprocess
 import time
+from fractions import Fraction
 from pathlib import Path
 
 NAME = 'signal-storage-init'
 NAMESPACE = 'signal-system'
 OWNER = 'signal.devops/managed-storage-init'
 LABELS = {'app.kubernetes.io/name': NAME, 'app.kubernetes.io/part-of': 'signal'}
+QUANTITY = re.compile(r'([+-]?(?:\d+(?:\.\d*)?|\.\d+))(Ki|Mi|Gi|Ti|Pi|Ei|[numkMGTPE]|[eE][+-]?\d+)?')
+DECIMAL_SCALES = {'n': -9, 'u': -6, 'm': -3, '': 0, 'k': 3, 'M': 6,
+                  'G': 9, 'T': 12, 'P': 15, 'E': 18}
+
+
+def quantity_value(value: object) -> object:
+    """Compare exact Quantity values, independent of API serialization suffixes.
+
+    Kubernetes serializes e.g. 1000m as 1. Unsupported values remain unchanged;
+    do not approximate or round resource changes when comparing Job templates.
+    """
+    if not isinstance(value, str) or len(value) > 64:
+        return value
+    match = QUANTITY.fullmatch(value)
+    if not match:
+        return value
+    number, suffix = match.groups()
+    suffix = suffix or ''
+    if suffix in DECIMAL_SCALES:
+        scale = DECIMAL_SCALES[suffix]
+        multiplier = Fraction(10) ** scale
+    elif suffix.endswith('i'):
+        multiplier = Fraction(1024) ** (('Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei').index(suffix) + 1)
+    else:
+        scale = int(suffix[1:])
+        if abs(scale) > 30:
+            return value
+        multiplier = Fraction(10) ** scale
+    return Fraction(number) * multiplier
 
 
 class StorageError(RuntimeError):
@@ -66,12 +97,16 @@ def canonical_template(job: dict, *, ignore_image_digest: bool = False) -> dict:
     for key, value in defaults.items():
         if spec.get(key) == value:
             spec.pop(key)
-    for container in spec['containers']:
+    for container in [*spec['containers'], *spec.get('initContainers', [])]:
         for key, value in {'terminationMessagePath': '/dev/termination-log', 'terminationMessagePolicy': 'File'}.items():
             if container.get(key) == value:
                 container.pop(key)
         if ignore_image_digest:
             container['image'] = container['image'].split('@', 1)[0]
+        resources = container.get('resources', {})
+        for field in ('limits', 'requests'):
+            if field in resources:
+                resources[field] = {name: quantity_value(value) for name, value in resources[field].items()}
     return template
 
 

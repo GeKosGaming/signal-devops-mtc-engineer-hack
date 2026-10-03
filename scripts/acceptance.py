@@ -91,6 +91,7 @@ def main() -> int:
         r.check('baseline functional verification',lambda:{'output':run(['python3','scripts/verify.py','--out',str(r.out.relative_to(ROOT)/'before')],timeout=900)[-2000:]})
         r.check('second deployment',deploy)
         after=fingerprint()
+        r.data['redeploy_fingerprints']={'before':before,'after':after}
         def invariant():
             require(before==after,'Pods, PVC/Job identities or TLS certificate changed during an unchanged redeploy')
             return {'before':before,'after':after}

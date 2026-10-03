@@ -31,6 +31,8 @@ def existing_job(condition: str | None = 'Complete') -> dict:
     spec.update({'dnsPolicy':'ClusterFirst', 'schedulerName':'default-scheduler',
                  'enableServiceLinks':True, 'terminationGracePeriodSeconds':30})
     spec['containers'][0].update({'terminationMessagePath':'/dev/termination-log', 'terminationMessagePolicy':'File'})
+    # The API serializes Quantity values in canonical form (1000m becomes 1).
+    spec['containers'][0]['resources']['limits']['cpu'] = '1'
     job['status'] = {'conditions':[{'type':condition, 'status':'True'}]} if condition else {'active':1}
     return job
 
@@ -61,6 +63,32 @@ class StorageLifecycle(unittest.TestCase):
         desired = desired_job()
         desired['spec']['template']['spec']['containers'][0]['args'][-1] += ' && true'
         self.assertEqual(storage.plan(existing_job(), desired), 'replace')
+
+    def test_api_canonical_quantities_preserve_completed_job(self):
+        old = existing_job()
+        resources = old['spec']['template']['spec']['containers'][0]['resources']
+        resources['limits']['memory'] = '67108864'
+        resources['requests']['cpu'] = '0.05'
+        resources['requests']['memory'] = '16384Ki'
+        self.assertEqual(storage.plan(old, desired_job()), 'keep')
+
+    def test_different_actual_resource_quantity_remains_incompatible(self):
+        for resource, value in (('cpu', '2'), ('memory', '65Mi')):
+            with self.subTest(resource=resource):
+                old = existing_job(None)
+                old['spec']['template']['spec']['containers'][0]['resources']['limits'][resource] = value
+                with self.assertRaisesRegex(storage.StorageError, 'incompatible'):
+                    storage.plan(old, desired_job())
+                old['status'] = {'conditions':[{'type':'Complete', 'status':'True'}]}
+                self.assertEqual(storage.plan(old, desired_job()), 'replace')
+
+    def test_quantity_comparison_is_exact_and_invalid_values_are_not_coerced(self):
+        self.assertEqual(storage.quantity_value('1000m'), storage.quantity_value('1'))
+        self.assertEqual(storage.quantity_value('1e3'), storage.quantity_value('1k'))
+        self.assertEqual(storage.quantity_value('1.5Gi'), storage.quantity_value('1536Mi'))
+        self.assertNotEqual(storage.quantity_value('1m'), storage.quantity_value('1.001m'))
+        for invalid in ('1CPU', '1e99999999', 'NaN', '1K'):
+            self.assertEqual(storage.quantity_value(invalid), invalid)
 
     def test_failed_owned_job_is_recreated_with_delete_preconditions(self):
         old = existing_job('Failed')

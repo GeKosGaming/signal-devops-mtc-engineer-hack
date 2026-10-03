@@ -38,7 +38,9 @@ jobs:
       - name: Measure buffered log delivery after a temporary Loki outage
         run: make log-delivery
       - name: Final acceptance for this exact commit
-        run: make acceptance
+        run: |
+          make acceptance
+          cp .state/os-package-versions.txt evidence/acceptance/os-package-versions.txt
       - name: Build the reviewed submission
         if: inputs.package_submission
         run: |
