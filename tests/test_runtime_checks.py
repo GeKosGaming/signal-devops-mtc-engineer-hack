@@ -64,6 +64,84 @@ class ExternalTLS(unittest.TestCase):
             with self.assertRaises(runtime.CheckError): verify.external_https()
 
 
+class CounterProof(unittest.TestCase):
+    def pods(self):
+        return {'items': [{'metadata': {'name': name, 'uid': 'uid-'+name,
+                                       'labels': {'app.kubernetes.io/name': 'web-stable'}},
+                          'status': {'phase': 'Running', 'containerStatuses': [
+                              {'name': 'nginx', 'ready': True, 'restartCount': 0},
+                              {'name': 'nginx-exporter', 'ready': True, 'restartCount': 0}]}}
+                         for name in ('stable-1', 'stable-2')]}
+    def metrics(self, values):
+        return {'status': 'success', 'data': {'resultType': 'vector', 'result': [
+            {'metric': {'job': 'nginx', 'release': 'stable', 'pod': pod}, 'value': [100, str(value)]}
+            for pod, value in values.items()]}}
+    def test_retired_pod_series_disappearance_cannot_subtract_from_live_cohort(self):
+        before = self.metrics({'stable-1': 100, 'stable-2': 10, 'deleted-stable': 5000})
+        after = self.metrics({'stable-1': 122, 'stable-2': 28})
+        report = MemoryReport()
+        with patch.object(verify, 'get', return_value=self.pods()), \
+             patch.object(verify, 'query', side_effect=[before, after]), \
+             patch.object(verify, 'http'):
+            request = MagicMock(return_value=response('stable'))
+            proof = verify.request_counter_proof(9090, request, report, timeout=0)
+        self.assertEqual(request.call_count, 40)
+        self.assertEqual(proof['observed_increase'], 40)
+        self.assertEqual(proof['deltas'], {'stable-1': 22, 'stable-2': 18})
+        self.assertNotIn('deleted-stable', proof['before']['values'])
+    def test_missing_or_duplicate_current_counter_does_not_pass(self):
+        for values in ({'stable-1': 1}, {'stable-1': 1, 'stable-2': 1}):
+            raw = self.metrics(values)
+            if len(values) == 2: raw['data']['result'].append(raw['data']['result'][0])
+            with self.subTest(rows=len(raw['data']['result'])), \
+                 patch.object(verify, 'query', return_value=raw):
+                with self.assertRaisesRegex(runtime.CheckError, 'Missing or duplicate'):
+                    verify.stable_counters(9090, {'stable-1': {}, 'stable-2': {}})
+    def test_current_counter_reset_is_fatal_even_if_other_pod_grows(self):
+        report = MemoryReport()
+        with patch.object(verify, 'get', return_value=self.pods()), \
+             patch.object(verify, 'query', side_effect=[self.metrics({'stable-1': 100, 'stable-2': 10}),
+                                                       self.metrics({'stable-1': 0, 'stable-2': 200})]):
+            with self.assertRaisesRegex(RuntimeError, 'counter reset'):
+                verify.request_counter_proof(9090, lambda:response('stable'), report, timeout=0)
+        self.assertEqual(report.data['request_counter_proof']['sent'], 40)
+        self.assertEqual(len(report.data['request_counter_proof']['observations']), 1)
+    def test_pod_replacement_or_nginx_restart_cannot_pass_by_higher_counter(self):
+        for change in ('uid', 'restart'):
+            changed = self.pods()
+            if change == 'uid': changed['items'][0]['metadata']['uid'] = 'replacement'
+            else: changed['items'][0]['status']['containerStatuses'][0]['restartCount'] = 1
+            with self.subTest(change=change), \
+                 patch.object(verify, 'get', side_effect=[self.pods(), changed]), \
+                 patch.object(verify, 'query', return_value=self.metrics({'stable-1': 1, 'stable-2': 1})):
+                with self.assertRaisesRegex(RuntimeError, 'identities or Nginx restart'):
+                    verify.request_counter_proof(9090, lambda:response('stable'), MemoryReport(), timeout=0)
+    def test_flat_counters_cannot_pass_and_failed_evidence_is_preserved(self):
+        report = MemoryReport()
+        with patch.object(verify, 'get', return_value=self.pods()), \
+             patch.object(verify, 'query', return_value=self.metrics({'stable-1': 1, 'stable-2': 1})):
+            with self.assertRaisesRegex(runtime.CheckError, 'not increased'):
+                verify.request_counter_proof(9090, lambda:response('stable'), report, timeout=0)
+        self.assertEqual(report.data['request_counter_proof']['sent'], 40)
+        self.assertIn('before', report.data['request_counter_proof'])
+        self.assertEqual(len(report.data['request_counter_proof']['observations']), 1)
+    def test_partial_http_failure_does_not_claim_forty_successful_requests(self):
+        report = MemoryReport(); request = MagicMock(side_effect=[response('stable'), OSError('request failed')])
+        with patch.object(verify, 'get', return_value=self.pods()), \
+             patch.object(verify, 'query', return_value=self.metrics({'stable-1': 1, 'stable-2': 1})):
+            with self.assertRaises(OSError): verify.request_counter_proof(9090, request, report, timeout=0)
+        self.assertEqual(report.data['request_counter_proof']['sent'], 1)
+    def test_terminating_or_unready_pod_is_not_selected_for_live_counter_proof(self):
+        actual = self.pods(); retired = self.pods()['items'][0]
+        retired['metadata'].update({'name': 'retired', 'uid': 'old', 'deletionTimestamp': 'now'})
+        unready = self.pods()['items'][0]
+        unready['metadata'].update({'name': 'starting', 'uid': 'new'})
+        unready['status']['containerStatuses'][0]['ready'] = False
+        actual['items'].extend([retired, unready])
+        with patch.object(verify, 'get', return_value=actual):
+            self.assertEqual(set(verify.stable_pod_identities()), {'stable-1', 'stable-2'})
+
+
 class ProcessIsolation(unittest.TestCase):
     def test_child_process_uses_bundle_config_without_mutating_caller(self):
         with patch.dict(os.environ, {'KUBECONFIG': 'existing-user-config', 'PATH': 'original-path'}):
@@ -95,6 +173,39 @@ class ProcessIsolation(unittest.TestCase):
 
 
 class CanaryGates(unittest.TestCase):
+    def fault(self, *, body='Injected canary failure\n', release='canary'):
+        return {'status': 503, 'body': body, 'headers': {'x-release': release}, 'latency_ms': 1}
+    def test_fault_observation_waits_for_actual_envoy_transition_and_records_responses(self):
+        report = MemoryReport()
+        with patch.object(canary, 'http', side_effect=[OSError('endpoint converging'), response(), self.fault()]) as request, \
+             patch.object(canary.time, 'sleep'):
+            observed = canary.observe_canary('http://gateway', report, broken=True, timeout=1)
+        self.assertTrue(observed['passed'])
+        self.assertEqual(len(observed['attempts']), 3)
+        self.assertIn('endpoint converging', observed['attempts'][0]['error'])
+        self.assertEqual(observed['attempts'][1]['response']['status'], 200)
+        self.assertEqual(observed['response']['status'], 503)
+        self.assertTrue(all(call.args[0] == 'http://gateway/canary' for call in request.call_args_list))
+    def test_unrelated_503_or_never_converged_fault_fails_with_attempt_evidence(self):
+        for result in (response(), self.fault(body='upstream unavailable'), self.fault(release='stable')):
+            report = MemoryReport()
+            with self.subTest(result=result), patch.object(canary, 'http', return_value=result):
+                with self.assertRaisesRegex(runtime.CheckError, 'Timed out'):
+                    canary.observe_canary('http://gateway', report, broken=True, timeout=0)
+            observed = report.data['canary_data_plane_transitions'][0]
+            self.assertFalse(observed['passed'])
+            self.assertEqual(len(observed['attempts']), 1)
+            self.assertEqual(observed['attempts'][0]['response'], result)
+    def test_restoration_observation_waits_past_old_fault_endpoint(self):
+        with patch.object(canary, 'http', side_effect=[self.fault(), response()]), patch.object(canary.time, 'sleep'):
+            observed = canary.observe_canary('http://gateway', MemoryReport(), broken=False, timeout=1)
+        self.assertTrue(observed['passed'])
+        self.assertEqual(len(observed['attempts']), 2)
+        self.assertEqual(observed['response']['status'], 200)
+    def test_restoration_cannot_accept_healthy_stable_instead_of_canary(self):
+        with patch.object(canary, 'http', return_value=response('stable')):
+            with self.assertRaises(runtime.CheckError):
+                canary.observe_canary('http://gateway', MemoryReport(), broken=False, timeout=0)
     def baseline(self):
         return [{'name': 'web-stable', 'port': 8080, 'weight': 100},
                 {'name': 'web-canary', 'port': 8080, 'weight': 0}]

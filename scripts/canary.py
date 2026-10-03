@@ -109,6 +109,38 @@ def inject(broken: bool) -> None:
     k('-n',APP,'rollout','status','deployment/web-canary','--timeout=180s',timeout=190)
 
 
+def observe_canary(base: str, report: Report, *, broken: bool, timeout: float = 60) -> dict:
+    """A completed rollout can precede Envoy endpoint convergence; record real attempts."""
+    observation = {'expected': 'injected failure' if broken else 'healthy canary', 'attempts': []}
+    report.data.setdefault('canary_data_plane_transitions', []).append(observation)
+    started = time.monotonic()
+    def attempt():
+        item = {'attempt': len(observation['attempts']) + 1}
+        observation['attempts'].append(item)
+        try:
+            result = http(base+'/canary', headers={'Host': 'signal.local'})
+            item['response'] = result
+            if broken:
+                require(result['status'] == 503 and result['body'] == 'Injected canary failure\n'
+                        and result['headers'].get('x-release') == 'canary',
+                        'Injected fault has not reached the data plane: '+json.dumps(result))
+            else:
+                hello(result, 'canary')
+            return result
+        except (CheckError, OSError, ValueError) as exc:
+            item['error'] = str(exc)
+            raise
+    try:
+        observation['response'] = retry(attempt, timeout, 1)
+        observation['passed'] = True
+        return observation
+    except (CheckError, OSError, ValueError) as exc:
+        observation.update({'passed': False, 'error': str(exc)})
+        raise
+    finally:
+        observation['elapsed_seconds'] = round(time.monotonic()-started, 3)
+
+
 def recovery(base: str) -> dict:
     """Deletes one Pod only in this demo namespace; measures failures rather than promising zero."""
     pods=get('pods',ns=APP)['items']
@@ -147,15 +179,16 @@ def main() -> int:
                 try:
                     report.check('90/10 weighted routing',lambda:split_proof(base))
                     inject(True)
-                    r=http(base+'/canary',headers={'Host':'signal.local'})
-                    require(r['status']==503,'Fault injection did not produce 503')
+                    observed=report.check('injected fault observed through Envoy Gateway',
+                                          lambda:observe_canary(base,report,broken=True))
+                    require(observed is not None, 'Fault injection did not reach the data plane within the deadline')
                     accepted=promote(base,pp,report,max_p95_ms=args.p95_ms)
                     report.check('bad canary was rejected',lambda:require(not accepted and report.data.get('gate_rejection','').startswith('Canary gate rejected:'),'Expected HTTP canary gate rejection did not occur'))
                 finally:
                     # The intentionally modified canary is restored even if a gate, connection or assertion fails.
                     try: inject(False)
                     finally: weights(0)
-                report.check('canary configuration restored',lambda:hello(http(base+'/canary',headers={'Host':'signal.local'}),'canary'))
+                report.check('canary configuration restored',lambda:observe_canary(base,report,broken=False))
                 report.check('single-Pod recovery measured',lambda:recovery(base))
             else:
                 accepted=promote(base,pp,report,max_p95_ms=args.p95_ms)

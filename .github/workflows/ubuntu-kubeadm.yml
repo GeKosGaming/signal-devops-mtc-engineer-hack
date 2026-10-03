@@ -21,6 +21,10 @@ jobs:
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Use main at the exact workflow commit
+        run: git checkout -B main "$GITHUB_SHA"
       - name: Install project tools and verify exact container configurations
         run: |
           make tools

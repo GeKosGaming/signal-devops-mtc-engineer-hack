@@ -54,6 +54,61 @@ def external_https() -> dict:
             **hello(http(entry['https_url'], headers={'Host': 'signal.local'},
                          ca=ROOT/'.state/tls/ca.crt', connect_ip=entry['connect_ip']), 'stable')}
 
+def stable_pod_identities() -> dict:
+    """Exclude terminating Pods; a historical Prometheus series is not a live backend."""
+    pods = get('pods', ns=APP)['items']
+    selected = [p for p in pods if p['metadata'].get('labels', {}).get('app.kubernetes.io/name') == 'web-stable'
+                and not p['metadata'].get('deletionTimestamp') and p.get('status', {}).get('phase') == 'Running'
+                and p['status'].get('containerStatuses') and all(c.get('ready') for c in p['status']['containerStatuses'])]
+    require(len(selected) >= 2, 'Two current ready stable Pods are required for the counter proof')
+    result = {}
+    for pod in selected:
+        nginx = [c for c in pod['status']['containerStatuses'] if c['name'] == 'nginx']
+        require(len(nginx) == 1, 'Stable Pod has no unique Nginx container status')
+        result[pod['metadata']['name']] = {'uid': pod['metadata']['uid'], 'nginx_restarts': nginx[0]['restartCount']}
+    return result
+
+
+def stable_counters(port: int, pods: dict) -> dict:
+    expression = 'nginx_http_requests_total{job="nginx",release="stable"}'
+    raw = query(port, expression)
+    vector(raw)  # Fail on unsuccessful, empty or non-finite responses.
+    rows = [x for x in raw['data']['result'] if x['metric'].get('pod') in pods]
+    require({x['metric'].get('pod') for x in rows} == set(pods) and len(rows) == len(pods),
+            'Missing or duplicate request counters for the current stable Pods')
+    require(all(x['metric'].get('job') == 'nginx' and x['metric'].get('release') == 'stable' for x in rows),
+            'Request counter has the wrong job or release')
+    values = {x['metric']['pod']: float(x['value'][1]) for x in rows}
+    require(all(x >= 0 for x in values.values()), 'Negative request counter')
+    return {'values': values, 'query': raw, 'expression': expression}
+
+
+def request_counter_proof(port: int, request, report: Report, *, timeout: float = 60) -> dict:
+    """Compare counters for a fixed live cohort, preserving failed measurements as evidence."""
+    proof = {'planned_requests': 40, 'sent': 0, 'observations': [],
+             'note': 'Fixed live stable Pod identities exclude retired series. stub_status also counts exporter scrapes; no exclusive causal attribution.'}
+    report.data['request_counter_proof'] = proof
+    pods = stable_pod_identities()
+    proof['pod_identities'] = pods
+    before = retry(lambda:stable_counters(port, pods), timeout)
+    proof['before'] = before
+    for _ in range(proof['planned_requests']):
+        hello(request(), 'stable')
+        proof['sent'] += 1
+    def increased():
+        if stable_pod_identities() != pods:
+            raise RuntimeError('Stable Pod identities or Nginx restart counts changed during the request counter proof')
+        after = stable_counters(port, pods)
+        proof['observations'].append(after)
+        deltas = {pod: after['values'][pod]-value for pod, value in before['values'].items()}
+        if any(value < 0 for value in deltas.values()):
+            raise RuntimeError('A stable request counter reset during the proof')
+        require(sum(deltas.values()) >= proof['sent'], 'Request counter has not increased by the generated load')
+        proof.update({'after': after, 'deltas': deltas, 'observed_increase': sum(deltas.values())})
+        return proof
+    return retry(increased, timeout)
+
+
 def logs(port: int, proof: str, stream: str, start: float) -> dict:
     selector = '{namespace="signal",app="web",stream="' + stream + '"}'
     expr = selector + (' | json | proof_id="' + proof + '"' if stream=='stdout' else ' |= "' + proof + '"')
@@ -123,16 +178,7 @@ def main() -> int:
             report.check('external HTTP NodePort entrypoint',lambda:retry(external_http,60))
             report.check('external HTTPS NodePort with verified CA and SNI',lambda:retry(external_https,60))
             report.check('all required Prometheus targets actually up',lambda:retry(lambda:targets(pp),150))
-            def metric_proof():
-                before=vector(query(pp,'sum(nginx_http_requests_total)'))[0]
-                for _ in range(40): hello(request(),'stable')
-                def increased():
-                    raw=query(pp,'sum(nginx_http_requests_total)'); after=vector(raw)[0]
-                    require(after-before>=40,'Request counter has not increased by the generated load')
-                    return {'before':before,'after':after,'sent':40,'query':raw,
-                            'note':'stub_status also counts exporter scrapes; no claim of exclusive causal attribution'}
-                return retry(increased,60)
-            report.check('real request counter increase',metric_proof)
+            report.check('real request counter increase',lambda:request_counter_proof(pp,request,report))
             def metrics():
                 exprs=['probe_success{job="gateway-probe"}','node_cpu_seconds_total{mode="idle"}',
                        'node_memory_MemTotal_bytes','nginx_up','envoy_cluster_upstream_rq_time_count']
