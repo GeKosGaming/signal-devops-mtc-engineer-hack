@@ -1,0 +1,66 @@
+groups:
+  - name: signal.availability
+    interval: 15s
+    rules:
+      - alert: SignalGatewayUnavailable
+        expr: probe_success{job="gateway-probe"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations:
+          summary: Gateway cannot deliver the expected HTTP response
+          runbook: docs/RUNBOOK.md#gateway
+      - alert: SignalTargetDown
+        # Static Loki target remains discoverable even when it is down.
+        # Discovered workloads use the capacity rules below so an unready surge
+        # Pod does not page while the required healthy replica count is present.
+        expr: up{job="loki"} == 0
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: The Loki scrape target is down
+          runbook: docs/RUNBOOK.md#metrics
+      # Count healthy targets, not all discovered Pods: a surge Pod during a
+      # rolling update neither hides a missing replica nor causes a capacity alert.
+      # The two-minute grace tolerates discovery/scrape changes during replacement.
+      - alert: SignalNginxStableCapacityLow
+        expr: (sum(up{job="nginx",release="stable"}) or vector(0)) < 2
+        for: 2m
+        labels: {severity: warning, job: nginx, release: stable}
+        annotations:
+          summary: Fewer than two healthy stable Nginx targets for two minutes
+          runbook: docs/RUNBOOK.md#metrics
+      - alert: SignalNginxCanaryMissing
+        expr: (sum(up{job="nginx",release="canary"}) or vector(0)) < 1
+        for: 2m
+        labels: {severity: warning, job: nginx, release: canary}
+        annotations:
+          summary: No healthy canary Nginx target for two minutes
+          runbook: docs/RUNBOOK.md#metrics
+      - alert: SignalEnvoyCapacityLow
+        expr: (sum(up{job="envoy"}) or vector(0)) < 2
+        for: 2m
+        labels: {severity: warning, job: envoy}
+        annotations:
+          summary: Fewer than two healthy Envoy targets for two minutes
+          runbook: docs/RUNBOOK.md#metrics
+      - alert: SignalNodeMetricsMissing
+        expr: (sum(up{job="node"}) or vector(0)) < 1
+        for: 2m
+        labels: {severity: warning, job: node}
+        annotations:
+          summary: No healthy node-exporter target for two minutes
+          runbook: docs/RUNBOOK.md#metrics
+      - alert: SignalDiskLow
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint="/"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint="/"}) < 0.15
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: Less than 15 percent free disk space
+          runbook: docs/RUNBOOK.md#storage
+      - alert: SignalProbeMissing
+        expr: absent(probe_success{job="gateway-probe"})
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: The synthetic check itself is missing
+          runbook: docs/RUNBOOK.md#metrics

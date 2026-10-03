@@ -1,0 +1,11 @@
+kubeProxyReplacement: false
+routingMode: tunnel
+tunnelProtocol: vxlan
+ipam:
+  mode: kubernetes
+operator:
+  replicas: 1
+hubble:
+  enabled: false
+prometheus:
+  enabled: false

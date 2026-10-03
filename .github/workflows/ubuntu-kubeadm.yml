@@ -1,0 +1,50 @@
+name: Ubuntu kubeadm acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-ubuntu-kubeadm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  kubeadm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install project tools and verify exact container configurations
+        run: |
+          make tools
+          make validate-containers
+      - name: Bootstrap the dedicated Ubuntu VM with kubeadm
+        run: sudo bash scripts/bootstrap-ubuntu.sh --dedicated-node
+      - name: Prove the baseline and an unchanged redeployment
+        run: make acceptance
+      - name: Reject faulty canary and measure replica recovery
+        run: make demo
+      - name: Measure buffered log delivery after a temporary Loki outage
+        run: make log-delivery
+      - name: Final acceptance for this exact commit
+        run: make acceptance
+      - name: Capture diagnostics without credentials
+        if: failure()
+        run: |
+          export PATH="$PWD/.tools:$PATH" KUBECONFIG="$PWD/.state/kubeconfig"
+          mkdir -p evidence/ubuntu-diagnostics
+          kubectl get nodes -o wide > evidence/ubuntu-diagnostics/nodes.txt 2>&1 || true
+          kubectl get pods -A -o wide > evidence/ubuntu-diagnostics/pods.txt 2>&1 || true
+          kubectl get events -A --sort-by=.lastTimestamp > evidence/ubuntu-diagnostics/events.txt 2>&1 || true
+          kubectl -n envoy-gateway-system logs deployment/envoy-gateway --tail=200 > evidence/ubuntu-diagnostics/controller.txt 2>&1 || true
+          kubectl -n signal-logging logs daemonset/fluentd --tail=100 > evidence/ubuntu-diagnostics/fluentd.txt 2>&1 || true
+          kubectl -n signal-observe logs deployment/loki --tail=100 > evidence/ubuntu-diagnostics/loki.txt 2>&1 || true
+          sudo journalctl -u kubelet --no-pager -n 100 > evidence/ubuntu-diagnostics/kubelet.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signal-ubuntu-kubeadm-${{ github.sha }}
+          path: evidence/
+          retention-days: 30

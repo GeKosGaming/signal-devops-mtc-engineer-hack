@@ -1,0 +1,2537 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "gateway.networking.k8s.io/v1",
+      "kind": "GatewayClass",
+      "metadata": {
+        "name": "signal",
+        "labels": {
+          "app.kubernetes.io/name": "signal",
+          "app.kubernetes.io/part-of": "signal"
+        }
+      },
+      "spec": {
+        "controllerName": "gateway.envoyproxy.io/gatewayclass-controller"
+      }
+    },
+    {
+      "apiVersion": "gateway.envoyproxy.io/v1alpha1",
+      "kind": "EnvoyProxy",
+      "metadata": {
+        "name": "signal",
+        "labels": {
+          "app.kubernetes.io/name": "signal",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "provider": {
+          "type": "Kubernetes",
+          "kubernetes": {
+            "envoyDeployment": {
+              "replicas": 2,
+              "container": {
+                "resources": {
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "128Mi"
+                  },
+                  "limits": {
+                    "memory": "512Mi"
+                  }
+                }
+              }
+            },
+            "envoyService": {
+              "name": "signal-gateway",
+              "type": "NodePort",
+              "externalTrafficPolicy": "Cluster",
+              "patch": {
+                "type": "StrategicMerge",
+                "value": {
+                  "spec": {
+                    "ports": [
+                      {
+                        "port": 80,
+                        "nodePort": 30080
+                      },
+                      {
+                        "port": 443,
+                        "nodePort": 30443
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "telemetry": {
+          "metrics": {
+            "prometheus": {
+              "disable": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "gateway.networking.k8s.io/v1",
+      "kind": "Gateway",
+      "metadata": {
+        "name": "signal",
+        "labels": {
+          "app.kubernetes.io/name": "signal",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "gatewayClassName": "signal",
+        "infrastructure": {
+          "parametersRef": {
+            "group": "gateway.envoyproxy.io",
+            "kind": "EnvoyProxy",
+            "name": "signal"
+          }
+        },
+        "listeners": [
+          {
+            "hostname": "signal.local",
+            "allowedRoutes": {
+              "namespaces": {
+                "from": "Same"
+              }
+            },
+            "name": "http",
+            "protocol": "HTTP",
+            "port": 80
+          },
+          {
+            "hostname": "signal.local",
+            "allowedRoutes": {
+              "namespaces": {
+                "from": "Same"
+              }
+            },
+            "name": "https",
+            "protocol": "HTTPS",
+            "port": 443,
+            "tls": {
+              "mode": "Terminate",
+              "certificateRefs": [
+                {
+                  "group": "",
+                  "kind": "Secret",
+                  "name": "signal-tls"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "gateway.networking.k8s.io/v1",
+      "kind": "HTTPRoute",
+      "metadata": {
+        "name": "web-main",
+        "labels": {
+          "app.kubernetes.io/name": "web-main",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "name": "signal",
+            "sectionName": "http"
+          },
+          {
+            "name": "signal",
+            "sectionName": "https"
+          }
+        ],
+        "hostnames": [
+          "signal.local"
+        ],
+        "rules": [
+          {
+            "matches": [
+              {
+                "path": {
+                  "type": "PathPrefix",
+                  "value": "/"
+                }
+              }
+            ],
+            "timeouts": {
+              "request": "5s",
+              "backendRequest": "3s"
+            },
+            "backendRefs": [
+              {
+                "name": "web-stable",
+                "port": 8080,
+                "weight": 100
+              },
+              {
+                "name": "web-canary",
+                "port": 8080,
+                "weight": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "gateway.networking.k8s.io/v1",
+      "kind": "HTTPRoute",
+      "metadata": {
+        "name": "web-preview",
+        "labels": {
+          "app.kubernetes.io/name": "web-preview",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "parentRefs": [
+          {
+            "name": "signal",
+            "sectionName": "http"
+          },
+          {
+            "name": "signal",
+            "sectionName": "https"
+          }
+        ],
+        "hostnames": [
+          "signal.local"
+        ],
+        "rules": [
+          {
+            "matches": [
+              {
+                "path": {
+                  "type": "PathPrefix",
+                  "value": "/canary"
+                }
+              },
+              {
+                "path": {
+                  "type": "PathPrefix",
+                  "value": "/"
+                },
+                "headers": [
+                  {
+                    "name": "X-Release",
+                    "type": "Exact",
+                    "value": "canary"
+                  }
+                ]
+              }
+            ],
+            "backendRefs": [
+              {
+                "name": "web-canary",
+                "port": 8080,
+                "weight": 1
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "path": {
+                  "type": "PathPrefix",
+                  "value": "/stable"
+                }
+              }
+            ],
+            "backendRefs": [
+              {
+                "name": "web-stable",
+                "port": 8080,
+                "weight": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "web-stable",
+        "labels": {
+          "app.kubernetes.io/name": "web-stable",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "data": {
+        "nginx.conf": "worker_processes auto;\npid /tmp/nginx.pid;\nerror_log /dev/stderr warn;\nevents { worker_connections 1024; }\nhttp {\n    server_tokens off;\n    client_body_temp_path /tmp/client_temp;\n    proxy_temp_path /tmp/proxy_temp;\n    fastcgi_temp_path /tmp/fastcgi_temp;\n    uwsgi_temp_path /tmp/uwsgi_temp;\n    scgi_temp_path /tmp/scgi_temp;\n    client_max_body_size 64k;\n    client_header_buffer_size 1k;\n    large_client_header_buffers 2 4k;\n    keepalive_timeout 15;\n    map $http_x_proof_id $proof_id {\n        default $request_id;\n        \"~^[a-zA-Z0-9-]{1,64}$\" $http_x_proof_id;\n    }\n    # Do not log authorization, cookies, query strings, or client IP addresses.\n    log_format json_access escape=json\n      '{\"timestamp\":\"$time_iso8601\",\"request_id\":\"$request_id\",'\n      '\"proof_id\":\"$proof_id\",\"method\":\"$request_method\",\"uri\":\"$uri\",'\n      '\"status\":$status,\"request_time\":$request_time,\"bytes\":$body_bytes_sent,'\n      '\"release\":\"stable\",\"pod\":\"$hostname\"}';\n    access_log /dev/stdout json_access;\n    server {\n        listen 8080;\n        default_type text/plain;\n        add_header X-Release \"stable\" always;\n        add_header X-Proof-ID $proof_id always;\n        add_header X-Content-Type-Options nosniff always;\n        location = /healthz { access_log off; return 200 \"ok\\n\"; }\n        location /missing/ {\n            root /tmp/signal-no-files;\n            log_not_found on;\n        }\n        location / { return 200 \"Hello World!\\n\"; }\n    }\n    server {\n        listen 127.0.0.1:8081;\n        access_log off;\n        location = /stub_status { stub_status; }\n        location / { return 404; }\n    }\n}\n"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "web-stable",
+        "labels": {
+          "app.kubernetes.io/name": "web-stable",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "replicas": 2,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "web-stable",
+            "app.kubernetes.io/part-of": "signal",
+            "signal/release": "stable",
+            "signal/workload": "web"
+          }
+        },
+        "strategy": {
+          "type": "RollingUpdate",
+          "rollingUpdate": {
+            "maxUnavailable": 0,
+            "maxSurge": 1
+          }
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "web-stable",
+              "app.kubernetes.io/part-of": "signal",
+              "signal/release": "stable",
+              "signal/workload": "web"
+            },
+            "annotations": {
+              "checksum/config": "bb301fb47d806650f82ff9660bb1e488a74b6fb269d00a05211a47dbea739094"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 101,
+              "runAsGroup": 101,
+              "fsGroup": 101,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "nginx",
+                "image": "docker.io/library/nginx:1.30.5-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "32Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "128Mi"
+                  }
+                },
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 8080
+                  }
+                ],
+                "command": [
+                  "nginx",
+                  "-g",
+                  "daemon off;",
+                  "-c",
+                  "/etc/signal/nginx.conf"
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "lifecycle": {
+                  "preStop": {
+                    "exec": {
+                      "command": [
+                        "sh",
+                        "-c",
+                        "sleep 3; nginx -s quit -c /etc/signal/nginx.conf"
+                      ]
+                    }
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/signal/nginx.conf",
+                    "readOnly": true,
+                    "subPath": "nginx.conf"
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  }
+                ]
+              },
+              {
+                "name": "nginx-exporter",
+                "image": "docker.io/nginx/nginx-prometheus-exporter:1.5.0@sha256:bf76e58df548a13e52bd543ac70f6d3d667e14884e8b51c149bd81994ca75ccd",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "24Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "64Mi"
+                  }
+                },
+                "args": [
+                  "--nginx.scrape-uri=http://127.0.0.1:8081/stub_status"
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9113
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9113
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9113
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9113
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                }
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "web-stable"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "64Mi"
+                }
+              }
+            ],
+            "topologySpreadConstraints": [
+              {
+                "maxSkew": 1,
+                "topologyKey": "kubernetes.io/hostname",
+                "whenUnsatisfiable": "ScheduleAnyway",
+                "labelSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "web-stable"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "web-stable",
+        "labels": {
+          "app.kubernetes.io/name": "web-stable",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "web-stable",
+          "app.kubernetes.io/part-of": "signal",
+          "signal/release": "stable",
+          "signal/workload": "web"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "web-canary",
+        "labels": {
+          "app.kubernetes.io/name": "web-canary",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "data": {
+        "nginx.conf": "worker_processes auto;\npid /tmp/nginx.pid;\nerror_log /dev/stderr warn;\nevents { worker_connections 1024; }\nhttp {\n    server_tokens off;\n    client_body_temp_path /tmp/client_temp;\n    proxy_temp_path /tmp/proxy_temp;\n    fastcgi_temp_path /tmp/fastcgi_temp;\n    uwsgi_temp_path /tmp/uwsgi_temp;\n    scgi_temp_path /tmp/scgi_temp;\n    client_max_body_size 64k;\n    client_header_buffer_size 1k;\n    large_client_header_buffers 2 4k;\n    keepalive_timeout 15;\n    map $http_x_proof_id $proof_id {\n        default $request_id;\n        \"~^[a-zA-Z0-9-]{1,64}$\" $http_x_proof_id;\n    }\n    # Do not log authorization, cookies, query strings, or client IP addresses.\n    log_format json_access escape=json\n      '{\"timestamp\":\"$time_iso8601\",\"request_id\":\"$request_id\",'\n      '\"proof_id\":\"$proof_id\",\"method\":\"$request_method\",\"uri\":\"$uri\",'\n      '\"status\":$status,\"request_time\":$request_time,\"bytes\":$body_bytes_sent,'\n      '\"release\":\"canary\",\"pod\":\"$hostname\"}';\n    access_log /dev/stdout json_access;\n    server {\n        listen 8080;\n        default_type text/plain;\n        add_header X-Release \"canary\" always;\n        add_header X-Proof-ID $proof_id always;\n        add_header X-Content-Type-Options nosniff always;\n        location = /healthz { access_log off; return 200 \"ok\\n\"; }\n        location /missing/ {\n            root /tmp/signal-no-files;\n            log_not_found on;\n        }\n        location / { return 200 \"Hello World!\\n\"; }\n    }\n    server {\n        listen 127.0.0.1:8081;\n        access_log off;\n        location = /stub_status { stub_status; }\n        location / { return 404; }\n    }\n}\n"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "web-canary",
+        "labels": {
+          "app.kubernetes.io/name": "web-canary",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "web-canary",
+            "app.kubernetes.io/part-of": "signal",
+            "signal/release": "canary",
+            "signal/workload": "web"
+          }
+        },
+        "strategy": {
+          "type": "RollingUpdate",
+          "rollingUpdate": {
+            "maxUnavailable": 0,
+            "maxSurge": 1
+          }
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "web-canary",
+              "app.kubernetes.io/part-of": "signal",
+              "signal/release": "canary",
+              "signal/workload": "web"
+            },
+            "annotations": {
+              "checksum/config": "7e7fbb10e54780c49f7bc4c0e75b6014254f0f9e983dfede7e49eeb21349984f"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 101,
+              "runAsGroup": 101,
+              "fsGroup": 101,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "nginx",
+                "image": "docker.io/library/nginx:1.30.5-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "32Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "128Mi"
+                  }
+                },
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 8080
+                  }
+                ],
+                "command": [
+                  "nginx",
+                  "-g",
+                  "daemon off;",
+                  "-c",
+                  "/etc/signal/nginx.conf"
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8080
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "lifecycle": {
+                  "preStop": {
+                    "exec": {
+                      "command": [
+                        "sh",
+                        "-c",
+                        "sleep 3; nginx -s quit -c /etc/signal/nginx.conf"
+                      ]
+                    }
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/signal/nginx.conf",
+                    "readOnly": true,
+                    "subPath": "nginx.conf"
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  }
+                ]
+              },
+              {
+                "name": "nginx-exporter",
+                "image": "docker.io/nginx/nginx-prometheus-exporter:1.5.0@sha256:bf76e58df548a13e52bd543ac70f6d3d667e14884e8b51c149bd81994ca75ccd",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "24Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "64Mi"
+                  }
+                },
+                "args": [
+                  "--nginx.scrape-uri=http://127.0.0.1:8081/stub_status"
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9113
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9113
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9113
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9113
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                }
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "web-canary"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "64Mi"
+                }
+              }
+            ],
+            "topologySpreadConstraints": [
+              {
+                "maxSkew": 1,
+                "topologyKey": "kubernetes.io/hostname",
+                "whenUnsatisfiable": "ScheduleAnyway",
+                "labelSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "web-canary"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "web-canary",
+        "labels": {
+          "app.kubernetes.io/name": "web-canary",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "web-canary",
+          "app.kubernetes.io/part-of": "signal",
+          "signal/release": "canary",
+          "signal/workload": "web"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "policy/v1",
+      "kind": "PodDisruptionBudget",
+      "metadata": {
+        "name": "web-stable",
+        "labels": {
+          "app.kubernetes.io/name": "web-stable",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "minAvailable": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "web-stable"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "prometheus",
+        "labels": {
+          "app.kubernetes.io/name": "prometheus",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "data": {
+        "prometheus.yml": "{\n  \"global\": {\n    \"scrape_interval\": \"15s\",\n    \"evaluation_interval\": \"15s\",\n    \"external_labels\": {\n      \"project\": \"signal\"\n    }\n  },\n  \"rule_files\": [\n    \"/etc/prometheus/alerts.yaml\"\n  ],\n  \"alerting\": {\n    \"alertmanagers\": [\n      {\n        \"static_configs\": [\n          {\n            \"targets\": [\n              \"alertmanager:9093\"\n            ]\n          }\n        ]\n      }\n    ]\n  },\n  \"scrape_configs\": [\n    {\n      \"job_name\": \"prometheus\",\n      \"static_configs\": [\n        {\n          \"targets\": [\n            \"localhost:9090\"\n          ]\n        }\n      ]\n    },\n    {\n      \"job_name\": \"loki\",\n      \"static_configs\": [\n        {\n          \"targets\": [\n            \"loki:3100\"\n          ]\n        }\n      ]\n    },\n    {\n      \"job_name\": \"nginx\",\n      \"metrics_path\": \"/metrics\",\n      \"kubernetes_sd_configs\": [\n        {\n          \"role\": \"pod\",\n          \"namespaces\": {\n            \"names\": [\n              \"signal\"\n            ]\n          }\n        }\n      ],\n      \"relabel_configs\": [\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_container_port_number\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"9113\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_phase\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"Running\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_namespace\"\n          ],\n          \"target_label\": \"namespace\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_name\"\n          ],\n          \"target_label\": \"pod\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_node_name\"\n          ],\n          \"target_label\": \"node\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_label_signal_release\"\n          ],\n          \"target_label\": \"release\"\n        }\n      ]\n    },\n    {\n      \"job_name\": \"envoy\",\n      \"metrics_path\": \"/stats/prometheus\",\n      \"kubernetes_sd_configs\": [\n        {\n          \"role\": \"pod\",\n          \"namespaces\": {\n            \"names\": [\n              \"envoy-gateway-system\"\n            ]\n          }\n        }\n      ],\n      \"relabel_configs\": [\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_container_port_number\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"19001\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_phase\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"Running\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_label_gateway_envoyproxy_io_owning_gateway_name\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"signal\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_namespace\"\n          ],\n          \"target_label\": \"namespace\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_name\"\n          ],\n          \"target_label\": \"pod\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_node_name\"\n          ],\n          \"target_label\": \"node\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_label_signal_release\"\n          ],\n          \"target_label\": \"release\"\n        }\n      ]\n    },\n    {\n      \"job_name\": \"node\",\n      \"metrics_path\": \"/metrics\",\n      \"kubernetes_sd_configs\": [\n        {\n          \"role\": \"pod\",\n          \"namespaces\": {\n            \"names\": [\n              \"signal-system\"\n            ]\n          }\n        }\n      ],\n      \"relabel_configs\": [\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_container_port_number\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"9100\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_phase\"\n          ],\n          \"action\": \"keep\",\n          \"regex\": \"Running\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_namespace\"\n          ],\n          \"target_label\": \"namespace\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_name\"\n          ],\n          \"target_label\": \"pod\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_node_name\"\n          ],\n          \"target_label\": \"node\"\n        },\n        {\n          \"source_labels\": [\n            \"__meta_kubernetes_pod_label_signal_release\"\n          ],\n          \"target_label\": \"release\"\n        }\n      ]\n    },\n    {\n      \"job_name\": \"gateway-probe\",\n      \"metrics_path\": \"/probe\",\n      \"params\": {\n        \"module\": [\n          \"http_hello\"\n        ]\n      },\n      \"static_configs\": [\n        {\n          \"targets\": [\n            \"http://signal-gateway.envoy-gateway-system.svc.cluster.local/\"\n          ]\n        }\n      ],\n      \"relabel_configs\": [\n        {\n          \"source_labels\": [\n            \"__address__\"\n          ],\n          \"target_label\": \"__param_target\"\n        },\n        {\n          \"source_labels\": [\n            \"__param_target\"\n          ],\n          \"target_label\": \"instance\"\n        },\n        {\n          \"target_label\": \"__address__\",\n          \"replacement\": \"blackbox:9115\"\n        }\n      ]\n    }\n  ]\n}",
+        "alerts.yaml": "groups:\n  - name: signal.availability\n    interval: 15s\n    rules:\n      - alert: SignalGatewayUnavailable\n        expr: probe_success{job=\"gateway-probe\"} == 0\n        for: 30s\n        labels: {severity: critical}\n        annotations:\n          summary: Gateway cannot deliver the expected HTTP response\n          runbook: docs/RUNBOOK.md#gateway\n      - alert: SignalTargetDown\n        # Static Loki target remains discoverable even when it is down.\n        # Discovered workloads use the capacity rules below so an unready surge\n        # Pod does not page while the required healthy replica count is present.\n        expr: up{job=\"loki\"} == 0\n        for: 1m\n        labels: {severity: warning}\n        annotations:\n          summary: The Loki scrape target is down\n          runbook: docs/RUNBOOK.md#metrics\n      # Count healthy targets, not all discovered Pods: a surge Pod during a\n      # rolling update neither hides a missing replica nor causes a capacity alert.\n      # The two-minute grace tolerates discovery/scrape changes during replacement.\n      - alert: SignalNginxStableCapacityLow\n        expr: (sum(up{job=\"nginx\",release=\"stable\"}) or vector(0)) < 2\n        for: 2m\n        labels: {severity: warning, job: nginx, release: stable}\n        annotations:\n          summary: Fewer than two healthy stable Nginx targets for two minutes\n          runbook: docs/RUNBOOK.md#metrics\n      - alert: SignalNginxCanaryMissing\n        expr: (sum(up{job=\"nginx\",release=\"canary\"}) or vector(0)) < 1\n        for: 2m\n        labels: {severity: warning, job: nginx, release: canary}\n        annotations:\n          summary: No healthy canary Nginx target for two minutes\n          runbook: docs/RUNBOOK.md#metrics\n      - alert: SignalEnvoyCapacityLow\n        expr: (sum(up{job=\"envoy\"}) or vector(0)) < 2\n        for: 2m\n        labels: {severity: warning, job: envoy}\n        annotations:\n          summary: Fewer than two healthy Envoy targets for two minutes\n          runbook: docs/RUNBOOK.md#metrics\n      - alert: SignalNodeMetricsMissing\n        expr: (sum(up{job=\"node\"}) or vector(0)) < 1\n        for: 2m\n        labels: {severity: warning, job: node}\n        annotations:\n          summary: No healthy node-exporter target for two minutes\n          runbook: docs/RUNBOOK.md#metrics\n      - alert: SignalDiskLow\n        expr: (node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs\",mountpoint=\"/\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs\",mountpoint=\"/\"}) < 0.15\n        for: 2m\n        labels: {severity: warning}\n        annotations:\n          summary: Less than 15 percent free disk space\n          runbook: docs/RUNBOOK.md#storage\n      - alert: SignalProbeMissing\n        expr: absent(probe_success{job=\"gateway-probe\"})\n        for: 2m\n        labels: {severity: critical}\n        annotations:\n          summary: The synthetic check itself is missing\n          runbook: docs/RUNBOOK.md#metrics\n"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "loki",
+        "labels": {
+          "app.kubernetes.io/name": "loki",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "data": {
+        "loki.yaml": "auth_enabled: false\nserver:\n  http_listen_port: 3100\n  grpc_listen_port: 9096\ncommon:\n  instance_addr: 127.0.0.1\n  path_prefix: /var/loki\n  replication_factor: 1\n  ring:\n    kvstore:\n      store: inmemory\n  storage:\n    filesystem:\n      chunks_directory: /var/loki/chunks\n      rules_directory: /var/loki/rules\nschema_config:\n  configs:\n    - from: \"2024-04-01\"\n      store: tsdb\n      object_store: filesystem\n      schema: v13\n      index:\n        prefix: index_\n        period: 24h\nstorage_config:\n  tsdb_shipper:\n    active_index_directory: /var/loki/tsdb-index\n    cache_location: /var/loki/tsdb-cache\ningester:\n  wal:\n    enabled: true\n    dir: /var/loki/wal\ncompactor:\n  working_directory: /var/loki/compactor\n  retention_enabled: true\n  delete_request_store: filesystem\nlimits_config:\n  retention_period: 24h\n  ingestion_rate_mb: 4\n  ingestion_burst_size_mb: 8\n  max_query_series: 1000\n  allow_structured_metadata: true\nanalytics:\n  reporting_enabled: false\n"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "blackbox",
+        "labels": {
+          "app.kubernetes.io/name": "blackbox",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "data": {
+        "blackbox.yaml": "modules:\n  http_hello:\n    prober: http\n    timeout: 5s\n    http:\n      valid_status_codes: [200]\n      method: GET\n      preferred_ip_protocol: ip4\n      headers:\n        Host: signal.local\n      fail_if_body_not_matches_regexp:\n        - '^Hello World!'\n"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "alertmanager",
+        "labels": {
+          "app.kubernetes.io/name": "alertmanager",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "data": {
+        "alertmanager.yaml": "global:\n  resolve_timeout: 2m\nroute:\n  receiver: local-only\n  group_by: [alertname, job]\n  group_wait: 15s\n  group_interval: 1m\n  repeat_interval: 2h\nreceivers:\n  - name: local-only\n# Intentionally no external recipient. Alerts are visible in the local API/UI.\n"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "grafana",
+        "labels": {
+          "app.kubernetes.io/name": "grafana",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "data": {
+        "datasources.yaml": "{\"apiVersion\": 1, \"datasources\": [{\"name\": \"Prometheus\", \"type\": \"prometheus\", \"uid\": \"prometheus\", \"url\": \"http://prometheus:9090\", \"access\": \"proxy\", \"isDefault\": true}, {\"name\": \"Loki\", \"type\": \"loki\", \"uid\": \"loki\", \"url\": \"http://loki:3100\", \"access\": \"proxy\"}]}",
+        "providers.yaml": "{\"apiVersion\": 1, \"providers\": [{\"name\": \"SIGNAL\", \"type\": \"file\", \"disableDeletion\": true, \"options\": {\"path\": \"/etc/grafana/dashboards\"}}]}",
+        "signal.json": "{\"uid\": \"signal-overview\", \"title\": \"SIGNAL / Evidence before confidence\", \"schemaVersion\": 39, \"version\": 1, \"refresh\": \"15s\", \"time\": {\"from\": \"now-15m\", \"to\": \"now\"}, \"tags\": [\"signal\", \"hackathon\"], \"panels\": [{\"id\": 1, \"title\": \"Gateway synthetic availability\", \"type\": \"stat\", \"gridPos\": {\"x\": 0, \"y\": 0, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"probe_success{job=\\\"gateway-probe\\\"}\", \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"percentunit\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 2, \"title\": \"Requests per second by release\", \"type\": \"timeseries\", \"gridPos\": {\"x\": 12, \"y\": 0, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"sum by (release) (rate(nginx_http_requests_total[2m]))\", \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"reqps\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 3, \"title\": \"Node CPU utilization\", \"type\": \"timeseries\", \"gridPos\": {\"x\": 0, \"y\": 8, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"1 - avg by (node) (rate(node_cpu_seconds_total{mode=\\\"idle\\\"}[2m]))\", \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"percentunit\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 4, \"title\": \"Node memory utilization\", \"type\": \"timeseries\", \"gridPos\": {\"x\": 12, \"y\": 8, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"1 - node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes\", \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"percentunit\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 5, \"title\": \"Envoy upstream latency p95 (ms)\", \"type\": \"timeseries\", \"gridPos\": {\"x\": 0, \"y\": 16, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"histogram_quantile(0.95, sum by (le) (rate(envoy_cluster_upstream_rq_time_bucket[5m])))\", \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"ms\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 6, \"title\": \"Required targets\", \"type\": \"stat\", \"gridPos\": {\"x\": 12, \"y\": 16, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"up{job=~\\\"nginx|envoy|node|loki\\\"}\", \"datasource\": {\"type\": \"prometheus\", \"uid\": \"prometheus\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"short\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 7, \"title\": \"HTTP status counts from application logs\", \"type\": \"timeseries\", \"gridPos\": {\"x\": 0, \"y\": 24, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"loki\", \"uid\": \"loki\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"sum by (status) (count_over_time({namespace=\\\"signal\\\",app=\\\"web\\\",stream=\\\"stdout\\\"} | json | __error__=\\\"\\\" [5m]))\", \"datasource\": {\"type\": \"loki\", \"uid\": \"loki\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"short\"}, \"overrides\": []}, \"options\": {}}, {\"id\": 8, \"title\": \"Searchable access and error logs\", \"type\": \"logs\", \"gridPos\": {\"x\": 12, \"y\": 24, \"w\": 12, \"h\": 8}, \"datasource\": {\"type\": \"loki\", \"uid\": \"loki\"}, \"targets\": [{\"refId\": \"A\", \"expr\": \"{namespace=\\\"signal\\\",app=\\\"web\\\"}\", \"datasource\": {\"type\": \"loki\", \"uid\": \"loki\"}}], \"fieldConfig\": {\"defaults\": {\"unit\": \"short\"}, \"overrides\": []}, \"options\": {}}]}"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "prometheus",
+        "labels": {
+          "app.kubernetes.io/name": "prometheus",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "prometheus",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "strategy": {
+          "type": "Recreate"
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "prometheus",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "4762e953f6466a1d6c2c85cd13e2a1c0dc842bb1778def45f40252877ed9b48f"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": true,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 65534,
+              "runAsGroup": 65534,
+              "fsGroup": 65534,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "prometheus",
+                "image": "docker.io/prom/prometheus:v3.13.4@sha256:87861b8cf91579109319ebc300f3f1060e6da9c05d6ae8ad15a20c879e84e32e",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "256Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "768Mi"
+                  }
+                },
+                "args": [
+                  "--config.file=/etc/prometheus/prometheus.yml",
+                  "--storage.tsdb.path=/prometheus",
+                  "--storage.tsdb.retention.time=24h",
+                  "--storage.tsdb.retention.size=3GB"
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9090
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/-/ready",
+                    "port": 9090
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/-/ready",
+                    "port": 9090
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/-/ready",
+                    "port": 9090
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/prometheus",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/prometheus",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "prometheus"
+                }
+              },
+              {
+                "name": "data",
+                "persistentVolumeClaim": {
+                  "claimName": "prometheus"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "128Mi"
+                }
+              }
+            ],
+            "serviceAccountName": "prometheus"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "prometheus",
+        "labels": {
+          "app.kubernetes.io/name": "prometheus",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "prometheus",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 9090,
+            "targetPort": 9090
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "loki",
+        "labels": {
+          "app.kubernetes.io/name": "loki",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "loki",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "strategy": {
+          "type": "Recreate"
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "loki",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "a95c23294561f5ea992d8c1c17fe875cb0f79273b18dd2747c15148b95681738"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 10001,
+              "runAsGroup": 10001,
+              "fsGroup": 10001,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "loki",
+                "image": "docker.io/grafana/loki:3.7.8@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "256Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "1024Mi"
+                  }
+                },
+                "args": [
+                  "-config.file=/etc/loki/loki.yaml"
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 3100
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 3100
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 3100
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 3100
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/var/loki",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/loki",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "loki"
+                }
+              },
+              {
+                "name": "data",
+                "persistentVolumeClaim": {
+                  "claimName": "loki"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "128Mi"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "loki",
+        "labels": {
+          "app.kubernetes.io/name": "loki",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "loki",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 3100,
+            "targetPort": 3100
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "alertmanager",
+        "labels": {
+          "app.kubernetes.io/name": "alertmanager",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "alertmanager",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "strategy": {
+          "type": "Recreate"
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "alertmanager",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "98e97527f700b2bdfa1621e59f2bf8c0acaf335c5eb5eae3469143db0ddf81d2"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 65534,
+              "runAsGroup": 65534,
+              "fsGroup": 65534,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "alertmanager",
+                "image": "docker.io/prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "32Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "128Mi"
+                  }
+                },
+                "args": [
+                  "--config.file=/etc/alertmanager/alertmanager.yaml",
+                  "--storage.path=/alertmanager",
+                  "--cluster.listen-address="
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9093
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/-/ready",
+                    "port": 9093
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/-/ready",
+                    "port": 9093
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/-/ready",
+                    "port": 9093
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/alertmanager",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/alertmanager",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "alertmanager"
+                }
+              },
+              {
+                "name": "data",
+                "persistentVolumeClaim": {
+                  "claimName": "alertmanager"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "128Mi"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "alertmanager",
+        "labels": {
+          "app.kubernetes.io/name": "alertmanager",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "alertmanager",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 9093,
+            "targetPort": 9093
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "grafana",
+        "labels": {
+          "app.kubernetes.io/name": "grafana",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "grafana",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "strategy": {
+          "type": "Recreate"
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "grafana",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "d9f15d143947f67444153bd29cd330283123909132569147d475ed85feeda60a"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 472,
+              "runAsGroup": 472,
+              "fsGroup": 472,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "grafana",
+                "image": "docker.io/grafana/grafana:13.1.0@sha256:121a7a9ece6dc10b969f1f96eed64b4f07dfac0d0b8abc070f7cb83bbde86f63",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "128Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "512Mi"
+                  }
+                },
+                "args": [],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 3000
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 3000
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 3000
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 3000
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "data",
+                    "mountPath": "/var/lib/grafana",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/grafana/provisioning/datasources/signal.yaml",
+                    "readOnly": true,
+                    "subPath": "datasources.yaml"
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/grafana/provisioning/dashboards/signal.yaml",
+                    "readOnly": true,
+                    "subPath": "providers.yaml"
+                  },
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/grafana/dashboards/signal.json",
+                    "readOnly": true,
+                    "subPath": "signal.json"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "GF_SECURITY_ADMIN_USER",
+                    "value": "admin"
+                  },
+                  {
+                    "name": "GF_USERS_ALLOW_SIGN_UP",
+                    "value": "false"
+                  },
+                  {
+                    "name": "GF_AUTH_ANONYMOUS_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "GF_ANALYTICS_REPORTING_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "GF_ANALYTICS_CHECK_FOR_UPDATES",
+                    "value": "false"
+                  },
+                  {
+                    "name": "GF_SECURITY_DISABLE_GRAVATAR",
+                    "value": "true"
+                  },
+                  {
+                    "name": "GF_SECURITY_ADMIN_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "grafana-admin",
+                        "key": "password"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "grafana"
+                }
+              },
+              {
+                "name": "data",
+                "persistentVolumeClaim": {
+                  "claimName": "grafana"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "128Mi"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "grafana",
+        "labels": {
+          "app.kubernetes.io/name": "grafana",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "grafana",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 3000,
+            "targetPort": 3000
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "blackbox",
+        "labels": {
+          "app.kubernetes.io/name": "blackbox",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "blackbox",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "strategy": {
+          "type": "RollingUpdate",
+          "rollingUpdate": {
+            "maxUnavailable": 0,
+            "maxSurge": 1
+          }
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "blackbox",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "2aaeb01641b6934935463285bec64b97aab1a91b4790506c6da09ea5b1b2dffb"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 65534,
+              "runAsGroup": 65534,
+              "fsGroup": 65534,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "blackbox",
+                "image": "docker.io/prom/blackbox-exporter:v0.28.0@sha256:e753ff9f3fc458d02cca5eddab5a77e1c175eee484a8925ac7d524f04366c2fc",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "32Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "128Mi"
+                  }
+                },
+                "args": [
+                  "--config.file=/etc/blackbox/blackbox.yaml"
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9115
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9115
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9115
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9115
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/etc/blackbox",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "blackbox"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "blackbox",
+        "labels": {
+          "app.kubernetes.io/name": "blackbox",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "type": "ClusterIP",
+        "selector": {
+          "app.kubernetes.io/name": "blackbox",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "ports": [
+          {
+            "name": "http",
+            "port": 9115,
+            "targetPort": 9115
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ServiceAccount",
+      "metadata": {
+        "name": "prometheus",
+        "labels": {
+          "app.kubernetes.io/name": "prometheus",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      }
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "kind": "ClusterRole",
+      "metadata": {
+        "name": "signal-prometheus-discovery",
+        "labels": {
+          "app.kubernetes.io/name": "signal-prometheus-discovery",
+          "app.kubernetes.io/part-of": "signal"
+        }
+      },
+      "rules": [
+        {
+          "apiGroups": [
+            ""
+          ],
+          "resources": [
+            "pods"
+          ],
+          "verbs": [
+            "get",
+            "list",
+            "watch"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "kind": "RoleBinding",
+      "metadata": {
+        "name": "signal-prometheus-discovery",
+        "labels": {
+          "app.kubernetes.io/name": "signal-prometheus-discovery",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "roleRef": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "ClusterRole",
+        "name": "signal-prometheus-discovery"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "prometheus",
+          "namespace": "signal-observe"
+        }
+      ]
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "kind": "RoleBinding",
+      "metadata": {
+        "name": "signal-prometheus-discovery",
+        "labels": {
+          "app.kubernetes.io/name": "signal-prometheus-discovery",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "envoy-gateway-system"
+      },
+      "roleRef": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "ClusterRole",
+        "name": "signal-prometheus-discovery"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "prometheus",
+          "namespace": "signal-observe"
+        }
+      ]
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "kind": "RoleBinding",
+      "metadata": {
+        "name": "signal-prometheus-discovery",
+        "labels": {
+          "app.kubernetes.io/name": "signal-prometheus-discovery",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-system"
+      },
+      "roleRef": {
+        "apiGroup": "rbac.authorization.k8s.io",
+        "kind": "ClusterRole",
+        "name": "signal-prometheus-discovery"
+      },
+      "subjects": [
+        {
+          "kind": "ServiceAccount",
+          "name": "prometheus",
+          "namespace": "signal-observe"
+        }
+      ]
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "name": "node-exporter",
+        "labels": {
+          "app.kubernetes.io/name": "node-exporter",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-system"
+      },
+      "spec": {
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "node-exporter",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "node-exporter",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 65534,
+              "runAsGroup": 65534,
+              "fsGroup": 65534,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "node-exporter",
+                "image": "docker.io/prom/node-exporter:v1.12.1@sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "20m",
+                    "memory": "32Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "128Mi"
+                  }
+                },
+                "args": [
+                  "--path.rootfs=/host",
+                  "--path.procfs=/host/proc",
+                  "--path.sysfs=/host/sys"
+                ],
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 9100
+                  }
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9100
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9100
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 15,
+                  "failureThreshold": 5
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/metrics",
+                    "port": 9100
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "root",
+                    "mountPath": "/host",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "root",
+                "hostPath": {
+                  "path": "/",
+                  "type": "Directory"
+                }
+              }
+            ],
+            "tolerations": [
+              {
+                "operator": "Exists"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "fluentd",
+        "labels": {
+          "app.kubernetes.io/name": "fluentd",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-logging"
+      },
+      "data": {
+        "fluent.conf": "<system>\n  log_level info\n  workers 1\n</system>\n<source>\n  @type tail\n  @id app_container_logs\n  path /var/log/containers/*_signal_nginx-*.log\n  pos_file /buffers/containers.pos\n  path_key source_file\n  tag signal.web\n  read_from_head true\n  follow_inodes true\n  refresh_interval 5s\n  rotate_wait 10s\n  <parse>\n    @type regexp\n    expression /^(?<time>\\S+) (?<stream>stdout|stderr) (?<flag>[FP]) (?<log>.*)$/\n    time_format %Y-%m-%dT%H:%M:%S.%N%:z\n    time_type string\n  </parse>\n</source>\n# JSON access logs become searchable fields; text error logs remain in \"log\".\n<filter signal.web>\n  @type parser\n  key_name log\n  reserve_data true\n  reserve_time true\n  remove_key_name_field true\n  emit_invalid_record_to_error false\n  <parse>\n    @type json\n  </parse>\n</filter>\n<filter signal.web>\n  @type record_transformer\n  enable_ruby true\n  <record>\n    app web\n    namespace signal\n    pod ${File.basename(record[\"source_file\"]).split(\"_\").first}\n  </record>\n  remove_keys source_file,flag\n</filter>\n<match signal.web>\n  @type loki\n  @id loki_output\n  url http://loki.signal-observe.svc.cluster.local:3100\n  line_format json\n  extra_labels {\"project\":\"signal\"}\n  <label>\n    app\n    namespace\n    pod\n    stream\n  </label>\n  <buffer>\n    @type file\n    path /buffers/loki\n    flush_mode interval\n    flush_interval 2s\n    flush_thread_count 1\n    chunk_limit_size 1m\n    total_limit_size 256m\n    retry_forever true\n    retry_max_interval 30s\n    overflow_action block\n  </buffer>\n</match>\n<source>\n  @type monitor_agent\n  bind 0.0.0.0\n  port 24220\n</source>\n"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "name": "fluentd",
+        "labels": {
+          "app.kubernetes.io/name": "fluentd",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-logging"
+      },
+      "spec": {
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "fluentd",
+            "app.kubernetes.io/part-of": "signal"
+          }
+        },
+        "revisionHistoryLimit": 3,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/name": "fluentd",
+              "app.kubernetes.io/part-of": "signal"
+            },
+            "annotations": {
+              "checksum/config": "6a596a5aa391c10db3f72bd8f16851ad46a04a9282d44b463f39b10bdcd8efb4"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": false,
+              "runAsUser": 0,
+              "runAsGroup": 0,
+              "fsGroup": 0,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "fluentd",
+                "image": "docker.io/grafana/fluent-plugin-loki:3.7.8@sha256:4f0438bdebb5bb4350e8de287f0c4b714ab1123f0e57a09590cb3540d2067b08",
+                "imagePullPolicy": "IfNotPresent",
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "128Mi"
+                  },
+                  "limits": {
+                    "cpu": "1000m",
+                    "memory": "384Mi"
+                  }
+                },
+                "ports": [
+                  {
+                    "name": "http",
+                    "containerPort": 24220
+                  }
+                ],
+                "command": [
+                  "fluentd"
+                ],
+                "args": [
+                  "-c",
+                  "/fluentd/etc/fluent.conf",
+                  "-p",
+                  "/fluentd/plugins"
+                ],
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/api/plugins.json",
+                    "port": 24220
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 3
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/api/plugins.json",
+                    "port": 24220
+                  },
+                  "timeoutSeconds": 3,
+                  "periodSeconds": 5,
+                  "failureThreshold": 60
+                },
+                "volumeMounts": [
+                  {
+                    "name": "config",
+                    "mountPath": "/fluentd/etc/fluent.conf",
+                    "readOnly": true,
+                    "subPath": "fluent.conf"
+                  },
+                  {
+                    "name": "logs",
+                    "mountPath": "/var/log",
+                    "readOnly": true
+                  },
+                  {
+                    "name": "buffer",
+                    "mountPath": "/buffers",
+                    "readOnly": false
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp",
+                    "readOnly": false
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "config",
+                "configMap": {
+                  "name": "fluentd"
+                }
+              },
+              {
+                "name": "logs",
+                "hostPath": {
+                  "path": "/var/log",
+                  "type": "Directory"
+                }
+              },
+              {
+                "name": "buffer",
+                "hostPath": {
+                  "path": "/var/lib/signal-fluentd",
+                  "type": "DirectoryOrCreate"
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "32Mi"
+                }
+              }
+            ],
+            "tolerations": [
+              {
+                "operator": "Exists"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "web-default-deny",
+        "labels": {
+          "app.kubernetes.io/name": "web-default-deny",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "podSelector": {},
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "web-from-gateway",
+        "labels": {
+          "app.kubernetes.io/name": "web-from-gateway",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "signal/workload": "web"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "envoy-gateway-system"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "gateway.envoyproxy.io/owning-gateway-name": "signal",
+                    "gateway.envoyproxy.io/owning-gateway-namespace": "signal"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 8080
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "web-metrics",
+        "labels": {
+          "app.kubernetes.io/name": "web-metrics",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "signal/workload": "web"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "signal-observe"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "prometheus"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9113
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "observe-ingress",
+        "labels": {
+          "app.kubernetes.io/name": "observe-ingress",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "podSelector": {},
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "signal-observe"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "loki-from-fluentd",
+        "labels": {
+          "app.kubernetes.io/name": "loki-from-fluentd",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-observe"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "loki"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "signal-logging"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "fluentd"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 3100
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "fluentd-minimum",
+        "labels": {
+          "app.kubernetes.io/name": "fluentd-minimum",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-logging"
+      },
+      "spec": {
+        "podSelector": {},
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "signal-observe"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 3100
+              }
+            ]
+          },
+          {
+            "to": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "kube-system"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "k8s-app": "kube-dns"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 53
+              },
+              {
+                "protocol": "UDP",
+                "port": 53
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "node-metrics",
+        "labels": {
+          "app.kubernetes.io/name": "node-metrics",
+          "app.kubernetes.io/part-of": "signal"
+        },
+        "namespace": "signal-system"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "node-exporter"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "signal-observe"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "prometheus"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9100
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

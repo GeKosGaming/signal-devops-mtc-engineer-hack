@@ -1,0 +1,17 @@
+.state/
+.tools/
+__pycache__/
+*.pyc
+.env
+*.key
+*.pem
+*.kubeconfig
+submission/*.zip
+evidence/runtime/
+evidence/demo/
+evidence/acceptance/
+
+evidence/ci/
+evidence/canary/
+evidence/log-delivery/
+evidence/ubuntu-diagnostics/

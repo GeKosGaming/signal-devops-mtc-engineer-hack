@@ -1,0 +1,12 @@
+modules:
+  http_hello:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      preferred_ip_protocol: ip4
+      headers:
+        Host: signal.local
+      fail_if_body_not_matches_regexp:
+        - '^Hello World!'

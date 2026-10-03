@@ -1,0 +1,11 @@
+global:
+  resolve_timeout: 2m
+route:
+  receiver: local-only
+  group_by: [alertname, job]
+  group_wait: 15s
+  group_interval: 1m
+  repeat_interval: 2h
+receivers:
+  - name: local-only
+# Intentionally no external recipient. Alerts are visible in the local API/UI.

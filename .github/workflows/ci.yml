@@ -1,0 +1,62 @@
+name: SIGNAL verification
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: signal-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y nginx
+      - name: Remove bundled evidence before recording this Ubuntu run
+        run: rm -f evidence/local-checks.json evidence/local-report.html
+      - run: make static
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signal-static-ubuntu
+          path: evidence/local-checks.json
+          if-no-files-found: warn
+          retention-days: 14
+  integration:
+    runs-on: ubuntu-24.04
+    needs: static
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create isolated kind cluster with the same Cilium
+        run: make kind
+      - name: Validate exact upstream container configurations
+        run: make validate-containers
+      - name: Deploy, prove behavior and check redeploy invariants
+        run: make ci-acceptance
+      - name: Reject a broken canary and measure recovery
+        run: make demo
+      - name: Final baseline verification
+        run: make verify
+      - name: Safe diagnostics (no Secrets or kubeconfig)
+        if: failure()
+        run: |
+          export PATH="$PWD/.tools:$PATH" KUBECONFIG="$PWD/.state/kubeconfig"
+          mkdir -p evidence/ci
+          kubectl get pods -A -o wide > evidence/ci/pods.txt 2>&1 || true
+          kubectl get events -A --sort-by=.lastTimestamp > evidence/ci/events.txt 2>&1 || true
+          kubectl -n envoy-gateway-system logs deployment/envoy-gateway --tail=200 > evidence/ci/controller.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signal-evidence
+          path: |
+            evidence/ci/
+            evidence/demo/
+            evidence/runtime/
+            evidence/log-delivery/
+          retention-days: 14

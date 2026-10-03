@@ -1,0 +1,12 @@
+{
+  "nginx": "docker.io/library/nginx:1.30.5-alpine",
+  "nginx_exporter": "docker.io/nginx/nginx-prometheus-exporter:1.5.0",
+  "fluentd": "docker.io/grafana/fluent-plugin-loki:3.7.8",
+  "loki": "docker.io/grafana/loki:3.7.8",
+  "prometheus": "docker.io/prom/prometheus:v3.13.4",
+  "grafana": "docker.io/grafana/grafana:13.1.0",
+  "node_exporter": "docker.io/prom/node-exporter:v1.12.1",
+  "blackbox": "docker.io/prom/blackbox-exporter:v0.28.0",
+  "alertmanager": "docker.io/prom/alertmanager:v0.34.1",
+  "busybox": "docker.io/library/busybox:1.37.0"
+}
