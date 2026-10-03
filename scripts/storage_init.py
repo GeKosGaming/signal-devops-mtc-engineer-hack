@@ -101,6 +101,12 @@ def canonical_template(job: dict, *, ignore_image_digest: bool = False) -> dict:
         for key, value in {'terminationMessagePath': '/dev/termination-log', 'terminationMessagePolicy': 'File'}.items():
             if container.get(key) == value:
                 container.pop(key)
+        # VolumeMount.readOnly is a non-pointer bool with json omitempty: the
+        # API drops explicit false while keeping true. Both false forms mount
+        # read/write, and neither should make an unchanged Job run again.
+        for mount in container.get('volumeMounts', []):
+            if mount.get('readOnly') is False:
+                mount.pop('readOnly')
         if ignore_image_digest:
             container['image'] = container['image'].split('@', 1)[0]
         resources = container.get('resources', {})

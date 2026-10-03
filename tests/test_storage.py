@@ -33,6 +33,8 @@ def existing_job(condition: str | None = 'Complete') -> dict:
     spec['containers'][0].update({'terminationMessagePath':'/dev/termination-log', 'terminationMessagePolicy':'File'})
     # The API serializes Quantity values in canonical form (1000m becomes 1).
     spec['containers'][0]['resources']['limits']['cpu'] = '1'
+    # The non-pointer VolumeMount.readOnly bool uses json omitempty.
+    spec['containers'][0]['volumeMounts'][0].pop('readOnly')
     job['status'] = {'conditions':[{'type':condition, 'status':'True'}]} if condition else {'active':1}
     return job
 
@@ -71,6 +73,19 @@ class StorageLifecycle(unittest.TestCase):
         resources['requests']['cpu'] = '0.05'
         resources['requests']['memory'] = '16384Ki'
         self.assertEqual(storage.plan(old, desired_job()), 'keep')
+
+    def test_omitted_false_volume_mount_keeps_completed_job(self):
+        old = existing_job()
+        self.assertNotIn('readOnly', old['spec']['template']['spec']['containers'][0]['volumeMounts'][0])
+        self.assertEqual(storage.plan(old, desired_job()), 'keep')
+
+    def test_true_read_only_mount_remains_incompatible(self):
+        old = existing_job(None)
+        old['spec']['template']['spec']['containers'][0]['volumeMounts'][0]['readOnly'] = True
+        with self.assertRaisesRegex(storage.StorageError, 'incompatible'):
+            storage.plan(old, desired_job())
+        old['status'] = {'conditions':[{'type':'Complete', 'status':'True'}]}
+        self.assertEqual(storage.plan(old, desired_job()), 'replace')
 
     def test_different_actual_resource_quantity_remains_incompatible(self):
         for resource, value in (('cpu', '2'), ('memory', '65Mi')):
