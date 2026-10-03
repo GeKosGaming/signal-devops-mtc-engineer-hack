@@ -1,4 +1,3 @@
-СТРАНИЦА 1
 SIGNAL
 MTC ENGINEER HACK / Коннов
 Инфраструктура с доказательством
@@ -10,7 +9,8 @@ Nginx Hello World в Kubernetes с настоящим Gateway API, метрик�
 отдельными сценариями.
 Статус проверки. ПОЛНАЯ ПРИЁМКА ПРОЙДЕНА 03.10.2026: Ubuntu 24.04.5 LTS, kubeadm/Kubernetes
 1.35.9 на отдельной GitHub VM. HTTP/TLS, метрики, access/error-логи, изоляция и неизменный
-повторный deploy подтверждены. Сценарии отказа/восстановления и здоровая canary пройдены.
+повторный deploy подтверждены. Пройдены отказ/восстановление, здоровая canary, SIGINT/SIGTERM и
+отказ конкурирующим операциям.
 Компонент
 Реализация / выбранная версия
 Основной стенд
@@ -36,11 +36,10 @@ Local PV сохраняют данные Prometheus, Loki, Grafana и Alertmanag
 localhost. Один узел не обеспечивает отказоустойчивость при потере VM.
 Репозиторий, main:
 github.com/GeKosGaming/signal-devops-mtc-engineer-hack
-Измеренный commit: efa05ee18b02
+Измеренный commit: f99de235d92b
 Протокол Ubuntu kubeadm в GitHub Actions
 
 
-СТРАНИЦА 2
 SIGNAL
 MTC ENGINEER HACK / Коннов
 Реализованный функционал
@@ -101,7 +100,6 @@ Nginx stub_status включает probes/scrapes; счётчик не заяв�
 Конкретный запрос доказывается отдельно через proof_id в Loki.
 
 
-СТРАНИЦА 3
 SIGNAL
 MTC ENGINEER HACK / Коннов
 Контроль изменений и отказов
@@ -125,21 +123,22 @@ Canary gate
 make canary: 200 samples на
 10/25/50% и 40 на 100%; gate 30
 samples, 0 ошибок, p95 ≤500 ms.
-Отказ / откат
-Canary возвращает 503 при здоровом /healthz; gate
-отвергает её, откатывает маршрут и проверяет
-ответ stable.
-make demo: реальное 90/10, отказ,
-откат, удаление stable Pod и
-измерение восстановления.
-Доставка логов
-Короткая недоступность Loki, запросы с
-уникальными ID, сохранение Fluentd buffer;
-восстановление Loki в finally.
-make log-delivery: измеренные
-задержки, missing IDs и
-наблюдаемые дубли; без обещания
-exactly-once.
+Отказ / сигналы
+Canary 503 при здоровом /healthz; gate отвергает
+её. SIGINT/SIGTERM до завершения вызывают
+проверяемую попытку восстановления baseline.
+make demo; make operation-check:
+TERM faulty demo, INT группе healthy
+promotion; дочерний FAIL, здоровый
+HTTP baseline.
+Доставка /
+recovery
+Недоступность Loki и Fluentd buffer; marker хранит
+UID/replicas, guarded restore проверяет исходный
+объект. Ручные действия описаны в RUNBOOK.
+make log-delivery: задержки, missing
+IDs и видимые дубли; exactly-once не
+заявлен.
 Изоляция /
 alerts
 Cilium NetworkPolicy; Nginx non-root/read-only/drop
@@ -148,21 +147,23 @@ ALL; Fluentd uid 0 для CRI. Capacity alerts
 make verify: разрешённый Gateway и
 запрещённый прямой доступ; четыре
 настоящих promtool сценария.
-Dashboard / CI
-Grafana + Prometheus/Loki, Blackbox, local alerts;
-раздельные static, kind integration и Ubuntu kubeadm
-acceptance.
-make ui; Actions и JSON/HTML reports
-с ОС, commit, imageID и
-длительностями.
-Измеренные результаты. 90/10: stable 361, canary 39 из 400. Восстановление Pod: 6.02 с, ошибок 0/50. После
+Координация /
+CI
+Общий Linux flock одной рабочей копии,
+проверенный inherited FD, nested acceptance →
+deploy. Grafana; раздельные static, kind и kubeadm
+CI.
+make operation-check; make
+acceptance; свежие artifacts одного
+чистого HEAD.
+Измеренные результаты. 90/10: stable 360, canary 40 из 400. Восстановление Pod: 6.58 с, ошибок 0/50. После
 недоступности Loki найдено 20/20 ID; максимальная наблюдённая задержка 39.9 с; дополнительных видимых копий
 0. Все этапы здоровой canary 10/25/50/100% прошли. Это измерения одного лабораторного прогона.
-500 ms - демонстрационный бюджет, не производственный SLO. CLI gate не заменяет rollout-controller; при отказе
-API/SIGKILL откат не гарантирован. Alertmanager использует локальный receiver без внешних уведомлений.
+500 ms - демонстрационный бюджет. CLI не заменяет rollout-controller; SIGKILL, потеря VM и недоступный API не
+гарантируют rollback. Marker удаляют после проверки. Lock не координирует другие checkout или прямой kubectl.
+Alertmanager - локальный receiver.
 
 
-СТРАНИЦА 4
 SIGNAL
 MTC ENGINEER HACK / Коннов
 Развитие для нескольких площадок
@@ -193,4 +194,5 @@ assembly и end-to-end mTLS. Error-лог Nginx может содержать IP
 Пароли, private keys и kubeconfig генерируются локально и исключены из Git. Образы проекта закреплены digest,
 charts сохранены с SHA-256; зависимости ОС и Actions не объявляются побитово воспроизводимыми.
 Документация: README, docs/REQUIREMENTS.md, RUNBOOK.md и DEMO.md. Протоколы: evidence/runtime, demo,
-log-delivery и acceptance в artifacts Actions. Паспорт не заменяет исходники и исполняемую приёмку.
+canary, operations, log-delivery и acceptance в artifacts Actions. Паспорт не заменяет исходники и исполняемую
+приёмку.

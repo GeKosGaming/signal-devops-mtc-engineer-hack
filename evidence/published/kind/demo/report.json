@@ -1,7 +1,7 @@
 {
   "name": "Canary failure drill",
   "environment": {
-    "timestamp_utc": "2026-10-03T17:45:41.208833+00:00",
+    "timestamp_utc": "2026-10-03T18:48:22.440485+00:00",
     "os": {
       "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
       "NAME": "Ubuntu",
@@ -17,7 +17,7 @@
       "UBUNTU_CODENAME": "noble",
       "LOGO": "ubuntu-logo"
     },
-    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "git_worktree_clean": true,
     "profile": "kind"
   },
@@ -29,15 +29,15 @@
         "path": "/",
         "samples": 400,
         "counts": {
-          "stable": 359,
-          "canary": 41
+          "stable": 361,
+          "canary": 39
         },
         "expected_canary_fraction": 0.1,
-        "actual_canary_fraction": 0.1025,
+        "actual_canary_fraction": 0.0975,
         "tolerance": 0.060000000000000005,
         "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
       },
-      "duration_seconds": 6.849
+      "duration_seconds": 10.784
     },
     {
       "name": "injected fault observed through Envoy Gateway",
@@ -48,38 +48,19 @@
           {
             "attempt": 1,
             "response": {
-              "status": 200,
-              "body": "Hello World!\n",
-              "headers": {
-                "server": "nginx",
-                "date": "Sat, 03 Oct 2026 17:45:55 GMT",
-                "content-type": "text/plain",
-                "content-length": "13",
-                "x-release": "canary",
-                "x-proof-id": "0198f84fffd0ac0deea6edc12f77c284",
-                "x-content-type-options": "nosniff",
-                "connection": "close"
-              },
-              "latency_ms": 3.959
-            },
-            "error": "Injected fault has not reached the data plane: {\"status\": 200, \"body\": \"Hello World!\\n\", \"headers\": {\"server\": \"nginx\", \"date\": \"Sat, 03 Oct 2026 17:45:55 GMT\", \"content-type\": \"text/plain\", \"content-length\": \"13\", \"x-release\": \"canary\", \"x-proof-id\": \"0198f84fffd0ac0deea6edc12f77c284\", \"x-content-type-options\": \"nosniff\", \"connection\": \"close\"}, \"latency_ms\": 3.959}"
-          },
-          {
-            "attempt": 2,
-            "response": {
               "status": 503,
               "body": "Injected canary failure\n",
               "headers": {
                 "server": "nginx",
-                "date": "Sat, 03 Oct 2026 17:45:56 GMT",
+                "date": "Sat, 03 Oct 2026 18:48:39 GMT",
                 "content-type": "text/plain",
                 "content-length": "24",
                 "x-release": "canary",
-                "x-proof-id": "ba68f098a2d356dfaaa3cd9ec07cb4f8",
+                "x-proof-id": "751043ba5cd5150335554ae03226f366",
                 "x-content-type-options": "nosniff",
                 "connection": "close"
               },
-              "latency_ms": 3.605
+              "latency_ms": 4.01
             }
           }
         ],
@@ -88,20 +69,20 @@
           "body": "Injected canary failure\n",
           "headers": {
             "server": "nginx",
-            "date": "Sat, 03 Oct 2026 17:45:56 GMT",
+            "date": "Sat, 03 Oct 2026 18:48:39 GMT",
             "content-type": "text/plain",
             "content-length": "24",
             "x-release": "canary",
-            "x-proof-id": "ba68f098a2d356dfaaa3cd9ec07cb4f8",
+            "x-proof-id": "751043ba5cd5150335554ae03226f366",
             "x-content-type-options": "nosniff",
             "connection": "close"
           },
-          "latency_ms": 3.605
+          "latency_ms": 4.01
         },
         "passed": true,
-        "elapsed_seconds": 1.041
+        "elapsed_seconds": 0.035
       },
-      "duration_seconds": 1.041
+      "duration_seconds": 0.035
     },
     {
       "name": "rollback to stable 100%",
@@ -112,17 +93,17 @@
             "listener": "http",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:46:02Z",
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
                 "message": "Route is accepted",
-                "observedGeneration": 5,
+                "observedGeneration": 9,
                 "reason": "Accepted",
                 "status": "True",
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:46:02Z",
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
                 "message": "Resolved all the Object references for the Route",
-                "observedGeneration": 5,
+                "observedGeneration": 9,
                 "reason": "ResolvedRefs",
                 "status": "True",
                 "type": "ResolvedRefs"
@@ -133,17 +114,17 @@
             "listener": "https",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:46:02Z",
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
                 "message": "Route is accepted",
-                "observedGeneration": 5,
+                "observedGeneration": 9,
                 "reason": "Accepted",
                 "status": "True",
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:46:02Z",
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
                 "message": "Resolved all the Object references for the Route",
-                "observedGeneration": 5,
+                "observedGeneration": 9,
                 "reason": "ResolvedRefs",
                 "status": "True",
                 "type": "ResolvedRefs"
@@ -156,7 +137,7 @@
             "listener": "http",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
                 "message": "Route is accepted",
                 "observedGeneration": 1,
                 "reason": "Accepted",
@@ -164,7 +145,7 @@
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
                 "message": "Resolved all the Object references for the Route",
                 "observedGeneration": 1,
                 "reason": "ResolvedRefs",
@@ -177,7 +158,7 @@
             "listener": "https",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
                 "message": "Route is accepted",
                 "observedGeneration": 1,
                 "reason": "Accepted",
@@ -185,7 +166,7 @@
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
                 "message": "Resolved all the Object references for the Route",
                 "observedGeneration": 1,
                 "reason": "ResolvedRefs",
@@ -196,7 +177,7 @@
           }
         ]
       },
-      "duration_seconds": 0.135
+      "duration_seconds": 0.185
     },
     {
       "name": "stable root traffic after rollback",
@@ -213,13 +194,133 @@
         "tolerance": 0,
         "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
       },
-      "duration_seconds": 0.588
+      "duration_seconds": 0.926
     },
     {
       "name": "bad canary was rejected",
       "passed": true,
       "evidence": null,
       "duration_seconds": 0.0
+    },
+    {
+      "name": "restore healthy canary manifests",
+      "passed": true,
+      "evidence": {
+        "configuration": "healthy"
+      },
+      "duration_seconds": 5.832
+    },
+    {
+      "name": "rollback to stable 100%",
+      "passed": true,
+      "evidence": {
+        "web-main": [
+          {
+            "listener": "http",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
+                "message": "Route is accepted",
+                "observedGeneration": 9,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 9,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          },
+          {
+            "listener": "https",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
+                "message": "Route is accepted",
+                "observedGeneration": 9,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T18:48:52Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 9,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          }
+        ],
+        "web-preview": [
+          {
+            "listener": "http",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
+                "message": "Route is accepted",
+                "observedGeneration": 1,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 1,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          },
+          {
+            "listener": "https",
+            "conditions": {
+              "Accepted": {
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
+                "message": "Route is accepted",
+                "observedGeneration": 1,
+                "reason": "Accepted",
+                "status": "True",
+                "type": "Accepted"
+              },
+              "ResolvedRefs": {
+                "lastTransitionTime": "2026-10-03T18:46:22Z",
+                "message": "Resolved all the Object references for the Route",
+                "observedGeneration": 1,
+                "reason": "ResolvedRefs",
+                "status": "True",
+                "type": "ResolvedRefs"
+              }
+            }
+          }
+        ]
+      },
+      "duration_seconds": 0.194
+    },
+    {
+      "name": "stable root traffic after rollback",
+      "passed": true,
+      "evidence": {
+        "path": "/",
+        "samples": 40,
+        "counts": {
+          "stable": 40,
+          "canary": 0
+        },
+        "expected_canary_fraction": 0.0,
+        "actual_canary_fraction": 0.0,
+        "tolerance": 0,
+        "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+      },
+      "duration_seconds": 0.961
     },
     {
       "name": "canary configuration restored",
@@ -230,38 +331,19 @@
           {
             "attempt": 1,
             "response": {
-              "status": 503,
-              "body": "Injected canary failure\n",
-              "headers": {
-                "server": "nginx",
-                "date": "Sat, 03 Oct 2026 17:46:09 GMT",
-                "content-type": "text/plain",
-                "content-length": "24",
-                "x-release": "canary",
-                "x-proof-id": "31fced5076f70d85d95b144b05bc6fcb",
-                "x-content-type-options": "nosniff",
-                "connection": "close"
-              },
-              "latency_ms": 2.624
-            },
-            "error": "Unexpected HTTP response: {'status': 503, 'body': 'Injected canary failure\\n', 'headers': {'server': 'nginx', 'date': 'Sat, 03 Oct 2026 17:46:09 GMT', 'content-type': 'text/plain', 'content-length': '24', 'x-release': 'canary', 'x-proof-id': '31fced5076f70d85d95b144b05bc6fcb', 'x-content-type-options': 'nosniff', 'connection': 'close'}, 'latency_ms': 2.624}"
-          },
-          {
-            "attempt": 2,
-            "response": {
               "status": 200,
               "body": "Hello World!\n",
               "headers": {
                 "server": "nginx",
-                "date": "Sat, 03 Oct 2026 17:46:10 GMT",
+                "date": "Sat, 03 Oct 2026 18:49:00 GMT",
                 "content-type": "text/plain",
                 "content-length": "13",
                 "x-release": "canary",
-                "x-proof-id": "78960105d610b6be657ad8c15d84b7e7",
+                "x-proof-id": "dfe24f21456f038b726f0a8a1ca31196",
                 "x-content-type-options": "nosniff",
                 "connection": "close"
               },
-              "latency_ms": 3.195
+              "latency_ms": 4.803
             }
           }
         ],
@@ -270,35 +352,48 @@
           "body": "Hello World!\n",
           "headers": {
             "server": "nginx",
-            "date": "Sat, 03 Oct 2026 17:46:10 GMT",
+            "date": "Sat, 03 Oct 2026 18:49:00 GMT",
             "content-type": "text/plain",
             "content-length": "13",
             "x-release": "canary",
-            "x-proof-id": "78960105d610b6be657ad8c15d84b7e7",
+            "x-proof-id": "dfe24f21456f038b726f0a8a1ca31196",
             "x-content-type-options": "nosniff",
             "connection": "close"
           },
-          "latency_ms": 3.195
+          "latency_ms": 4.803
         },
         "passed": true,
-        "elapsed_seconds": 1.032
+        "elapsed_seconds": 0.026
       },
-      "duration_seconds": 1.032
+      "duration_seconds": 0.026
+    },
+    {
+      "name": "recovery marker cleared",
+      "passed": true,
+      "evidence": {
+        "path": "/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json",
+        "removed": true
+      },
+      "duration_seconds": 0.0
     },
     {
       "name": "single-Pod recovery measured",
       "passed": true,
       "evidence": {
-        "deleted_pod": "web-stable-7488f7cd6b-k72bk",
+        "deleted_pod": "web-stable-7488f7cd6b-8rm2x",
         "requests": 50,
         "failed_requests": 0,
-        "elapsed_seconds": 6.008,
+        "elapsed_seconds": 6.596,
         "interpretation": "Measured recovery on one node, not node-level high availability."
       },
-      "duration_seconds": 6.051
+      "duration_seconds": 6.661
     }
   ],
   "passed": true,
+  "recovery_marker": {
+    "path": "/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json",
+    "removed": true
+  },
   "canary_data_plane_transitions": [
     {
       "expected": "injected failure",
@@ -306,38 +401,19 @@
         {
           "attempt": 1,
           "response": {
-            "status": 200,
-            "body": "Hello World!\n",
-            "headers": {
-              "server": "nginx",
-              "date": "Sat, 03 Oct 2026 17:45:55 GMT",
-              "content-type": "text/plain",
-              "content-length": "13",
-              "x-release": "canary",
-              "x-proof-id": "0198f84fffd0ac0deea6edc12f77c284",
-              "x-content-type-options": "nosniff",
-              "connection": "close"
-            },
-            "latency_ms": 3.959
-          },
-          "error": "Injected fault has not reached the data plane: {\"status\": 200, \"body\": \"Hello World!\\n\", \"headers\": {\"server\": \"nginx\", \"date\": \"Sat, 03 Oct 2026 17:45:55 GMT\", \"content-type\": \"text/plain\", \"content-length\": \"13\", \"x-release\": \"canary\", \"x-proof-id\": \"0198f84fffd0ac0deea6edc12f77c284\", \"x-content-type-options\": \"nosniff\", \"connection\": \"close\"}, \"latency_ms\": 3.959}"
-        },
-        {
-          "attempt": 2,
-          "response": {
             "status": 503,
             "body": "Injected canary failure\n",
             "headers": {
               "server": "nginx",
-              "date": "Sat, 03 Oct 2026 17:45:56 GMT",
+              "date": "Sat, 03 Oct 2026 18:48:39 GMT",
               "content-type": "text/plain",
               "content-length": "24",
               "x-release": "canary",
-              "x-proof-id": "ba68f098a2d356dfaaa3cd9ec07cb4f8",
+              "x-proof-id": "751043ba5cd5150335554ae03226f366",
               "x-content-type-options": "nosniff",
               "connection": "close"
             },
-            "latency_ms": 3.605
+            "latency_ms": 4.01
           }
         }
       ],
@@ -346,18 +422,18 @@
         "body": "Injected canary failure\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:45:56 GMT",
+          "date": "Sat, 03 Oct 2026 18:48:39 GMT",
           "content-type": "text/plain",
           "content-length": "24",
           "x-release": "canary",
-          "x-proof-id": "ba68f098a2d356dfaaa3cd9ec07cb4f8",
+          "x-proof-id": "751043ba5cd5150335554ae03226f366",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 3.605
+        "latency_ms": 4.01
       },
       "passed": true,
-      "elapsed_seconds": 1.041
+      "elapsed_seconds": 0.035
     },
     {
       "expected": "healthy canary",
@@ -365,38 +441,19 @@
         {
           "attempt": 1,
           "response": {
-            "status": 503,
-            "body": "Injected canary failure\n",
-            "headers": {
-              "server": "nginx",
-              "date": "Sat, 03 Oct 2026 17:46:09 GMT",
-              "content-type": "text/plain",
-              "content-length": "24",
-              "x-release": "canary",
-              "x-proof-id": "31fced5076f70d85d95b144b05bc6fcb",
-              "x-content-type-options": "nosniff",
-              "connection": "close"
-            },
-            "latency_ms": 2.624
-          },
-          "error": "Unexpected HTTP response: {'status': 503, 'body': 'Injected canary failure\\n', 'headers': {'server': 'nginx', 'date': 'Sat, 03 Oct 2026 17:46:09 GMT', 'content-type': 'text/plain', 'content-length': '24', 'x-release': 'canary', 'x-proof-id': '31fced5076f70d85d95b144b05bc6fcb', 'x-content-type-options': 'nosniff', 'connection': 'close'}, 'latency_ms': 2.624}"
-        },
-        {
-          "attempt": 2,
-          "response": {
             "status": 200,
             "body": "Hello World!\n",
             "headers": {
               "server": "nginx",
-              "date": "Sat, 03 Oct 2026 17:46:10 GMT",
+              "date": "Sat, 03 Oct 2026 18:49:00 GMT",
               "content-type": "text/plain",
               "content-length": "13",
               "x-release": "canary",
-              "x-proof-id": "78960105d610b6be657ad8c15d84b7e7",
+              "x-proof-id": "dfe24f21456f038b726f0a8a1ca31196",
               "x-content-type-options": "nosniff",
               "connection": "close"
             },
-            "latency_ms": 3.195
+            "latency_ms": 4.803
           }
         }
       ],
@@ -405,19 +462,190 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:46:10 GMT",
+          "date": "Sat, 03 Oct 2026 18:49:00 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "canary",
-          "x-proof-id": "78960105d610b6be657ad8c15d84b7e7",
+          "x-proof-id": "dfe24f21456f038b726f0a8a1ca31196",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 3.195
+        "latency_ms": 4.803
       },
       "passed": true,
-      "elapsed_seconds": 1.032
+      "elapsed_seconds": 0.026
     }
   ],
-  "gate_rejection": "Canary gate rejected: {\"samples\": 30, \"errors\": 30, \"error_rate\": 1.0, \"p95_ms\": 2.618, \"max_error_rate\": 0.01, \"max_p95_ms\": 500}"
+  "gate_rejection": "Canary gate rejected: {\"samples\": 30, \"errors\": 30, \"error_rate\": 1.0, \"p95_ms\": 4.875, \"max_error_rate\": 0.01, \"max_p95_ms\": 500}",
+  "canary_restoration": {
+    "passed": true,
+    "restore_canary_configuration": true,
+    "checks": [
+      {
+        "name": "restore healthy canary manifests",
+        "passed": true,
+        "evidence": {
+          "configuration": "healthy"
+        },
+        "duration_seconds": 5.832
+      },
+      {
+        "name": "rollback to stable 100%",
+        "passed": true,
+        "evidence": {
+          "web-main": [
+            {
+              "listener": "http",
+              "conditions": {
+                "Accepted": {
+                  "lastTransitionTime": "2026-10-03T18:48:52Z",
+                  "message": "Route is accepted",
+                  "observedGeneration": 9,
+                  "reason": "Accepted",
+                  "status": "True",
+                  "type": "Accepted"
+                },
+                "ResolvedRefs": {
+                  "lastTransitionTime": "2026-10-03T18:48:52Z",
+                  "message": "Resolved all the Object references for the Route",
+                  "observedGeneration": 9,
+                  "reason": "ResolvedRefs",
+                  "status": "True",
+                  "type": "ResolvedRefs"
+                }
+              }
+            },
+            {
+              "listener": "https",
+              "conditions": {
+                "Accepted": {
+                  "lastTransitionTime": "2026-10-03T18:48:52Z",
+                  "message": "Route is accepted",
+                  "observedGeneration": 9,
+                  "reason": "Accepted",
+                  "status": "True",
+                  "type": "Accepted"
+                },
+                "ResolvedRefs": {
+                  "lastTransitionTime": "2026-10-03T18:48:52Z",
+                  "message": "Resolved all the Object references for the Route",
+                  "observedGeneration": 9,
+                  "reason": "ResolvedRefs",
+                  "status": "True",
+                  "type": "ResolvedRefs"
+                }
+              }
+            }
+          ],
+          "web-preview": [
+            {
+              "listener": "http",
+              "conditions": {
+                "Accepted": {
+                  "lastTransitionTime": "2026-10-03T18:46:22Z",
+                  "message": "Route is accepted",
+                  "observedGeneration": 1,
+                  "reason": "Accepted",
+                  "status": "True",
+                  "type": "Accepted"
+                },
+                "ResolvedRefs": {
+                  "lastTransitionTime": "2026-10-03T18:46:22Z",
+                  "message": "Resolved all the Object references for the Route",
+                  "observedGeneration": 1,
+                  "reason": "ResolvedRefs",
+                  "status": "True",
+                  "type": "ResolvedRefs"
+                }
+              }
+            },
+            {
+              "listener": "https",
+              "conditions": {
+                "Accepted": {
+                  "lastTransitionTime": "2026-10-03T18:46:22Z",
+                  "message": "Route is accepted",
+                  "observedGeneration": 1,
+                  "reason": "Accepted",
+                  "status": "True",
+                  "type": "Accepted"
+                },
+                "ResolvedRefs": {
+                  "lastTransitionTime": "2026-10-03T18:46:22Z",
+                  "message": "Resolved all the Object references for the Route",
+                  "observedGeneration": 1,
+                  "reason": "ResolvedRefs",
+                  "status": "True",
+                  "type": "ResolvedRefs"
+                }
+              }
+            }
+          ]
+        },
+        "duration_seconds": 0.194
+      },
+      {
+        "name": "stable root traffic after rollback",
+        "passed": true,
+        "evidence": {
+          "path": "/",
+          "samples": 40,
+          "counts": {
+            "stable": 40,
+            "canary": 0
+          },
+          "expected_canary_fraction": 0.0,
+          "actual_canary_fraction": 0.0,
+          "tolerance": 0,
+          "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
+        },
+        "duration_seconds": 0.961
+      },
+      {
+        "name": "canary configuration restored",
+        "passed": true,
+        "evidence": {
+          "expected": "healthy canary",
+          "attempts": [
+            {
+              "attempt": 1,
+              "response": {
+                "status": 200,
+                "body": "Hello World!\n",
+                "headers": {
+                  "server": "nginx",
+                  "date": "Sat, 03 Oct 2026 18:49:00 GMT",
+                  "content-type": "text/plain",
+                  "content-length": "13",
+                  "x-release": "canary",
+                  "x-proof-id": "dfe24f21456f038b726f0a8a1ca31196",
+                  "x-content-type-options": "nosniff",
+                  "connection": "close"
+                },
+                "latency_ms": 4.803
+              }
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "Hello World!\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 18:49:00 GMT",
+              "content-type": "text/plain",
+              "content-length": "13",
+              "x-release": "canary",
+              "x-proof-id": "dfe24f21456f038b726f0a8a1ca31196",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 4.803
+          },
+          "passed": true,
+          "elapsed_seconds": 0.026
+        },
+        "duration_seconds": 0.026
+      }
+    ]
+  }
 }

@@ -1,0 +1,211 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Actual operation contention and canary signal recovery</title><style>body{font:16px system-ui;margin:3% auto;max-width:1200px;background:#111821;color:#e8edf3}h1{font-size:36px}table{width:100%;border-collapse:collapse}td,th{padding:16px;border-bottom:1px solid #425266;text-align:left;vertical-align:top}pre{white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;font-size:12px}.true{color:#9de5b0}.false{color:#ffaba6}small{color:#aab5c3}</style><h1>SIGNAL / PASS</h1><p>Actual operation contention and canary signal recovery</p><small>Measured evidence, not a readiness claim based on Pod phase. No external scripts, fonts or telemetry.</small><pre>{
+  &quot;timestamp_utc&quot;: &quot;2026-10-03T18:47:44.652065+00:00&quot;,
+  &quot;os&quot;: {
+    &quot;PRETTY_NAME&quot;: &quot;Ubuntu 24.04.5 LTS&quot;,
+    &quot;NAME&quot;: &quot;Ubuntu&quot;,
+    &quot;VERSION_ID&quot;: &quot;24.04&quot;,
+    &quot;VERSION&quot;: &quot;24.04.5 LTS (Noble Numbat)&quot;,
+    &quot;VERSION_CODENAME&quot;: &quot;noble&quot;,
+    &quot;ID&quot;: &quot;ubuntu&quot;,
+    &quot;ID_LIKE&quot;: &quot;debian&quot;,
+    &quot;HOME_URL&quot;: &quot;https://www.ubuntu.com/&quot;,
+    &quot;SUPPORT_URL&quot;: &quot;https://help.ubuntu.com/&quot;,
+    &quot;BUG_REPORT_URL&quot;: &quot;https://bugs.launchpad.net/ubuntu/&quot;,
+    &quot;PRIVACY_POLICY_URL&quot;: &quot;https://www.ubuntu.com/legal/terms-and-policies/privacy-policy&quot;,
+    &quot;UBUNTU_CODENAME&quot;: &quot;noble&quot;,
+    &quot;LOGO&quot;: &quot;ubuntu-logo&quot;
+  },
+  &quot;git_commit&quot;: &quot;f99de235d92b8909b59827021f41d97178e8d07b&quot;,
+  &quot;git_worktree_clean&quot;: true,
+  &quot;profile&quot;: &quot;kind&quot;
+}</pre><table><tr><th>Check</th><th>Result</th><th>Evidence</th></tr><tr><td>safe baseline before operation probes</td><td class="true">PASS</td><td><pre>{
+  &quot;stable&quot;: {
+    &quot;status&quot;: 200,
+    &quot;body&quot;: &quot;Hello World!\n&quot;,
+    &quot;headers&quot;: {
+      &quot;server&quot;: &quot;nginx&quot;,
+      &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:47:45 GMT&quot;,
+      &quot;content-type&quot;: &quot;text/plain&quot;,
+      &quot;content-length&quot;: &quot;13&quot;,
+      &quot;x-release&quot;: &quot;stable&quot;,
+      &quot;x-proof-id&quot;: &quot;19c0345e4fc49c3a75f115b21ef17089&quot;,
+      &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+      &quot;connection&quot;: &quot;close&quot;
+    },
+    &quot;latency_ms&quot;: 6.18
+  },
+  &quot;canary&quot;: {
+    &quot;status&quot;: 200,
+    &quot;body&quot;: &quot;Hello World!\n&quot;,
+    &quot;headers&quot;: {
+      &quot;server&quot;: &quot;nginx&quot;,
+      &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:47:45 GMT&quot;,
+      &quot;content-type&quot;: &quot;text/plain&quot;,
+      &quot;content-length&quot;: &quot;13&quot;,
+      &quot;x-release&quot;: &quot;canary&quot;,
+      &quot;x-proof-id&quot;: &quot;3ea7c431def4477c9c75ea99f6cc0a83&quot;,
+      &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+      &quot;connection&quot;: &quot;close&quot;
+    },
+    &quot;latency_ms&quot;: 3.584
+  }
+}</pre></td></tr><tr><td>concurrent mutations rejected before cluster changes</td><td class="true">PASS</td><td><pre>{
+  &quot;commands&quot;: [
+    {
+      &quot;command&quot;: [
+        &quot;bash&quot;,
+        &quot;scripts/deploy.sh&quot;
+      ],
+      &quot;returncode&quot;: 1,
+      &quot;elapsed_seconds&quot;: 0.009,
+      &quot;output&quot;: &quot;\n\n[SIGNAL ERROR] Another SIGNAL operation is running.\n&quot;
+    },
+    {
+      &quot;command&quot;: [
+        &quot;/usr/bin/python3&quot;,
+        &quot;scripts/canary.py&quot;,
+        &quot;--demo&quot;
+      ],
+      &quot;returncode&quot;: 1,
+      &quot;elapsed_seconds&quot;: 0.08,
+      &quot;output&quot;: &quot;\nAnother SIGNAL operation is running.\n&quot;
+    },
+    {
+      &quot;command&quot;: [
+        &quot;/usr/bin/python3&quot;,
+        &quot;scripts/log_delivery.py&quot;,
+        &quot;--run&quot;
+      ],
+      &quot;returncode&quot;: 1,
+      &quot;elapsed_seconds&quot;: 0.068,
+      &quot;output&quot;: &quot;\nAnother SIGNAL operation is running.\n&quot;
+    },
+    {
+      &quot;command&quot;: [
+        &quot;/usr/bin/python3&quot;,
+        &quot;scripts/acceptance.py&quot;
+      ],
+      &quot;returncode&quot;: 1,
+      &quot;elapsed_seconds&quot;: 0.071,
+      &quot;output&quot;: &quot;\nAnother SIGNAL operation is running.\n&quot;
+    }
+  ],
+  &quot;configuration_unchanged&quot;: true
+}</pre></td></tr><tr><td>SIGTERM after actual faulty canary injection restores baseline</td><td class="true">PASS</td><td><pre>{
+  &quot;signal&quot;: &quot;SIGTERM&quot;,
+  &quot;signal_scope&quot;: &quot;operator PID&quot;,
+  &quot;mode&quot;: &quot;fault demo&quot;,
+  &quot;mutation_observed_before_signal&quot;: true,
+  &quot;returncode&quot;: 1,
+  &quot;saved_report_passed&quot;: false,
+  &quot;recovery_marker_removed&quot;: true,
+  &quot;lock_released&quot;: true,
+  &quot;restored&quot;: {
+    &quot;stable&quot;: {
+      &quot;status&quot;: 200,
+      &quot;body&quot;: &quot;Hello World!\n&quot;,
+      &quot;headers&quot;: {
+        &quot;server&quot;: &quot;nginx&quot;,
+        &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:10 GMT&quot;,
+        &quot;content-type&quot;: &quot;text/plain&quot;,
+        &quot;content-length&quot;: &quot;13&quot;,
+        &quot;x-release&quot;: &quot;stable&quot;,
+        &quot;x-proof-id&quot;: &quot;be4946ce32d9988382445a64e06559c4&quot;,
+        &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+        &quot;connection&quot;: &quot;close&quot;
+      },
+      &quot;latency_ms&quot;: 3.742
+    },
+    &quot;canary&quot;: {
+      &quot;status&quot;: 200,
+      &quot;body&quot;: &quot;Hello World!\n&quot;,
+      &quot;headers&quot;: {
+        &quot;server&quot;: &quot;nginx&quot;,
+        &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:10 GMT&quot;,
+        &quot;content-type&quot;: &quot;text/plain&quot;,
+        &quot;content-length&quot;: &quot;13&quot;,
+        &quot;x-release&quot;: &quot;canary&quot;,
+        &quot;x-proof-id&quot;: &quot;2e824869de3367bb44efb1f36a2acef2&quot;,
+        &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+        &quot;connection&quot;: &quot;close&quot;
+      },
+      &quot;latency_ms&quot;: 3.477
+    }
+  },
+  &quot;elapsed_seconds&quot;: 25.045,
+  &quot;process_output&quot;: &quot;PASS 90/10 weighted routing\nPASS restore healthy canary manifests\nPASS rollback to stable 100%\nPASS stable root traffic after rollback\nPASS canary configuration restored\nPASS recovery marker cleared\nFAIL canary execution: SIGTERM received; attempting canary restoration\nFAIL controlled interruption: Canary operation interrupted: [{\&quot;signal_number\&quot;: 15, \&quot;signal_name\&quot;: \&quot;SIGTERM\&quot;, \&quot;during_cleanup\&quot;: false}]\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/demo/report.html\n&quot;
+}</pre></td></tr><tr><td>SIGINT during healthy promotion restores baseline</td><td class="true">PASS</td><td><pre>{
+  &quot;signal&quot;: &quot;SIGINT&quot;,
+  &quot;signal_scope&quot;: &quot;operator process group&quot;,
+  &quot;mode&quot;: &quot;healthy promotion&quot;,
+  &quot;mutation_observed_before_signal&quot;: true,
+  &quot;returncode&quot;: 1,
+  &quot;saved_report_passed&quot;: false,
+  &quot;recovery_marker_removed&quot;: true,
+  &quot;lock_released&quot;: true,
+  &quot;restored&quot;: {
+    &quot;stable&quot;: {
+      &quot;status&quot;: 200,
+      &quot;body&quot;: &quot;Hello World!\n&quot;,
+      &quot;headers&quot;: {
+        &quot;server&quot;: &quot;nginx&quot;,
+        &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:22 GMT&quot;,
+        &quot;content-type&quot;: &quot;text/plain&quot;,
+        &quot;content-length&quot;: &quot;13&quot;,
+        &quot;x-release&quot;: &quot;stable&quot;,
+        &quot;x-proof-id&quot;: &quot;50d22f60684ff9c21f8995f5684f7bd9&quot;,
+        &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+        &quot;connection&quot;: &quot;close&quot;
+      },
+      &quot;latency_ms&quot;: 3.619
+    },
+    &quot;canary&quot;: {
+      &quot;status&quot;: 200,
+      &quot;body&quot;: &quot;Hello World!\n&quot;,
+      &quot;headers&quot;: {
+        &quot;server&quot;: &quot;nginx&quot;,
+        &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:22 GMT&quot;,
+        &quot;content-type&quot;: &quot;text/plain&quot;,
+        &quot;content-length&quot;: &quot;13&quot;,
+        &quot;x-release&quot;: &quot;canary&quot;,
+        &quot;x-proof-id&quot;: &quot;add5cd8480f1c99edc6730163f153ce2&quot;,
+        &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+        &quot;connection&quot;: &quot;close&quot;
+      },
+      &quot;latency_ms&quot;: 3.75
+    }
+  },
+  &quot;elapsed_seconds&quot;: 11.356,
+  &quot;process_output&quot;: &quot;PASS rollback to stable 100%\nPASS stable root traffic after rollback\nPASS recovery marker cleared\nFAIL canary execution: SIGINT received; attempting canary restoration\nFAIL controlled interruption: Canary operation interrupted: [{\&quot;signal_number\&quot;: 2, \&quot;signal_name\&quot;: \&quot;SIGINT\&quot;, \&quot;during_cleanup\&quot;: false}]\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/canary/report.html\n&quot;
+}</pre></td></tr><tr><td>stable baseline after operation probes</td><td class="true">PASS</td><td><pre>{
+  &quot;stable&quot;: {
+    &quot;status&quot;: 200,
+    &quot;body&quot;: &quot;Hello World!\n&quot;,
+    &quot;headers&quot;: {
+      &quot;server&quot;: &quot;nginx&quot;,
+      &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:22 GMT&quot;,
+      &quot;content-type&quot;: &quot;text/plain&quot;,
+      &quot;content-length&quot;: &quot;13&quot;,
+      &quot;x-release&quot;: &quot;stable&quot;,
+      &quot;x-proof-id&quot;: &quot;2946a60743fe7786e224d3742ba49b78&quot;,
+      &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+      &quot;connection&quot;: &quot;close&quot;
+    },
+    &quot;latency_ms&quot;: 4.003
+  },
+  &quot;canary&quot;: {
+    &quot;status&quot;: 200,
+    &quot;body&quot;: &quot;Hello World!\n&quot;,
+    &quot;headers&quot;: {
+      &quot;server&quot;: &quot;nginx&quot;,
+      &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:22 GMT&quot;,
+      &quot;content-type&quot;: &quot;text/plain&quot;,
+      &quot;content-length&quot;: &quot;13&quot;,
+      &quot;x-release&quot;: &quot;canary&quot;,
+      &quot;x-proof-id&quot;: &quot;2e64e1d4aebd4fc6be0fcbac5a210cf8&quot;,
+      &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
+      &quot;connection&quot;: &quot;close&quot;
+    },
+    &quot;latency_ms&quot;: 3.653
+  }
+}</pre></td></tr></table></html>

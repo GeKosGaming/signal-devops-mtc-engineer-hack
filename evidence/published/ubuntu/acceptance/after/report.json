@@ -1,7 +1,7 @@
 {
   "name": "Full runtime verification",
   "environment": {
-    "timestamp_utc": "2026-10-03T17:49:19.605475+00:00",
+    "timestamp_utc": "2026-10-03T18:51:53.375516+00:00",
     "os": {
       "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
       "NAME": "Ubuntu",
@@ -17,7 +17,7 @@
       "UBUNTU_CODENAME": "noble",
       "LOGO": "ubuntu-logo"
     },
-    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "git_worktree_clean": true,
     "profile": "kubeadm"
   },
@@ -40,14 +40,14 @@
         "compiler": "gc",
         "platform": "linux/amd64"
       },
-      "duration_seconds": 0.029
+      "duration_seconds": 0.04
     },
     {
       "name": "GatewayClass accepted/current",
       "passed": true,
       "evidence": {
         "Accepted": {
-          "lastTransitionTime": "2026-10-03T17:44:07Z",
+          "lastTransitionTime": "2026-10-03T18:46:02Z",
           "message": "Valid GatewayClass",
           "observedGeneration": 1,
           "reason": "Accepted",
@@ -55,14 +55,14 @@
           "type": "Accepted"
         }
       },
-      "duration_seconds": 0.033
+      "duration_seconds": 0.046
     },
     {
       "name": "Gateway accepted/programmed/current",
       "passed": true,
       "evidence": {
         "Accepted": {
-          "lastTransitionTime": "2026-10-03T17:44:40Z",
+          "lastTransitionTime": "2026-10-03T18:46:35Z",
           "message": "The Gateway has been scheduled by Envoy Gateway",
           "observedGeneration": 1,
           "reason": "Accepted",
@@ -70,7 +70,7 @@
           "type": "Accepted"
         },
         "Programmed": {
-          "lastTransitionTime": "2026-10-03T17:44:40Z",
+          "lastTransitionTime": "2026-10-03T18:46:35Z",
           "message": "Address assigned to the Gateway, 2/2 envoy replicas available",
           "observedGeneration": 1,
           "reason": "Programmed",
@@ -78,7 +78,7 @@
           "type": "Programmed"
         }
       },
-      "duration_seconds": 0.036
+      "duration_seconds": 0.045
     },
     {
       "name": "both HTTPRoutes attached, current generation",
@@ -89,17 +89,17 @@
             "listener": "http",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:47:40Z",
+                "lastTransitionTime": "2026-10-03T18:50:05Z",
                 "message": "Route is accepted",
-                "observedGeneration": 10,
+                "observedGeneration": 14,
                 "reason": "Accepted",
                 "status": "True",
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:47:40Z",
+                "lastTransitionTime": "2026-10-03T18:50:05Z",
                 "message": "Resolved all the Object references for the Route",
-                "observedGeneration": 10,
+                "observedGeneration": 14,
                 "reason": "ResolvedRefs",
                 "status": "True",
                 "type": "ResolvedRefs"
@@ -110,17 +110,17 @@
             "listener": "https",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:47:40Z",
+                "lastTransitionTime": "2026-10-03T18:50:05Z",
                 "message": "Route is accepted",
-                "observedGeneration": 10,
+                "observedGeneration": 14,
                 "reason": "Accepted",
                 "status": "True",
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:47:40Z",
+                "lastTransitionTime": "2026-10-03T18:50:05Z",
                 "message": "Resolved all the Object references for the Route",
-                "observedGeneration": 10,
+                "observedGeneration": 14,
                 "reason": "ResolvedRefs",
                 "status": "True",
                 "type": "ResolvedRefs"
@@ -133,7 +133,7 @@
             "listener": "http",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:28Z",
                 "message": "Route is accepted",
                 "observedGeneration": 1,
                 "reason": "Accepted",
@@ -141,7 +141,7 @@
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:28Z",
                 "message": "Resolved all the Object references for the Route",
                 "observedGeneration": 1,
                 "reason": "ResolvedRefs",
@@ -154,7 +154,7 @@
             "listener": "https",
             "conditions": {
               "Accepted": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:28Z",
                 "message": "Route is accepted",
                 "observedGeneration": 1,
                 "reason": "Accepted",
@@ -162,7 +162,7 @@
                 "type": "Accepted"
               },
               "ResolvedRefs": {
-                "lastTransitionTime": "2026-10-03T17:44:30Z",
+                "lastTransitionTime": "2026-10-03T18:46:28Z",
                 "message": "Resolved all the Object references for the Route",
                 "observedGeneration": 1,
                 "reason": "ResolvedRefs",
@@ -173,7 +173,7 @@
           }
         ]
       },
-      "duration_seconds": 0.067
+      "duration_seconds": 0.09
     },
     {
       "name": "HTTP exact response via Envoy Gateway",
@@ -183,17 +183,17 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:20 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "5a7753a94db17391a714736dad2254fe",
+          "x-proof-id": "75864001fee16e35d1e239d170b48f30",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.961
+        "latency_ms": 3.052
       },
-      "duration_seconds": 0.016
+      "duration_seconds": 0.024
     },
     {
       "name": "TLS validated with local CA, never insecure",
@@ -203,15 +203,15 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:20 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "9e41a266ee0661d6f1e5981a36f636fa",
+          "x-proof-id": "f6fb846c64db7cba3f7c738a931cfe24",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 3.867
+        "latency_ms": 4.407
       },
       "duration_seconds": 0.005
     },
@@ -223,17 +223,17 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:21 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "canary",
-          "x-proof-id": "11bfcb284d7c71c4701cee3f6b0120f4",
+          "x-proof-id": "1a2811bb1a629d26db862aaac5525091",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.354
+        "latency_ms": 2.522
       },
-      "duration_seconds": 0.014
+      "duration_seconds": 0.021
     },
     {
       "name": "path routing /stable",
@@ -243,17 +243,17 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:21 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "1b84ba77cfd2eaf11d8d19c5766c5ffd",
+          "x-proof-id": "e2edf34efaacd9582fdd4b391e77bd48",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.642
+        "latency_ms": 2.323
       },
-      "duration_seconds": 0.014
+      "duration_seconds": 0.022
     },
     {
       "name": "header routing",
@@ -263,17 +263,17 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:21 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "canary",
-          "x-proof-id": "56b3681e292a558790d298b900e7af0e",
+          "x-proof-id": "b4844ebb01a338ab028d30069f4d882d",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.387
+        "latency_ms": 2.852
       },
-      "duration_seconds": 0.014
+      "duration_seconds": 0.022
     },
     {
       "name": "unknown hostname rejected",
@@ -282,54 +282,54 @@
         "status": 404,
         "body": "",
         "headers": {
-          "date": "Sat, 03 Oct 2026 17:49:20 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "connection": "close",
           "content-length": "0"
         },
-        "latency_ms": 1.969
+        "latency_ms": 2.158
       },
-      "duration_seconds": 0.013
+      "duration_seconds": 0.022
     },
     {
       "name": "external HTTP NodePort entrypoint",
       "passed": true,
       "evidence": {
-        "url": "http://10.1.1.119:30080/",
+        "url": "http://10.1.0.43:30080/",
         "status": 200,
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:21 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "3d2eeeec0216938750e4e3fd79d122d4",
+          "x-proof-id": "75f27891aefe74eb71a4d04bd747d4de",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 1.292
+        "latency_ms": 1.027
       },
-      "duration_seconds": 0.017
+      "duration_seconds": 0.02
     },
     {
       "name": "external HTTPS NodePort with verified CA and SNI",
       "passed": true,
       "evidence": {
         "url": "https://signal.local:30443/",
-        "connect_ip": "10.1.1.119",
+        "connect_ip": "10.1.0.43",
         "status": 200,
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:21 GMT",
+          "date": "Sat, 03 Oct 2026 18:51:54 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "35145ce3180a9f7225042d99145558c2",
+          "x-proof-id": "0b6d1c7b23789386887bed3664ebe602",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.319
+        "latency_ms": 2.503
       },
       "duration_seconds": 0.003
     },
@@ -340,10 +340,10 @@
         "counts": {
           "gateway-probe": 1,
           "envoy": 2,
-          "nginx": 3,
-          "loki": 1,
           "node": 1,
-          "prometheus": 1
+          "nginx": 3,
+          "prometheus": 1,
+          "loki": 1
         },
         "releases": {
           "stable": 2,
@@ -352,29 +352,29 @@
         "targets": [
           {
             "labels": {
-              "instance": "10.244.0.204:19001",
+              "instance": "10.244.0.193:19001",
               "job": "envoy",
               "namespace": "envoy-gateway-system",
               "node": "runnervm8df0l",
-              "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+              "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:08.599022411Z",
+            "lastScrape": "2026-10-03T18:51:43.060312443Z",
             "lastError": "",
-            "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+            "scrapeUrl": "http://10.244.0.193:19001/stats/prometheus"
           },
           {
             "labels": {
-              "instance": "10.244.0.5:19001",
+              "instance": "10.244.0.54:19001",
               "job": "envoy",
               "namespace": "envoy-gateway-system",
               "node": "runnervm8df0l",
-              "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+              "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:18.265934973Z",
+            "lastScrape": "2026-10-03T18:51:53.337835192Z",
             "lastError": "",
-            "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+            "scrapeUrl": "http://10.244.0.54:19001/stats/prometheus"
           },
           {
             "labels": {
@@ -382,7 +382,7 @@
               "job": "gateway-probe"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:06.316584482Z",
+            "lastScrape": "2026-10-03T18:51:44.815198708Z",
             "lastError": "",
             "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
           },
@@ -392,51 +392,51 @@
               "job": "loki"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:15.377134895Z",
+            "lastScrape": "2026-10-03T18:51:46.392939514Z",
             "lastError": "",
             "scrapeUrl": "http://loki:3100/metrics"
           },
           {
             "labels": {
-              "instance": "10.244.0.106:9113",
+              "instance": "10.244.0.60:9113",
               "job": "nginx",
               "namespace": "signal",
               "node": "runnervm8df0l",
-              "pod": "web-stable-7488f7cd6b-96hqm",
+              "pod": "web-stable-7488f7cd6b-j25jt",
               "release": "stable"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:13.638025521Z",
+            "lastScrape": "2026-10-03T18:51:41.362136906Z",
             "lastError": "",
-            "scrapeUrl": "http://10.244.0.106:9113/metrics"
+            "scrapeUrl": "http://10.244.0.60:9113/metrics"
           },
           {
             "labels": {
-              "instance": "10.244.0.201:9113",
+              "instance": "10.244.0.200:9113",
               "job": "nginx",
               "namespace": "signal",
               "node": "runnervm8df0l",
-              "pod": "web-stable-7488f7cd6b-mdw7k",
+              "pod": "web-stable-7488f7cd6b-vzz9d",
               "release": "stable"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:20.395767333Z",
+            "lastScrape": "2026-10-03T18:51:51.670245562Z",
             "lastError": "",
-            "scrapeUrl": "http://10.244.0.201:9113/metrics"
+            "scrapeUrl": "http://10.244.0.200:9113/metrics"
           },
           {
             "labels": {
-              "instance": "10.244.0.133:9113",
+              "instance": "10.244.0.92:9113",
               "job": "nginx",
               "namespace": "signal",
               "node": "runnervm8df0l",
-              "pod": "web-canary-7b8f84874d-9hdnm",
+              "pod": "web-canary-7b8f84874d-kgs8n",
               "release": "canary"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:20.039281152Z",
+            "lastScrape": "2026-10-03T18:51:43.362631469Z",
             "lastError": "",
-            "scrapeUrl": "http://10.244.0.133:9113/metrics"
+            "scrapeUrl": "http://10.244.0.92:9113/metrics"
           },
           {
             "labels": {
@@ -444,10 +444,10 @@
               "job": "node",
               "namespace": "signal-system",
               "node": "runnervm8df0l",
-              "pod": "node-exporter-wwdzp"
+              "pod": "node-exporter-vlc4d"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:08.683370565Z",
+            "lastScrape": "2026-10-03T18:51:49.450532473Z",
             "lastError": "",
             "scrapeUrl": "http://10.244.0.51:9100/metrics"
           },
@@ -457,13 +457,13 @@
               "job": "prometheus"
             },
             "health": "up",
-            "lastScrape": "2026-10-03T17:49:08.698994564Z",
+            "lastScrape": "2026-10-03T18:51:46.731878625Z",
             "lastError": "",
             "scrapeUrl": "http://localhost:9090/metrics"
           }
         ]
       },
-      "duration_seconds": 0.015
+      "duration_seconds": 0.024
     },
     {
       "name": "real request counter increase",
@@ -474,8 +474,8 @@
         "observations": [
           {
             "values": {
-              "web-stable-7488f7cd6b-mdw7k": 710.0,
-              "web-stable-7488f7cd6b-96hqm": 368.0
+              "web-stable-7488f7cd6b-vzz9d": 1045.0,
+              "web-stable-7488f7cd6b-j25jt": 363.0
             },
             "query": {
               "status": "success",
@@ -485,31 +485,31 @@
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.201:9113",
+                      "instance": "10.244.0.200:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-mdw7k",
+                      "pod": "web-stable-7488f7cd6b-vzz9d",
                       "release": "stable"
                     },
                     "value": [
-                      1791049761.822,
-                      "710"
+                      1791053515.995,
+                      "1045"
                     ]
                   },
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.106:9113",
+                      "instance": "10.244.0.60:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-96hqm",
+                      "pod": "web-stable-7488f7cd6b-j25jt",
                       "release": "stable"
                     },
                     "value": [
-                      1791049761.822,
-                      "368"
+                      1791053515.995,
+                      "363"
                     ]
                   }
                 ]
@@ -519,8 +519,8 @@
           },
           {
             "values": {
-              "web-stable-7488f7cd6b-mdw7k": 710.0,
-              "web-stable-7488f7cd6b-96hqm": 368.0
+              "web-stable-7488f7cd6b-vzz9d": 1045.0,
+              "web-stable-7488f7cd6b-j25jt": 401.0
             },
             "query": {
               "status": "success",
@@ -530,31 +530,31 @@
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.201:9113",
+                      "instance": "10.244.0.200:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-mdw7k",
+                      "pod": "web-stable-7488f7cd6b-vzz9d",
                       "release": "stable"
                     },
                     "value": [
-                      1791049764.878,
-                      "710"
+                      1791053519.069,
+                      "1045"
                     ]
                   },
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.106:9113",
+                      "instance": "10.244.0.60:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-96hqm",
+                      "pod": "web-stable-7488f7cd6b-j25jt",
                       "release": "stable"
                     },
                     "value": [
-                      1791049764.878,
-                      "368"
+                      1791053519.069,
+                      "401"
                     ]
                   }
                 ]
@@ -564,8 +564,8 @@
           },
           {
             "values": {
-              "web-stable-7488f7cd6b-mdw7k": 710.0,
-              "web-stable-7488f7cd6b-96hqm": 368.0
+              "web-stable-7488f7cd6b-vzz9d": 1045.0,
+              "web-stable-7488f7cd6b-j25jt": 401.0
             },
             "query": {
               "status": "success",
@@ -575,31 +575,31 @@
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.201:9113",
+                      "instance": "10.244.0.200:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-mdw7k",
+                      "pod": "web-stable-7488f7cd6b-vzz9d",
                       "release": "stable"
                     },
                     "value": [
-                      1791049767.932,
-                      "710"
+                      1791053522.154,
+                      "1045"
                     ]
                   },
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.106:9113",
+                      "instance": "10.244.0.60:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-96hqm",
+                      "pod": "web-stable-7488f7cd6b-j25jt",
                       "release": "stable"
                     },
                     "value": [
-                      1791049767.932,
-                      "368"
+                      1791053522.154,
+                      "401"
                     ]
                   }
                 ]
@@ -609,8 +609,8 @@
           },
           {
             "values": {
-              "web-stable-7488f7cd6b-mdw7k": 710.0,
-              "web-stable-7488f7cd6b-96hqm": 397.0
+              "web-stable-7488f7cd6b-vzz9d": 1045.0,
+              "web-stable-7488f7cd6b-j25jt": 401.0
             },
             "query": {
               "status": "success",
@@ -620,31 +620,31 @@
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.201:9113",
+                      "instance": "10.244.0.200:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-mdw7k",
+                      "pod": "web-stable-7488f7cd6b-vzz9d",
                       "release": "stable"
                     },
                     "value": [
-                      1791049770.986,
-                      "710"
+                      1791053525.227,
+                      "1045"
                     ]
                   },
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.106:9113",
+                      "instance": "10.244.0.60:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-96hqm",
+                      "pod": "web-stable-7488f7cd6b-j25jt",
                       "release": "stable"
                     },
                     "value": [
-                      1791049770.986,
-                      "397"
+                      1791053525.227,
+                      "401"
                     ]
                   }
                 ]
@@ -654,8 +654,8 @@
           },
           {
             "values": {
-              "web-stable-7488f7cd6b-mdw7k": 710.0,
-              "web-stable-7488f7cd6b-96hqm": 397.0
+              "web-stable-7488f7cd6b-vzz9d": 1072.0,
+              "web-stable-7488f7cd6b-j25jt": 401.0
             },
             "query": {
               "status": "success",
@@ -665,76 +665,31 @@
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.201:9113",
+                      "instance": "10.244.0.200:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-mdw7k",
+                      "pod": "web-stable-7488f7cd6b-vzz9d",
                       "release": "stable"
                     },
                     "value": [
-                      1791049774.037,
-                      "710"
+                      1791053528.307,
+                      "1072"
                     ]
                   },
                   {
                     "metric": {
                       "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.106:9113",
+                      "instance": "10.244.0.60:9113",
                       "job": "nginx",
                       "namespace": "signal",
                       "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-96hqm",
+                      "pod": "web-stable-7488f7cd6b-j25jt",
                       "release": "stable"
                     },
                     "value": [
-                      1791049774.037,
-                      "397"
-                    ]
-                  }
-                ]
-              }
-            },
-            "expression": "nginx_http_requests_total{job=\"nginx\",release=\"stable\"}"
-          },
-          {
-            "values": {
-              "web-stable-7488f7cd6b-mdw7k": 745.0,
-              "web-stable-7488f7cd6b-96hqm": 397.0
-            },
-            "query": {
-              "status": "success",
-              "data": {
-                "resultType": "vector",
-                "result": [
-                  {
-                    "metric": {
-                      "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.201:9113",
-                      "job": "nginx",
-                      "namespace": "signal",
-                      "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-mdw7k",
-                      "release": "stable"
-                    },
-                    "value": [
-                      1791049777.092,
-                      "745"
-                    ]
-                  },
-                  {
-                    "metric": {
-                      "__name__": "nginx_http_requests_total",
-                      "instance": "10.244.0.106:9113",
-                      "job": "nginx",
-                      "namespace": "signal",
-                      "node": "runnervm8df0l",
-                      "pod": "web-stable-7488f7cd6b-96hqm",
-                      "release": "stable"
-                    },
-                    "value": [
-                      1791049777.092,
-                      "397"
+                      1791053528.307,
+                      "401"
                     ]
                   }
                 ]
@@ -745,19 +700,19 @@
         ],
         "note": "Fixed live stable Pod identities exclude retired series. stub_status also counts exporter scrapes; no exclusive causal attribution.",
         "pod_identities": {
-          "web-stable-7488f7cd6b-96hqm": {
-            "uid": "80b58e30-2e9e-47bf-8bb7-c2ddf354156a",
+          "web-stable-7488f7cd6b-j25jt": {
+            "uid": "3766ab4e-50a5-4d40-b6c6-cb4d4e287b67",
             "nginx_restarts": 0
           },
-          "web-stable-7488f7cd6b-mdw7k": {
-            "uid": "6241d770-cddf-4b10-9068-81f7752038fa",
+          "web-stable-7488f7cd6b-vzz9d": {
+            "uid": "f36fe524-874a-42d2-99b2-c5610dcd5de7",
             "nginx_restarts": 0
           }
         },
         "before": {
           "values": {
-            "web-stable-7488f7cd6b-mdw7k": 710.0,
-            "web-stable-7488f7cd6b-96hqm": 368.0
+            "web-stable-7488f7cd6b-vzz9d": 1045.0,
+            "web-stable-7488f7cd6b-j25jt": 363.0
           },
           "query": {
             "status": "success",
@@ -767,31 +722,31 @@
                 {
                   "metric": {
                     "__name__": "nginx_http_requests_total",
-                    "instance": "10.244.0.201:9113",
+                    "instance": "10.244.0.200:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-stable-7488f7cd6b-mdw7k",
+                    "pod": "web-stable-7488f7cd6b-vzz9d",
                     "release": "stable"
                   },
                   "value": [
-                    1791049761.151,
-                    "710"
+                    1791053515.041,
+                    "1045"
                   ]
                 },
                 {
                   "metric": {
                     "__name__": "nginx_http_requests_total",
-                    "instance": "10.244.0.106:9113",
+                    "instance": "10.244.0.60:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-stable-7488f7cd6b-96hqm",
+                    "pod": "web-stable-7488f7cd6b-j25jt",
                     "release": "stable"
                   },
                   "value": [
-                    1791049761.151,
-                    "368"
+                    1791053515.041,
+                    "363"
                   ]
                 }
               ]
@@ -801,8 +756,8 @@
         },
         "after": {
           "values": {
-            "web-stable-7488f7cd6b-mdw7k": 745.0,
-            "web-stable-7488f7cd6b-96hqm": 397.0
+            "web-stable-7488f7cd6b-vzz9d": 1072.0,
+            "web-stable-7488f7cd6b-j25jt": 401.0
           },
           "query": {
             "status": "success",
@@ -812,31 +767,31 @@
                 {
                   "metric": {
                     "__name__": "nginx_http_requests_total",
-                    "instance": "10.244.0.201:9113",
+                    "instance": "10.244.0.200:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-stable-7488f7cd6b-mdw7k",
+                    "pod": "web-stable-7488f7cd6b-vzz9d",
                     "release": "stable"
                   },
                   "value": [
-                    1791049777.092,
-                    "745"
+                    1791053528.307,
+                    "1072"
                   ]
                 },
                 {
                   "metric": {
                     "__name__": "nginx_http_requests_total",
-                    "instance": "10.244.0.106:9113",
+                    "instance": "10.244.0.60:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-stable-7488f7cd6b-96hqm",
+                    "pod": "web-stable-7488f7cd6b-j25jt",
                     "release": "stable"
                   },
                   "value": [
-                    1791049777.092,
-                    "397"
+                    1791053528.307,
+                    "401"
                   ]
                 }
               ]
@@ -845,12 +800,12 @@
           "expression": "nginx_http_requests_total{job=\"nginx\",release=\"stable\"}"
         },
         "deltas": {
-          "web-stable-7488f7cd6b-mdw7k": 35.0,
-          "web-stable-7488f7cd6b-96hqm": 29.0
+          "web-stable-7488f7cd6b-vzz9d": 27.0,
+          "web-stable-7488f7cd6b-j25jt": 38.0
         },
-        "observed_increase": 64.0
+        "observed_increase": 65.0
       },
-      "duration_seconds": 16.003
+      "duration_seconds": 13.343
     },
     {
       "name": "nonempty finite infrastructure and latency metrics",
@@ -868,7 +823,7 @@
                   "job": "gateway-probe"
                 },
                 "value": [
-                  1791049777.106,
+                  1791053528.327,
                   "1"
                 ]
               }
@@ -889,11 +844,11 @@
                   "mode": "idle",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "value": [
-                  1791049777.119,
-                  "357.9"
+                  1791053528.349,
+                  "462.87"
                 ]
               },
               {
@@ -905,11 +860,11 @@
                   "mode": "idle",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "value": [
-                  1791049777.119,
-                  "365.07"
+                  1791053528.349,
+                  "459.82"
                 ]
               },
               {
@@ -921,11 +876,11 @@
                   "mode": "idle",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "value": [
-                  1791049777.119,
-                  "360.91"
+                  1791053528.349,
+                  "453.87"
                 ]
               },
               {
@@ -937,11 +892,11 @@
                   "mode": "idle",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "value": [
-                  1791049777.119,
-                  "361.44"
+                  1791053528.349,
+                  "454.94"
                 ]
               }
             ]
@@ -959,11 +914,11 @@
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "value": [
-                  1791049777.132,
-                  "16766414848"
+                  1791053528.369,
+                  "16765374464"
                 ]
               }
             ]
@@ -977,45 +932,45 @@
               {
                 "metric": {
                   "__name__": "nginx_up",
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
                   "release": "stable"
                 },
                 "value": [
-                  1791049777.146,
+                  1791053528.39,
                   "1"
                 ]
               },
               {
                 "metric": {
                   "__name__": "nginx_up",
-                  "instance": "10.244.0.133:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
+                  "release": "stable"
+                },
+                "value": [
+                  1791053528.39,
+                  "1"
+                ]
+              },
+              {
+                "metric": {
+                  "__name__": "nginx_up",
+                  "instance": "10.244.0.92:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-kgs8n",
                   "release": "canary"
                 },
                 "value": [
-                  1791049777.146,
-                  "1"
-                ]
-              },
-              {
-                "metric": {
-                  "__name__": "nginx_up",
-                  "instance": "10.244.0.106:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
-                  "release": "stable"
-                },
-                "value": [
-                  1791049777.146,
+                  1791053528.39,
                   "1"
                 ]
               }
@@ -1030,125 +985,125 @@
               {
                 "metric": {
                   "__name__": "envoy_cluster_upstream_rq_time_count",
-                  "envoy_cluster_name": "httproute/signal/web-main/rule/0",
-                  "instance": "10.244.0.5:19001",
+                  "envoy_cluster_name": "prometheus_stats",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "value": [
-                  1791049777.159,
-                  "1383"
+                  1791053528.411,
+                  "22"
+                ]
+              },
+              {
+                "metric": {
+                  "__name__": "envoy_cluster_upstream_rq_time_count",
+                  "envoy_cluster_name": "httproute/signal/web-main/rule/0",
+                  "instance": "10.244.0.54:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
+                },
+                "value": [
+                  1791053528.411,
+                  "20"
+                ]
+              },
+              {
+                "metric": {
+                  "__name__": "envoy_cluster_upstream_rq_time_count",
+                  "envoy_cluster_name": "prometheus_stats",
+                  "instance": "10.244.0.54:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
+                },
+                "value": [
+                  1791053528.411,
+                  "22"
+                ]
+              },
+              {
+                "metric": {
+                  "__name__": "envoy_cluster_upstream_rq_time_count",
+                  "envoy_cluster_name": "httproute/signal/web-main/rule/0",
+                  "instance": "10.244.0.193:19001",
+                  "job": "envoy",
+                  "namespace": "envoy-gateway-system",
+                  "node": "runnervm8df0l",
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
+                },
+                "value": [
+                  1791053528.411,
+                  "1947"
                 ]
               },
               {
                 "metric": {
                   "__name__": "envoy_cluster_upstream_rq_time_count",
                   "envoy_cluster_name": "httproute/signal/web-preview/rule/0",
-                  "instance": "10.244.0.5:19001",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "value": [
-                  1791049777.159,
-                  "160"
+                  1791053528.411,
+                  "245"
                 ]
               },
               {
                 "metric": {
                   "__name__": "envoy_cluster_upstream_rq_time_count",
                   "envoy_cluster_name": "httproute/signal/web-preview/rule/1",
-                  "instance": "10.244.0.5:19001",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "value": [
-                  1791049777.159,
+                  1791053528.411,
                   "4"
-                ]
-              },
-              {
-                "metric": {
-                  "__name__": "envoy_cluster_upstream_rq_time_count",
-                  "envoy_cluster_name": "httproute/signal/web-main/rule/0",
-                  "instance": "10.244.0.204:19001",
-                  "job": "envoy",
-                  "namespace": "envoy-gateway-system",
-                  "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
-                },
-                "value": [
-                  1791049777.159,
-                  "16"
-                ]
-              },
-              {
-                "metric": {
-                  "__name__": "envoy_cluster_upstream_rq_time_count",
-                  "envoy_cluster_name": "prometheus_stats",
-                  "instance": "10.244.0.5:19001",
-                  "job": "envoy",
-                  "namespace": "envoy-gateway-system",
-                  "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
-                },
-                "value": [
-                  1791049777.159,
-                  "19"
-                ]
-              },
-              {
-                "metric": {
-                  "__name__": "envoy_cluster_upstream_rq_time_count",
-                  "envoy_cluster_name": "prometheus_stats",
-                  "instance": "10.244.0.204:19001",
-                  "job": "envoy",
-                  "namespace": "envoy-gateway-system",
-                  "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
-                },
-                "value": [
-                  1791049777.159,
-                  "18"
                 ]
               }
             ]
           }
         }
       },
-      "duration_seconds": 0.067
+      "duration_seconds": 0.104
     },
     {
       "name": "unique request proof issued",
       "passed": true,
       "evidence": {
-        "proof_id": "signal-27bef506cf0f4e6c8c70a6007c0116f9",
+        "proof_id": "signal-1f724272cfc54b8481ffdeda6d817bbc",
         "status": 200,
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:37 GMT",
+          "date": "Sat, 03 Oct 2026 18:52:08 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "signal-27bef506cf0f4e6c8c70a6007c0116f9",
+          "x-proof-id": "signal-1f724272cfc54b8481ffdeda6d817bbc",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.664
+        "latency_ms": 3.254
       },
-      "duration_seconds": 0.014
+      "duration_seconds": 0.024
     },
     {
       "name": "same request found in Fluentd -> Loki access logs",
       "passed": true,
       "evidence": {
-        "query": "{namespace=\"signal\",app=\"web\",stream=\"stdout\"} | json | proof_id=\"signal-27bef506cf0f4e6c8c70a6007c0116f9\"",
+        "query": "{namespace=\"signal\",app=\"web\",stream=\"stdout\"} | json | proof_id=\"signal-1f724272cfc54b8481ffdeda6d817bbc\"",
         "result": [
           {
             "stream": {
@@ -1157,28 +1112,28 @@
               "detected_level": "unknown",
               "method": "GET",
               "namespace": "signal",
-              "pod": "web-stable-7488f7cd6b-96hqm",
+              "pod": "web-stable-7488f7cd6b-vzz9d",
               "project": "signal",
-              "proof_id": "signal-27bef506cf0f4e6c8c70a6007c0116f9",
+              "proof_id": "signal-1f724272cfc54b8481ffdeda6d817bbc",
               "release": "stable",
-              "request_id": "9a4887b1b01a8efcba3599c27ee6ee20",
+              "request_id": "b280f24ca3d28635bc6088e12ef65fa9",
               "request_time": "0.0",
               "service_name": "web",
               "status": "200",
               "stream": "stdout",
-              "timestamp": "2026-10-03T17:49:37+00:00",
+              "timestamp": "2026-10-03T18:52:08+00:00",
               "uri": "/"
             },
             "values": [
               [
-                "1791049777174149439",
-                "{\"timestamp\":\"2026-10-03T17:49:37+00:00\",\"request_id\":\"9a4887b1b01a8efcba3599c27ee6ee20\",\"proof_id\":\"signal-27bef506cf0f4e6c8c70a6007c0116f9\",\"method\":\"GET\",\"uri\":\"/\",\"status\":200,\"request_time\":0.0,\"bytes\":13,\"release\":\"stable\"}"
+                "1791053528435332043",
+                "{\"timestamp\":\"2026-10-03T18:52:08+00:00\",\"request_id\":\"b280f24ca3d28635bc6088e12ef65fa9\",\"proof_id\":\"signal-1f724272cfc54b8481ffdeda6d817bbc\",\"method\":\"GET\",\"uri\":\"/\",\"status\":200,\"request_time\":0.0,\"bytes\":13,\"release\":\"stable\"}"
               ]
             ]
           }
         ]
       },
-      "duration_seconds": 3.048
+      "duration_seconds": 6.093
     },
     {
       "name": "real application error generated",
@@ -1188,54 +1143,54 @@
         "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:40 GMT",
+          "date": "Sat, 03 Oct 2026 18:52:14 GMT",
           "content-type": "text/html",
           "content-length": "146",
           "x-release": "stable",
-          "x-proof-id": "87342ae1aa1ceb0fe348d58c4b0a686d",
+          "x-proof-id": "41c1dcfe40ae527a91991110f7dedd04",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.635
+        "latency_ms": 2.859
       },
-      "duration_seconds": 0.014
+      "duration_seconds": 0.023
     },
     {
       "name": "error log collected by Fluentd -> Loki",
       "passed": true,
       "evidence": {
-        "query": "{namespace=\"signal\",app=\"web\",stream=\"stderr\"} |= \"error-60fe17e771a64b7cb19110fd0f5087d4\"",
+        "query": "{namespace=\"signal\",app=\"web\",stream=\"stderr\"} |= \"error-1ce9ea70800c498e8a925b792a0a61ab\"",
         "result": [
           {
             "stream": {
               "app": "web",
               "detected_level": "error",
               "namespace": "signal",
-              "pod": "web-stable-7488f7cd6b-mdw7k",
+              "pod": "web-stable-7488f7cd6b-j25jt",
               "project": "signal",
               "service_name": "web",
               "stream": "stderr"
             },
             "values": [
               [
-                "1791049780235582749",
-                "{\"log\":\"2026/10/03 17:49:40 [error] 10#10: *121 open() \\\"/tmp/signal-no-files/missing/error-60fe17e771a64b7cb19110fd0f5087d4\\\" failed (2: No such file or directory), client: 10.244.0.5, server: , request: \\\"GET /missing/error-60fe17e771a64b7cb19110fd0f5087d4 HTTP/1.1\\\", host: \\\"signal.local\\\"\"}"
+                "1791053534551666478",
+                "{\"log\":\"2026/10/03 18:52:14 [error] 7#7: *75 open() \\\"/tmp/signal-no-files/missing/error-1ce9ea70800c498e8a925b792a0a61ab\\\" failed (2: No such file or directory), client: 10.244.0.193, server: , request: \\\"GET /missing/error-1ce9ea70800c498e8a925b792a0a61ab HTTP/1.1\\\", host: \\\"signal.local\\\"\"}"
               ]
             ]
           }
         ]
       },
-      "duration_seconds": 3.032
+      "duration_seconds": 6.072
     },
     {
       "name": "NetworkPolicy positive and negative controls",
       "passed": true,
       "evidence": {
-        "job": "policy-proof-db8b70f44d",
+        "job": "policy-proof-c106272eff",
         "positive_control": "Gateway access succeeded before blocked direct Service access",
         "log": "wget: download timed out\nDIRECT_ACCESS_BLOCKED\n"
       },
-      "duration_seconds": 6.579
+      "duration_seconds": 6.858
     },
     {
       "name": "application still healthy after isolation test",
@@ -1245,17 +1200,17 @@
         "body": "Hello World!\n",
         "headers": {
           "server": "nginx",
-          "date": "Sat, 03 Oct 2026 17:49:49 GMT",
+          "date": "Sat, 03 Oct 2026 18:52:27 GMT",
           "content-type": "text/plain",
           "content-length": "13",
           "x-release": "stable",
-          "x-proof-id": "cad64ae6ecd4c76946dd0219dea8f6a5",
+          "x-proof-id": "852c379f9b8947bee6c5c6954ec09d4e",
           "x-content-type-options": "nosniff",
           "connection": "close"
         },
-        "latency_ms": 2.704
+        "latency_ms": 2.802
       },
-      "duration_seconds": 0.018
+      "duration_seconds": 0.025
     },
     {
       "name": "runtime image inventory",
@@ -1263,7 +1218,7 @@
       "evidence": [
         {
           "namespace": "envoy-gateway-system",
-          "pod": "envoy-gateway-bf66cfbdb-4sxf9",
+          "pod": "envoy-gateway-bf66cfbdb-l9lql",
           "images": [
             {
               "name": "envoy-gateway",
@@ -1275,7 +1230,7 @@
         },
         {
           "namespace": "envoy-gateway-system",
-          "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps",
+          "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw",
           "images": [
             {
               "name": "envoy",
@@ -1293,7 +1248,7 @@
         },
         {
           "namespace": "envoy-gateway-system",
-          "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8",
+          "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k",
           "images": [
             {
               "name": "envoy",
@@ -1311,7 +1266,7 @@
         },
         {
           "namespace": "kube-system",
-          "pod": "cilium-5ccp6",
+          "pod": "cilium-dk774",
           "images": [
             {
               "name": "cilium-agent",
@@ -1323,7 +1278,7 @@
         },
         {
           "namespace": "kube-system",
-          "pod": "cilium-envoy-smzvd",
+          "pod": "cilium-envoy-t4fg5",
           "images": [
             {
               "name": "cilium-envoy",
@@ -1335,7 +1290,7 @@
         },
         {
           "namespace": "kube-system",
-          "pod": "cilium-operator-5dcb99c57f-px628",
+          "pod": "cilium-operator-5dcb99c57f-m79lv",
           "images": [
             {
               "name": "cilium-operator",
@@ -1347,7 +1302,7 @@
         },
         {
           "namespace": "kube-system",
-          "pod": "coredns-7d764666f9-8qrg8",
+          "pod": "coredns-7d764666f9-pcbbp",
           "images": [
             {
               "name": "coredns",
@@ -1359,7 +1314,7 @@
         },
         {
           "namespace": "kube-system",
-          "pod": "coredns-7d764666f9-gwnsj",
+          "pod": "coredns-7d764666f9-q8zdt",
           "images": [
             {
               "name": "coredns",
@@ -1407,7 +1362,7 @@
         },
         {
           "namespace": "kube-system",
-          "pod": "kube-proxy-z4bww",
+          "pod": "kube-proxy-kqbhn",
           "images": [
             {
               "name": "kube-proxy",
@@ -1431,7 +1386,7 @@
         },
         {
           "namespace": "signal-logging",
-          "pod": "fluentd-lkgcf",
+          "pod": "fluentd-kcxhs",
           "images": [
             {
               "name": "fluentd",
@@ -1443,7 +1398,7 @@
         },
         {
           "namespace": "signal-observe",
-          "pod": "alertmanager-6b7d77d876-2f6xz",
+          "pod": "alertmanager-6b7d77d876-7f2p4",
           "images": [
             {
               "name": "alertmanager",
@@ -1455,7 +1410,7 @@
         },
         {
           "namespace": "signal-observe",
-          "pod": "blackbox-5fb8fd75bc-26grm",
+          "pod": "blackbox-5fb8fd75bc-qlgn7",
           "images": [
             {
               "name": "blackbox",
@@ -1467,7 +1422,7 @@
         },
         {
           "namespace": "signal-observe",
-          "pod": "grafana-74b57bf989-pv7kr",
+          "pod": "grafana-74b57bf989-z4fqs",
           "images": [
             {
               "name": "grafana",
@@ -1479,7 +1434,7 @@
         },
         {
           "namespace": "signal-observe",
-          "pod": "loki-58c8b9bd86-zdk5n",
+          "pod": "loki-58c8b9bd86-96sbv",
           "images": [
             {
               "name": "loki",
@@ -1491,7 +1446,7 @@
         },
         {
           "namespace": "signal-observe",
-          "pod": "prometheus-b7fccf6b5-zsg2q",
+          "pod": "prometheus-b7fccf6b5-dczzd",
           "images": [
             {
               "name": "prometheus",
@@ -1503,7 +1458,7 @@
         },
         {
           "namespace": "signal-system",
-          "pod": "node-exporter-wwdzp",
+          "pod": "node-exporter-vlc4d",
           "images": [
             {
               "name": "node-exporter",
@@ -1515,7 +1470,7 @@
         },
         {
           "namespace": "signal-system",
-          "pod": "signal-storage-init-jk4g5",
+          "pod": "signal-storage-init-rp485",
           "images": [
             {
               "name": "prepare",
@@ -1527,7 +1482,7 @@
         },
         {
           "namespace": "signal",
-          "pod": "web-canary-7b8f84874d-9hdnm",
+          "pod": "web-canary-7b8f84874d-kgs8n",
           "images": [
             {
               "name": "nginx",
@@ -1545,7 +1500,7 @@
         },
         {
           "namespace": "signal",
-          "pod": "web-stable-7488f7cd6b-96hqm",
+          "pod": "web-stable-7488f7cd6b-j25jt",
           "images": [
             {
               "name": "nginx",
@@ -1563,7 +1518,7 @@
         },
         {
           "namespace": "signal",
-          "pod": "web-stable-7488f7cd6b-mdw7k",
+          "pod": "web-stable-7488f7cd6b-vzz9d",
           "images": [
             {
               "name": "nginx",
@@ -1580,7 +1535,7 @@
           ]
         }
       ],
-      "duration_seconds": 0.067
+      "duration_seconds": 0.095
     }
   ],
   "passed": true,
@@ -1590,8 +1545,8 @@
     "observations": [
       {
         "values": {
-          "web-stable-7488f7cd6b-mdw7k": 710.0,
-          "web-stable-7488f7cd6b-96hqm": 368.0
+          "web-stable-7488f7cd6b-vzz9d": 1045.0,
+          "web-stable-7488f7cd6b-j25jt": 363.0
         },
         "query": {
           "status": "success",
@@ -1601,31 +1556,31 @@
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
                   "release": "stable"
                 },
                 "value": [
-                  1791049761.822,
-                  "710"
+                  1791053515.995,
+                  "1045"
                 ]
               },
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "value": [
-                  1791049761.822,
-                  "368"
+                  1791053515.995,
+                  "363"
                 ]
               }
             ]
@@ -1635,8 +1590,8 @@
       },
       {
         "values": {
-          "web-stable-7488f7cd6b-mdw7k": 710.0,
-          "web-stable-7488f7cd6b-96hqm": 368.0
+          "web-stable-7488f7cd6b-vzz9d": 1045.0,
+          "web-stable-7488f7cd6b-j25jt": 401.0
         },
         "query": {
           "status": "success",
@@ -1646,31 +1601,31 @@
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
                   "release": "stable"
                 },
                 "value": [
-                  1791049764.878,
-                  "710"
+                  1791053519.069,
+                  "1045"
                 ]
               },
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "value": [
-                  1791049764.878,
-                  "368"
+                  1791053519.069,
+                  "401"
                 ]
               }
             ]
@@ -1680,8 +1635,8 @@
       },
       {
         "values": {
-          "web-stable-7488f7cd6b-mdw7k": 710.0,
-          "web-stable-7488f7cd6b-96hqm": 368.0
+          "web-stable-7488f7cd6b-vzz9d": 1045.0,
+          "web-stable-7488f7cd6b-j25jt": 401.0
         },
         "query": {
           "status": "success",
@@ -1691,31 +1646,31 @@
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
                   "release": "stable"
                 },
                 "value": [
-                  1791049767.932,
-                  "710"
+                  1791053522.154,
+                  "1045"
                 ]
               },
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "value": [
-                  1791049767.932,
-                  "368"
+                  1791053522.154,
+                  "401"
                 ]
               }
             ]
@@ -1725,8 +1680,8 @@
       },
       {
         "values": {
-          "web-stable-7488f7cd6b-mdw7k": 710.0,
-          "web-stable-7488f7cd6b-96hqm": 397.0
+          "web-stable-7488f7cd6b-vzz9d": 1045.0,
+          "web-stable-7488f7cd6b-j25jt": 401.0
         },
         "query": {
           "status": "success",
@@ -1736,31 +1691,31 @@
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
                   "release": "stable"
                 },
                 "value": [
-                  1791049770.986,
-                  "710"
+                  1791053525.227,
+                  "1045"
                 ]
               },
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "value": [
-                  1791049770.986,
-                  "397"
+                  1791053525.227,
+                  "401"
                 ]
               }
             ]
@@ -1770,8 +1725,8 @@
       },
       {
         "values": {
-          "web-stable-7488f7cd6b-mdw7k": 710.0,
-          "web-stable-7488f7cd6b-96hqm": 397.0
+          "web-stable-7488f7cd6b-vzz9d": 1072.0,
+          "web-stable-7488f7cd6b-j25jt": 401.0
         },
         "query": {
           "status": "success",
@@ -1781,76 +1736,31 @@
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
                   "release": "stable"
                 },
                 "value": [
-                  1791049774.037,
-                  "710"
+                  1791053528.307,
+                  "1072"
                 ]
               },
               {
                 "metric": {
                   "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "value": [
-                  1791049774.037,
-                  "397"
-                ]
-              }
-            ]
-          }
-        },
-        "expression": "nginx_http_requests_total{job=\"nginx\",release=\"stable\"}"
-      },
-      {
-        "values": {
-          "web-stable-7488f7cd6b-mdw7k": 745.0,
-          "web-stable-7488f7cd6b-96hqm": 397.0
-        },
-        "query": {
-          "status": "success",
-          "data": {
-            "resultType": "vector",
-            "result": [
-              {
-                "metric": {
-                  "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.201:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
-                  "release": "stable"
-                },
-                "value": [
-                  1791049777.092,
-                  "745"
-                ]
-              },
-              {
-                "metric": {
-                  "__name__": "nginx_http_requests_total",
-                  "instance": "10.244.0.106:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
-                  "release": "stable"
-                },
-                "value": [
-                  1791049777.092,
-                  "397"
+                  1791053528.307,
+                  "401"
                 ]
               }
             ]
@@ -1861,19 +1771,19 @@
     ],
     "note": "Fixed live stable Pod identities exclude retired series. stub_status also counts exporter scrapes; no exclusive causal attribution.",
     "pod_identities": {
-      "web-stable-7488f7cd6b-96hqm": {
-        "uid": "80b58e30-2e9e-47bf-8bb7-c2ddf354156a",
+      "web-stable-7488f7cd6b-j25jt": {
+        "uid": "3766ab4e-50a5-4d40-b6c6-cb4d4e287b67",
         "nginx_restarts": 0
       },
-      "web-stable-7488f7cd6b-mdw7k": {
-        "uid": "6241d770-cddf-4b10-9068-81f7752038fa",
+      "web-stable-7488f7cd6b-vzz9d": {
+        "uid": "f36fe524-874a-42d2-99b2-c5610dcd5de7",
         "nginx_restarts": 0
       }
     },
     "before": {
       "values": {
-        "web-stable-7488f7cd6b-mdw7k": 710.0,
-        "web-stable-7488f7cd6b-96hqm": 368.0
+        "web-stable-7488f7cd6b-vzz9d": 1045.0,
+        "web-stable-7488f7cd6b-j25jt": 363.0
       },
       "query": {
         "status": "success",
@@ -1883,31 +1793,31 @@
             {
               "metric": {
                 "__name__": "nginx_http_requests_total",
-                "instance": "10.244.0.201:9113",
+                "instance": "10.244.0.200:9113",
                 "job": "nginx",
                 "namespace": "signal",
                 "node": "runnervm8df0l",
-                "pod": "web-stable-7488f7cd6b-mdw7k",
+                "pod": "web-stable-7488f7cd6b-vzz9d",
                 "release": "stable"
               },
               "value": [
-                1791049761.151,
-                "710"
+                1791053515.041,
+                "1045"
               ]
             },
             {
               "metric": {
                 "__name__": "nginx_http_requests_total",
-                "instance": "10.244.0.106:9113",
+                "instance": "10.244.0.60:9113",
                 "job": "nginx",
                 "namespace": "signal",
                 "node": "runnervm8df0l",
-                "pod": "web-stable-7488f7cd6b-96hqm",
+                "pod": "web-stable-7488f7cd6b-j25jt",
                 "release": "stable"
               },
               "value": [
-                1791049761.151,
-                "368"
+                1791053515.041,
+                "363"
               ]
             }
           ]
@@ -1917,8 +1827,8 @@
     },
     "after": {
       "values": {
-        "web-stable-7488f7cd6b-mdw7k": 745.0,
-        "web-stable-7488f7cd6b-96hqm": 397.0
+        "web-stable-7488f7cd6b-vzz9d": 1072.0,
+        "web-stable-7488f7cd6b-j25jt": 401.0
       },
       "query": {
         "status": "success",
@@ -1928,31 +1838,31 @@
             {
               "metric": {
                 "__name__": "nginx_http_requests_total",
-                "instance": "10.244.0.201:9113",
+                "instance": "10.244.0.200:9113",
                 "job": "nginx",
                 "namespace": "signal",
                 "node": "runnervm8df0l",
-                "pod": "web-stable-7488f7cd6b-mdw7k",
+                "pod": "web-stable-7488f7cd6b-vzz9d",
                 "release": "stable"
               },
               "value": [
-                1791049777.092,
-                "745"
+                1791053528.307,
+                "1072"
               ]
             },
             {
               "metric": {
                 "__name__": "nginx_http_requests_total",
-                "instance": "10.244.0.106:9113",
+                "instance": "10.244.0.60:9113",
                 "job": "nginx",
                 "namespace": "signal",
                 "node": "runnervm8df0l",
-                "pod": "web-stable-7488f7cd6b-96hqm",
+                "pod": "web-stable-7488f7cd6b-j25jt",
                 "release": "stable"
               },
               "value": [
-                1791049777.092,
-                "397"
+                1791053528.307,
+                "401"
               ]
             }
           ]
@@ -1961,9 +1871,9 @@
       "expression": "nginx_http_requests_total{job=\"nginx\",release=\"stable\"}"
     },
     "deltas": {
-      "web-stable-7488f7cd6b-mdw7k": 35.0,
-      "web-stable-7488f7cd6b-96hqm": 29.0
+      "web-stable-7488f7cd6b-vzz9d": 27.0,
+      "web-stable-7488f7cd6b-j25jt": 38.0
     },
-    "observed_increase": 64.0
+    "observed_increase": 65.0
   }
 }

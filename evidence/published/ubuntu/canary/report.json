@@ -1,7 +1,7 @@
 {
   "name": "Canary promotion",
   "environment": {
-    "timestamp_utc": "2026-10-03T17:46:31.665107+00:00",
+    "timestamp_utc": "2026-10-03T18:48:55.604100+00:00",
     "os": {
       "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
       "NAME": "Ubuntu",
@@ -17,7 +17,7 @@
       "UBUNTU_CODENAME": "noble",
       "LOGO": "ubuntu-logo"
     },
-    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "git_worktree_clean": true,
     "profile": "kubeadm"
   },
@@ -29,32 +29,32 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 4.933,
+        "p95_ms": 3.227,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-108a58c47b624522b392e86ff84f12fb",
+        "cohort_proof_id": "canary-3d2c179312474572abd0c2a69dbb403d",
         "weighted_root_route": {
           "path": "/",
           "samples": 200,
           "counts": {
-            "stable": 179,
-            "canary": 21
+            "stable": 181,
+            "canary": 19
           },
           "expected_canary_fraction": 0.1,
-          "actual_canary_fraction": 0.105,
+          "actual_canary_fraction": 0.095,
           "tolerance": 0.08485281374238571,
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049604.9638088,
+          "after_unix": 1791053340.1612601,
           "targets": {
             "counts": {
-              "prometheus": 1,
-              "nginx": 3,
               "envoy": 2,
               "gateway-probe": 1,
               "loki": 1,
-              "node": 1
+              "node": 1,
+              "prometheus": 1,
+              "nginx": 3
             },
             "releases": {
               "stable": 2,
@@ -63,29 +63,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.204:19001",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:38.599022411Z",
+                "lastScrape": "2026-10-03T18:49:13.060312443Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.193:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.5:19001",
+                  "instance": "10.244.0.54:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:48.265934973Z",
+                "lastScrape": "2026-10-03T18:49:08.337835192Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.54:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -93,7 +93,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:36.316584482Z",
+                "lastScrape": "2026-10-03T18:48:59.815198708Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -103,51 +103,51 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:45.377134895Z",
+                "lastScrape": "2026-10-03T18:49:01.392939514Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.133:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:06.670245562Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.200:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.92:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-kgs8n",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:50.039281152Z",
+                "lastScrape": "2026-10-03T18:49:13.362631469Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+                "scrapeUrl": "http://10.244.0.92:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:43.638025521Z",
+                "lastScrape": "2026-10-03T18:49:11.362136906Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.106:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.201:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:35.395767333Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.201:9113/metrics"
+                "scrapeUrl": "http://10.244.0.60:9113/metrics"
               },
               {
                 "labels": {
@@ -155,10 +155,10 @@
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:38.683370565Z",
+                "lastScrape": "2026-10-03T18:49:04.450532473Z",
                 "lastError": "",
                 "scrapeUrl": "http://10.244.0.51:9100/metrics"
               },
@@ -168,7 +168,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:38.698994564Z",
+                "lastScrape": "2026-10-03T18:49:01.731878625Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -182,15 +182,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049610.2,
+                    1791053354.724,
                     "1"
                   ]
                 }
@@ -204,16 +204,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049610.214,
-                    "1791049610.039"
+                    1791053354.745,
+                    "1791053353.362"
                   ]
                 }
               ]
@@ -229,32 +229,32 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 6.131,
+        "p95_ms": 3.304,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-18eee0354f264be0b53d2343e3ae11b8",
+        "cohort_proof_id": "canary-c2bf580931324426ad251bce67008f6b",
         "weighted_root_route": {
           "path": "/",
           "samples": 200,
           "counts": {
-            "stable": 151,
-            "canary": 49
+            "stable": 150,
+            "canary": 50
           },
           "expected_canary_fraction": 0.25,
-          "actual_canary_fraction": 0.245,
+          "actual_canary_fraction": 0.25,
           "tolerance": 0.1224744871391589,
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049610.8303154,
+          "after_unix": 1791053355.5664153,
           "targets": {
             "counts": {
-              "prometheus": 1,
-              "nginx": 3,
               "envoy": 2,
               "gateway-probe": 1,
               "loki": 1,
-              "node": 1
+              "node": 1,
+              "prometheus": 1,
+              "nginx": 3
             },
             "releases": {
               "stable": 2,
@@ -263,29 +263,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.204:19001",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:53.599022411Z",
+                "lastScrape": "2026-10-03T18:49:28.060312443Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.193:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.5:19001",
+                  "instance": "10.244.0.54:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:03.265934973Z",
+                "lastScrape": "2026-10-03T18:49:23.337835192Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.54:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -293,7 +293,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:51.316584482Z",
+                "lastScrape": "2026-10-03T18:49:29.815198708Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -303,51 +303,51 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:00.377134895Z",
+                "lastScrape": "2026-10-03T18:49:16.392939514Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.92:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:47:05.395767333Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.201:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.133:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "pod": "web-canary-7b8f84874d-kgs8n",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:05.039281152Z",
+                "lastScrape": "2026-10-03T18:49:28.362631469Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+                "scrapeUrl": "http://10.244.0.92:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:58.638025521Z",
+                "lastScrape": "2026-10-03T18:49:26.362136906Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.106:9113/metrics"
+                "scrapeUrl": "http://10.244.0.60:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.200:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:21.670245562Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.200:9113/metrics"
               },
               {
                 "labels": {
@@ -355,10 +355,10 @@
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:53.683370565Z",
+                "lastScrape": "2026-10-03T18:49:19.450532473Z",
                 "lastError": "",
                 "scrapeUrl": "http://10.244.0.51:9100/metrics"
               },
@@ -368,7 +368,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:53.698994564Z",
+                "lastScrape": "2026-10-03T18:49:16.731878625Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -382,15 +382,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049626.109,
+                    1791053370.089,
                     "1"
                   ]
                 }
@@ -404,16 +404,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049626.123,
-                    "1791049625.039"
+                    1791053370.109,
+                    "1791053368.362"
                   ]
                 }
               ]
@@ -429,32 +429,32 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 3.624,
+        "p95_ms": 3.084,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-e870a3c4310842ce9419a7a036b1d84b",
+        "cohort_proof_id": "canary-3787d067c05b45b88bd3416fc837f889",
         "weighted_root_route": {
           "path": "/",
           "samples": 200,
           "counts": {
-            "stable": 100,
-            "canary": 100
+            "stable": 99,
+            "canary": 101
           },
           "expected_canary_fraction": 0.5,
-          "actual_canary_fraction": 0.5,
+          "actual_canary_fraction": 0.505,
           "tolerance": 0.1414213562373095,
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049626.7339246,
+          "after_unix": 1791053370.9321926,
           "targets": {
             "counts": {
-              "prometheus": 1,
-              "nginx": 3,
               "envoy": 2,
               "gateway-probe": 1,
               "loki": 1,
-              "node": 1
+              "node": 1,
+              "prometheus": 1,
+              "nginx": 3
             },
             "releases": {
               "stable": 2,
@@ -463,29 +463,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.204:19001",
+                  "instance": "10.244.0.54:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:08.599022411Z",
+                "lastScrape": "2026-10-03T18:49:38.337835192Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.54:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.5:19001",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:18.265934973Z",
+                "lastScrape": "2026-10-03T18:49:43.060312443Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.193:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -493,7 +493,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:06.316584482Z",
+                "lastScrape": "2026-10-03T18:49:29.815198708Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -503,51 +503,51 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:15.377134895Z",
+                "lastScrape": "2026-10-03T18:49:31.392939514Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.201:9113",
+                  "instance": "10.244.0.60:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
                   "release": "stable"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:05.395767333Z",
+                "lastScrape": "2026-10-03T18:49:41.362136906Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.201:9113/metrics"
+                "scrapeUrl": "http://10.244.0.60:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.133:9113",
+                  "instance": "10.244.0.200:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:36.670245562Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.200:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.92:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-canary-7b8f84874d-kgs8n",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:20.039281152Z",
+                "lastScrape": "2026-10-03T18:49:43.362631469Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.133:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.106:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:47:13.638025521Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.106:9113/metrics"
+                "scrapeUrl": "http://10.244.0.92:9113/metrics"
               },
               {
                 "labels": {
@@ -555,10 +555,10 @@
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:08.683370565Z",
+                "lastScrape": "2026-10-03T18:49:34.450532473Z",
                 "lastError": "",
                 "scrapeUrl": "http://10.244.0.51:9100/metrics"
               },
@@ -568,7 +568,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:08.698994564Z",
+                "lastScrape": "2026-10-03T18:49:31.731878625Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -582,15 +582,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049640.193,
+                    1791053383.484,
                     "1"
                   ]
                 }
@@ -604,16 +604,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049640.208,
-                    "1791049640.039"
+                    1791053383.504,
+                    "1791053383.362"
                   ]
                 }
               ]
@@ -629,10 +629,10 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 3.492,
+        "p95_ms": 5.363,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-c6e3cac4b22c479ab7dafadc1590719f",
+        "cohort_proof_id": "canary-9dbf054f77e64a66a076a5f74875587e",
         "weighted_root_route": {
           "path": "/",
           "samples": 40,
@@ -646,15 +646,15 @@
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049640.8491464,
+          "after_unix": 1791053384.3523588,
           "targets": {
             "counts": {
-              "prometheus": 1,
-              "nginx": 3,
               "envoy": 2,
               "gateway-probe": 1,
               "loki": 1,
-              "node": 1
+              "node": 1,
+              "prometheus": 1,
+              "nginx": 3
             },
             "releases": {
               "stable": 2,
@@ -663,29 +663,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.204:19001",
+                  "instance": "10.244.0.193:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:23.599022411Z",
+                "lastScrape": "2026-10-03T18:49:58.060312443Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.204:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.193:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.5:19001",
+                  "instance": "10.244.0.54:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "runnervm8df0l",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:33.265934973Z",
+                "lastScrape": "2026-10-03T18:49:53.337835192Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.5:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.54:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -693,7 +693,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:21.316584482Z",
+                "lastScrape": "2026-10-03T18:49:44.815198708Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -703,51 +703,51 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:30.377134895Z",
+                "lastScrape": "2026-10-03T18:49:46.392939514Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.106:9113",
+                  "instance": "10.244.0.92:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-96hqm",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:47:28.638025521Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.106:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.201:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-stable-7488f7cd6b-mdw7k",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:47:35.395767333Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.201:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.133:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "runnervm8df0l",
-                  "pod": "web-canary-7b8f84874d-9hdnm",
+                  "pod": "web-canary-7b8f84874d-kgs8n",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:35.039281152Z",
+                "lastScrape": "2026-10-03T18:49:58.362631469Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.133:9113/metrics"
+                "scrapeUrl": "http://10.244.0.92:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.60:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-j25jt",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:56.362136906Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.60:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.200:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "runnervm8df0l",
+                  "pod": "web-stable-7488f7cd6b-vzz9d",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:51.670245562Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.200:9113/metrics"
               },
               {
                 "labels": {
@@ -755,10 +755,10 @@
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "runnervm8df0l",
-                  "pod": "node-exporter-wwdzp"
+                  "pod": "node-exporter-vlc4d"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:23.683370565Z",
+                "lastScrape": "2026-10-03T18:49:49.450532473Z",
                 "lastError": "",
                 "scrapeUrl": "http://10.244.0.51:9100/metrics"
               },
@@ -768,7 +768,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:23.698994564Z",
+                "lastScrape": "2026-10-03T18:49:46.731878625Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -782,15 +782,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049655.655,
+                    1791053399.441,
                     "1"
                   ]
                 }
@@ -804,16 +804,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.133:9113",
+                    "instance": "10.244.0.92:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "runnervm8df0l",
-                    "pod": "web-canary-7b8f84874d-9hdnm",
+                    "pod": "web-canary-7b8f84874d-kgs8n",
                     "release": "canary"
                   },
                   "value": [
-                    1791049655.673,
-                    "1791049655.039"
+                    1791053399.461,
+                    "1791053398.362"
                   ]
                 }
               ]
@@ -827,7 +827,20 @@
       "passed": true,
       "evidence": null,
       "duration_seconds": 0.0
+    },
+    {
+      "name": "recovery marker cleared",
+      "passed": true,
+      "evidence": {
+        "path": "/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json",
+        "removed": true
+      },
+      "duration_seconds": 0.0
     }
   ],
-  "passed": true
+  "passed": true,
+  "recovery_marker": {
+    "path": "/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json",
+    "removed": true
+  }
 }

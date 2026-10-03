@@ -1,7 +1,7 @@
 {
   "name": "Redeploy/Ubuntu acceptance",
   "environment": {
-    "timestamp_utc": "2026-10-03T17:48:37.476965+00:00",
+    "timestamp_utc": "2026-10-03T18:51:05.098886+00:00",
     "os": {
       "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
       "NAME": "Ubuntu",
@@ -17,7 +17,7 @@
       "UBUNTU_CODENAME": "noble",
       "LOGO": "ubuntu-logo"
     },
-    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "git_worktree_clean": true,
     "profile": "kubeadm"
   },
@@ -51,15 +51,15 @@
             "container": false,
             "wsl_environment": false,
             "ipv4": [
-              "10.1.1.119",
-              "10.244.0.105",
+              "10.1.0.43",
+              "10.244.0.40",
               "10.88.0.1",
               "127.0.0.1",
               "172.17.0.1"
             ],
             "owned_cluster_marker": true,
             "local_apiserver_manifest": true,
-            "configured_node_ip": "10.1.1.119"
+            "configured_node_ip": "10.1.0.43"
           },
           "node": "runnervm8df0l",
           "node_os": "Ubuntu 24.04.5 LTS",
@@ -67,7 +67,7 @@
           "kubeadm_configuration_matches": true
         }
       },
-      "duration_seconds": 0.115
+      "duration_seconds": 0.142
     },
     {
       "name": "first deployment",
@@ -75,7 +75,7 @@
       "evidence": {
         "output": "\ndeployment.apps/alertmanager serverside-applied\nservice/alertmanager serverside-applied\ndeployment.apps/grafana serverside-applied\nservice/grafana serverside-applied\ndeployment.apps/blackbox serverside-applied\nservice/blackbox serverside-applied\nserviceaccount/prometheus serverside-applied\nclusterrole.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\ndaemonset.apps/node-exporter serverside-applied\nconfigmap/fluentd serverside-applied\ndaemonset.apps/fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/web-default-deny serverside-applied\nnetworkpolicy.networking.k8s.io/web-from-gateway serverside-applied\nnetworkpolicy.networking.k8s.io/web-metrics serverside-applied\nnetworkpolicy.networking.k8s.io/observe-ingress serverside-applied\nnetworkpolicy.networking.k8s.io/loki-from-fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/fluentd-minimum serverside-applied\nnetworkpolicy.networking.k8s.io/node-metrics serverside-applied\ndeployment \"web-stable\" successfully rolled out\ndeployment \"web-canary\" successfully rolled out\ndeployment \"loki\" successfully rolled out\ndeployment \"prometheus\" successfully rolled out\ndeployment \"grafana\" successfully rolled out\ndeployment \"blackbox\" successfully rolled out\ndeployment \"alertmanager\" successfully rolled out\ndaemon set \"fluentd\" successfully rolled out\ndaemon set \"node-exporter\" successfully rolled out\ngateway.gateway.networking.k8s.io/signal condition met\n\n[SIGNAL] Deployment completed. Now run make verify; deployment success alone is not acceptance.\n"
       },
-      "duration_seconds": 5.641
+      "duration_seconds": 6.769
     },
     {
       "name": "baseline functional verification",
@@ -83,7 +83,7 @@
       "evidence": {
         "output": "PASS cluster version\nPASS GatewayClass accepted/current\nPASS Gateway accepted/programmed/current\nPASS both HTTPRoutes attached, current generation\nPASS HTTP exact response via Envoy Gateway\nPASS TLS validated with local CA, never insecure\nPASS path routing /canary\nPASS path routing /stable\nPASS header routing\nPASS unknown hostname rejected\nPASS external HTTP NodePort entrypoint\nPASS external HTTPS NodePort with verified CA and SNI\nPASS all required Prometheus targets actually up\nPASS real request counter increase\nPASS nonempty finite infrastructure and latency metrics\nPASS unique request proof issued\nPASS same request found in Fluentd -> Loki access logs\nPASS real application error generated\nPASS error log collected by Fluentd -> Loki\nPASS NetworkPolicy positive and negative controls\nPASS application still healthy after isolation test\nPASS runtime image inventory\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/acceptance/before/report.html\n"
       },
-      "duration_seconds": 30.508
+      "duration_seconds": 34.307
     },
     {
       "name": "second deployment",
@@ -91,7 +91,7 @@
       "evidence": {
         "output": "\ndeployment.apps/alertmanager serverside-applied\nservice/alertmanager serverside-applied\ndeployment.apps/grafana serverside-applied\nservice/grafana serverside-applied\ndeployment.apps/blackbox serverside-applied\nservice/blackbox serverside-applied\nserviceaccount/prometheus serverside-applied\nclusterrole.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\nrolebinding.rbac.authorization.k8s.io/signal-prometheus-discovery serverside-applied\ndaemonset.apps/node-exporter serverside-applied\nconfigmap/fluentd serverside-applied\ndaemonset.apps/fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/web-default-deny serverside-applied\nnetworkpolicy.networking.k8s.io/web-from-gateway serverside-applied\nnetworkpolicy.networking.k8s.io/web-metrics serverside-applied\nnetworkpolicy.networking.k8s.io/observe-ingress serverside-applied\nnetworkpolicy.networking.k8s.io/loki-from-fluentd serverside-applied\nnetworkpolicy.networking.k8s.io/fluentd-minimum serverside-applied\nnetworkpolicy.networking.k8s.io/node-metrics serverside-applied\ndeployment \"web-stable\" successfully rolled out\ndeployment \"web-canary\" successfully rolled out\ndeployment \"loki\" successfully rolled out\ndeployment \"prometheus\" successfully rolled out\ndeployment \"grafana\" successfully rolled out\ndeployment \"blackbox\" successfully rolled out\ndeployment \"alertmanager\" successfully rolled out\ndaemon set \"fluentd\" successfully rolled out\ndaemon set \"node-exporter\" successfully rolled out\ngateway.gateway.networking.k8s.io/signal condition met\n\n[SIGNAL] Deployment completed. Now run make verify; deployment success alone is not acceptance.\n"
       },
-      "duration_seconds": 5.539
+      "duration_seconds": 6.627
     },
     {
       "name": "idempotence: same Pods, PVCs and certificates",
@@ -101,181 +101,181 @@
           "running_pods": [
             [
               "envoy-gateway-system",
-              "envoy-gateway-bf66cfbdb-4sxf9",
-              "2e1149d9-e231-4413-aa2b-3b681e23541f"
+              "envoy-gateway-bf66cfbdb-l9lql",
+              "271f3cc8-66ca-453c-997e-9b5baa628507"
             ],
             [
               "envoy-gateway-system",
-              "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps",
-              "30e9e2fa-f447-4941-8078-bcbf0e180a1b"
+              "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw",
+              "7161de72-abe0-46ff-9a1d-812c00db1b7d"
             ],
             [
               "envoy-gateway-system",
-              "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8",
-              "c374bd4f-f710-4368-b9f2-cf714ca505ef"
+              "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k",
+              "b74b25b9-0a12-408c-844f-0643507b8c6e"
             ],
             [
               "signal",
-              "web-canary-7b8f84874d-9hdnm",
-              "942626f1-7e18-4fa3-ad99-9a3518fe9b16"
+              "web-canary-7b8f84874d-kgs8n",
+              "419f29f5-03a3-47ed-81c0-5fe2cf5abd3f"
             ],
             [
               "signal",
-              "web-stable-7488f7cd6b-96hqm",
-              "80b58e30-2e9e-47bf-8bb7-c2ddf354156a"
+              "web-stable-7488f7cd6b-j25jt",
+              "3766ab4e-50a5-4d40-b6c6-cb4d4e287b67"
             ],
             [
               "signal",
-              "web-stable-7488f7cd6b-mdw7k",
-              "6241d770-cddf-4b10-9068-81f7752038fa"
+              "web-stable-7488f7cd6b-vzz9d",
+              "f36fe524-874a-42d2-99b2-c5610dcd5de7"
             ],
             [
               "signal-logging",
-              "fluentd-lkgcf",
-              "fddf89f7-96a8-49e9-8ba6-ddfd4e78d36a"
+              "fluentd-kcxhs",
+              "cc002c3b-19ed-42f2-85d1-63895d494a87"
             ],
             [
               "signal-observe",
-              "alertmanager-6b7d77d876-2f6xz",
-              "18552e34-3a1e-4180-96b2-d175e0fac13c"
+              "alertmanager-6b7d77d876-7f2p4",
+              "3e39e236-96d3-4ec8-bdd2-4ea3633bdbf5"
             ],
             [
               "signal-observe",
-              "blackbox-5fb8fd75bc-26grm",
-              "78e6f7b5-a54c-4ff6-9028-26a258c8cec8"
+              "blackbox-5fb8fd75bc-qlgn7",
+              "2cbc734b-7bd7-4a7f-bfc7-332631d4c59a"
             ],
             [
               "signal-observe",
-              "grafana-74b57bf989-pv7kr",
-              "d573fb61-c20b-4d28-ba12-2d3fcabf7560"
+              "grafana-74b57bf989-z4fqs",
+              "87327f27-78ce-4b4b-bf40-e512ad0603b2"
             ],
             [
               "signal-observe",
-              "loki-58c8b9bd86-zdk5n",
-              "0d8a6be4-6710-4948-b6a6-e4ce2a791e16"
+              "loki-58c8b9bd86-96sbv",
+              "6ff8d80c-10e7-481b-a5cd-5c8b7f8a1519"
             ],
             [
               "signal-observe",
-              "prometheus-b7fccf6b5-zsg2q",
-              "c521d3f8-85b4-4690-90be-030cb41506db"
+              "prometheus-b7fccf6b5-dczzd",
+              "85957b42-4f91-4b58-83d2-cb4e063195c8"
             ],
             [
               "signal-system",
-              "node-exporter-wwdzp",
-              "d0b5222b-4c3a-4142-88f8-fef28162658f"
+              "node-exporter-vlc4d",
+              "00d6b1de-b2b7-4ae2-8f8b-1c4ce9d7d1a0"
             ]
           ],
           "pvc_uids": [
             [
               "alertmanager",
-              "6749323b-97fd-454a-889a-ab45b1009b21"
+              "741d76c8-bcb5-4a67-9328-43c0794c1cd0"
             ],
             [
               "grafana",
-              "b785ad3c-7b8e-4831-9db8-09011ef3873c"
+              "b42bdcbb-3ae8-41da-97f5-a2d2975e62d8"
             ],
             [
               "loki",
-              "08942f7f-645b-4403-8367-16893102e49b"
+              "f339c284-b470-40e8-a069-85e1492fe3ae"
             ],
             [
               "prometheus",
-              "8bd908f0-188a-4d7b-b3a3-391035c39820"
+              "07b2bc58-7341-45f5-8c3b-d6812909c161"
             ]
           ],
-          "storage_job_uid": "ab803555-610a-4a78-8cf5-4dd185a1fa72",
-          "ca_sha256": "3f94ea8de3af134b8ef5663c8d585f1c86218ac529d9d4b2cb1edb10ba5cfdaf",
-          "leaf_sha256": "a23e6ac9dbfaff9b1ae37386836b10585c64092e72107d06c395a11393472d6a"
+          "storage_job_uid": "c1b8577c-4df4-448e-8377-0807f9f30f7f",
+          "ca_sha256": "4954507198c5b193c078306e52288292971c54dd1c1407d9e7a5710865836490",
+          "leaf_sha256": "2a1cb883687934a9d34715794037bec950fdf41978e65771b9e8d5162b08c015"
         },
         "after": {
           "running_pods": [
             [
               "envoy-gateway-system",
-              "envoy-gateway-bf66cfbdb-4sxf9",
-              "2e1149d9-e231-4413-aa2b-3b681e23541f"
+              "envoy-gateway-bf66cfbdb-l9lql",
+              "271f3cc8-66ca-453c-997e-9b5baa628507"
             ],
             [
               "envoy-gateway-system",
-              "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps",
-              "30e9e2fa-f447-4941-8078-bcbf0e180a1b"
+              "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw",
+              "7161de72-abe0-46ff-9a1d-812c00db1b7d"
             ],
             [
               "envoy-gateway-system",
-              "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8",
-              "c374bd4f-f710-4368-b9f2-cf714ca505ef"
+              "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k",
+              "b74b25b9-0a12-408c-844f-0643507b8c6e"
             ],
             [
               "signal",
-              "web-canary-7b8f84874d-9hdnm",
-              "942626f1-7e18-4fa3-ad99-9a3518fe9b16"
+              "web-canary-7b8f84874d-kgs8n",
+              "419f29f5-03a3-47ed-81c0-5fe2cf5abd3f"
             ],
             [
               "signal",
-              "web-stable-7488f7cd6b-96hqm",
-              "80b58e30-2e9e-47bf-8bb7-c2ddf354156a"
+              "web-stable-7488f7cd6b-j25jt",
+              "3766ab4e-50a5-4d40-b6c6-cb4d4e287b67"
             ],
             [
               "signal",
-              "web-stable-7488f7cd6b-mdw7k",
-              "6241d770-cddf-4b10-9068-81f7752038fa"
+              "web-stable-7488f7cd6b-vzz9d",
+              "f36fe524-874a-42d2-99b2-c5610dcd5de7"
             ],
             [
               "signal-logging",
-              "fluentd-lkgcf",
-              "fddf89f7-96a8-49e9-8ba6-ddfd4e78d36a"
+              "fluentd-kcxhs",
+              "cc002c3b-19ed-42f2-85d1-63895d494a87"
             ],
             [
               "signal-observe",
-              "alertmanager-6b7d77d876-2f6xz",
-              "18552e34-3a1e-4180-96b2-d175e0fac13c"
+              "alertmanager-6b7d77d876-7f2p4",
+              "3e39e236-96d3-4ec8-bdd2-4ea3633bdbf5"
             ],
             [
               "signal-observe",
-              "blackbox-5fb8fd75bc-26grm",
-              "78e6f7b5-a54c-4ff6-9028-26a258c8cec8"
+              "blackbox-5fb8fd75bc-qlgn7",
+              "2cbc734b-7bd7-4a7f-bfc7-332631d4c59a"
             ],
             [
               "signal-observe",
-              "grafana-74b57bf989-pv7kr",
-              "d573fb61-c20b-4d28-ba12-2d3fcabf7560"
+              "grafana-74b57bf989-z4fqs",
+              "87327f27-78ce-4b4b-bf40-e512ad0603b2"
             ],
             [
               "signal-observe",
-              "loki-58c8b9bd86-zdk5n",
-              "0d8a6be4-6710-4948-b6a6-e4ce2a791e16"
+              "loki-58c8b9bd86-96sbv",
+              "6ff8d80c-10e7-481b-a5cd-5c8b7f8a1519"
             ],
             [
               "signal-observe",
-              "prometheus-b7fccf6b5-zsg2q",
-              "c521d3f8-85b4-4690-90be-030cb41506db"
+              "prometheus-b7fccf6b5-dczzd",
+              "85957b42-4f91-4b58-83d2-cb4e063195c8"
             ],
             [
               "signal-system",
-              "node-exporter-wwdzp",
-              "d0b5222b-4c3a-4142-88f8-fef28162658f"
+              "node-exporter-vlc4d",
+              "00d6b1de-b2b7-4ae2-8f8b-1c4ce9d7d1a0"
             ]
           ],
           "pvc_uids": [
             [
               "alertmanager",
-              "6749323b-97fd-454a-889a-ab45b1009b21"
+              "741d76c8-bcb5-4a67-9328-43c0794c1cd0"
             ],
             [
               "grafana",
-              "b785ad3c-7b8e-4831-9db8-09011ef3873c"
+              "b42bdcbb-3ae8-41da-97f5-a2d2975e62d8"
             ],
             [
               "loki",
-              "08942f7f-645b-4403-8367-16893102e49b"
+              "f339c284-b470-40e8-a069-85e1492fe3ae"
             ],
             [
               "prometheus",
-              "8bd908f0-188a-4d7b-b3a3-391035c39820"
+              "07b2bc58-7341-45f5-8c3b-d6812909c161"
             ]
           ],
-          "storage_job_uid": "ab803555-610a-4a78-8cf5-4dd185a1fa72",
-          "ca_sha256": "3f94ea8de3af134b8ef5663c8d585f1c86218ac529d9d4b2cb1edb10ba5cfdaf",
-          "leaf_sha256": "a23e6ac9dbfaff9b1ae37386836b10585c64092e72107d06c395a11393472d6a"
+          "storage_job_uid": "c1b8577c-4df4-448e-8377-0807f9f30f7f",
+          "ca_sha256": "4954507198c5b193c078306e52288292971c54dd1c1407d9e7a5710865836490",
+          "leaf_sha256": "2a1cb883687934a9d34715794037bec950fdf41978e65771b9e8d5162b08c015"
         }
       },
       "duration_seconds": 0.0
@@ -286,7 +286,7 @@
       "evidence": {
         "output": "PASS cluster version\nPASS GatewayClass accepted/current\nPASS Gateway accepted/programmed/current\nPASS both HTTPRoutes attached, current generation\nPASS HTTP exact response via Envoy Gateway\nPASS TLS validated with local CA, never insecure\nPASS path routing /canary\nPASS path routing /stable\nPASS header routing\nPASS unknown hostname rejected\nPASS external HTTP NodePort entrypoint\nPASS external HTTPS NodePort with verified CA and SNI\nPASS all required Prometheus targets actually up\nPASS real request counter increase\nPASS nonempty finite infrastructure and latency metrics\nPASS unique request proof issued\nPASS same request found in Fluentd -> Loki access logs\nPASS real application error generated\nPASS error log collected by Fluentd -> Loki\nPASS NetworkPolicy positive and negative controls\nPASS application still healthy after isolation test\nPASS runtime image inventory\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/acceptance/after/report.html\n"
       },
-      "duration_seconds": 30.392
+      "duration_seconds": 34.307
     }
   ],
   "passed": true,
@@ -295,181 +295,181 @@
       "running_pods": [
         [
           "envoy-gateway-system",
-          "envoy-gateway-bf66cfbdb-4sxf9",
-          "2e1149d9-e231-4413-aa2b-3b681e23541f"
+          "envoy-gateway-bf66cfbdb-l9lql",
+          "271f3cc8-66ca-453c-997e-9b5baa628507"
         ],
         [
           "envoy-gateway-system",
-          "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps",
-          "30e9e2fa-f447-4941-8078-bcbf0e180a1b"
+          "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw",
+          "7161de72-abe0-46ff-9a1d-812c00db1b7d"
         ],
         [
           "envoy-gateway-system",
-          "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8",
-          "c374bd4f-f710-4368-b9f2-cf714ca505ef"
+          "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k",
+          "b74b25b9-0a12-408c-844f-0643507b8c6e"
         ],
         [
           "signal",
-          "web-canary-7b8f84874d-9hdnm",
-          "942626f1-7e18-4fa3-ad99-9a3518fe9b16"
+          "web-canary-7b8f84874d-kgs8n",
+          "419f29f5-03a3-47ed-81c0-5fe2cf5abd3f"
         ],
         [
           "signal",
-          "web-stable-7488f7cd6b-96hqm",
-          "80b58e30-2e9e-47bf-8bb7-c2ddf354156a"
+          "web-stable-7488f7cd6b-j25jt",
+          "3766ab4e-50a5-4d40-b6c6-cb4d4e287b67"
         ],
         [
           "signal",
-          "web-stable-7488f7cd6b-mdw7k",
-          "6241d770-cddf-4b10-9068-81f7752038fa"
+          "web-stable-7488f7cd6b-vzz9d",
+          "f36fe524-874a-42d2-99b2-c5610dcd5de7"
         ],
         [
           "signal-logging",
-          "fluentd-lkgcf",
-          "fddf89f7-96a8-49e9-8ba6-ddfd4e78d36a"
+          "fluentd-kcxhs",
+          "cc002c3b-19ed-42f2-85d1-63895d494a87"
         ],
         [
           "signal-observe",
-          "alertmanager-6b7d77d876-2f6xz",
-          "18552e34-3a1e-4180-96b2-d175e0fac13c"
+          "alertmanager-6b7d77d876-7f2p4",
+          "3e39e236-96d3-4ec8-bdd2-4ea3633bdbf5"
         ],
         [
           "signal-observe",
-          "blackbox-5fb8fd75bc-26grm",
-          "78e6f7b5-a54c-4ff6-9028-26a258c8cec8"
+          "blackbox-5fb8fd75bc-qlgn7",
+          "2cbc734b-7bd7-4a7f-bfc7-332631d4c59a"
         ],
         [
           "signal-observe",
-          "grafana-74b57bf989-pv7kr",
-          "d573fb61-c20b-4d28-ba12-2d3fcabf7560"
+          "grafana-74b57bf989-z4fqs",
+          "87327f27-78ce-4b4b-bf40-e512ad0603b2"
         ],
         [
           "signal-observe",
-          "loki-58c8b9bd86-zdk5n",
-          "0d8a6be4-6710-4948-b6a6-e4ce2a791e16"
+          "loki-58c8b9bd86-96sbv",
+          "6ff8d80c-10e7-481b-a5cd-5c8b7f8a1519"
         ],
         [
           "signal-observe",
-          "prometheus-b7fccf6b5-zsg2q",
-          "c521d3f8-85b4-4690-90be-030cb41506db"
+          "prometheus-b7fccf6b5-dczzd",
+          "85957b42-4f91-4b58-83d2-cb4e063195c8"
         ],
         [
           "signal-system",
-          "node-exporter-wwdzp",
-          "d0b5222b-4c3a-4142-88f8-fef28162658f"
+          "node-exporter-vlc4d",
+          "00d6b1de-b2b7-4ae2-8f8b-1c4ce9d7d1a0"
         ]
       ],
       "pvc_uids": [
         [
           "alertmanager",
-          "6749323b-97fd-454a-889a-ab45b1009b21"
+          "741d76c8-bcb5-4a67-9328-43c0794c1cd0"
         ],
         [
           "grafana",
-          "b785ad3c-7b8e-4831-9db8-09011ef3873c"
+          "b42bdcbb-3ae8-41da-97f5-a2d2975e62d8"
         ],
         [
           "loki",
-          "08942f7f-645b-4403-8367-16893102e49b"
+          "f339c284-b470-40e8-a069-85e1492fe3ae"
         ],
         [
           "prometheus",
-          "8bd908f0-188a-4d7b-b3a3-391035c39820"
+          "07b2bc58-7341-45f5-8c3b-d6812909c161"
         ]
       ],
-      "storage_job_uid": "ab803555-610a-4a78-8cf5-4dd185a1fa72",
-      "ca_sha256": "3f94ea8de3af134b8ef5663c8d585f1c86218ac529d9d4b2cb1edb10ba5cfdaf",
-      "leaf_sha256": "a23e6ac9dbfaff9b1ae37386836b10585c64092e72107d06c395a11393472d6a"
+      "storage_job_uid": "c1b8577c-4df4-448e-8377-0807f9f30f7f",
+      "ca_sha256": "4954507198c5b193c078306e52288292971c54dd1c1407d9e7a5710865836490",
+      "leaf_sha256": "2a1cb883687934a9d34715794037bec950fdf41978e65771b9e8d5162b08c015"
     },
     "after": {
       "running_pods": [
         [
           "envoy-gateway-system",
-          "envoy-gateway-bf66cfbdb-4sxf9",
-          "2e1149d9-e231-4413-aa2b-3b681e23541f"
+          "envoy-gateway-bf66cfbdb-l9lql",
+          "271f3cc8-66ca-453c-997e-9b5baa628507"
         ],
         [
           "envoy-gateway-system",
-          "envoy-signal-signal-abdcf5a2-688b98f8c7-gnfps",
-          "30e9e2fa-f447-4941-8078-bcbf0e180a1b"
+          "envoy-signal-signal-abdcf5a2-688b98f8c7-8vclw",
+          "7161de72-abe0-46ff-9a1d-812c00db1b7d"
         ],
         [
           "envoy-gateway-system",
-          "envoy-signal-signal-abdcf5a2-688b98f8c7-jmkg8",
-          "c374bd4f-f710-4368-b9f2-cf714ca505ef"
+          "envoy-signal-signal-abdcf5a2-688b98f8c7-dxf5k",
+          "b74b25b9-0a12-408c-844f-0643507b8c6e"
         ],
         [
           "signal",
-          "web-canary-7b8f84874d-9hdnm",
-          "942626f1-7e18-4fa3-ad99-9a3518fe9b16"
+          "web-canary-7b8f84874d-kgs8n",
+          "419f29f5-03a3-47ed-81c0-5fe2cf5abd3f"
         ],
         [
           "signal",
-          "web-stable-7488f7cd6b-96hqm",
-          "80b58e30-2e9e-47bf-8bb7-c2ddf354156a"
+          "web-stable-7488f7cd6b-j25jt",
+          "3766ab4e-50a5-4d40-b6c6-cb4d4e287b67"
         ],
         [
           "signal",
-          "web-stable-7488f7cd6b-mdw7k",
-          "6241d770-cddf-4b10-9068-81f7752038fa"
+          "web-stable-7488f7cd6b-vzz9d",
+          "f36fe524-874a-42d2-99b2-c5610dcd5de7"
         ],
         [
           "signal-logging",
-          "fluentd-lkgcf",
-          "fddf89f7-96a8-49e9-8ba6-ddfd4e78d36a"
+          "fluentd-kcxhs",
+          "cc002c3b-19ed-42f2-85d1-63895d494a87"
         ],
         [
           "signal-observe",
-          "alertmanager-6b7d77d876-2f6xz",
-          "18552e34-3a1e-4180-96b2-d175e0fac13c"
+          "alertmanager-6b7d77d876-7f2p4",
+          "3e39e236-96d3-4ec8-bdd2-4ea3633bdbf5"
         ],
         [
           "signal-observe",
-          "blackbox-5fb8fd75bc-26grm",
-          "78e6f7b5-a54c-4ff6-9028-26a258c8cec8"
+          "blackbox-5fb8fd75bc-qlgn7",
+          "2cbc734b-7bd7-4a7f-bfc7-332631d4c59a"
         ],
         [
           "signal-observe",
-          "grafana-74b57bf989-pv7kr",
-          "d573fb61-c20b-4d28-ba12-2d3fcabf7560"
+          "grafana-74b57bf989-z4fqs",
+          "87327f27-78ce-4b4b-bf40-e512ad0603b2"
         ],
         [
           "signal-observe",
-          "loki-58c8b9bd86-zdk5n",
-          "0d8a6be4-6710-4948-b6a6-e4ce2a791e16"
+          "loki-58c8b9bd86-96sbv",
+          "6ff8d80c-10e7-481b-a5cd-5c8b7f8a1519"
         ],
         [
           "signal-observe",
-          "prometheus-b7fccf6b5-zsg2q",
-          "c521d3f8-85b4-4690-90be-030cb41506db"
+          "prometheus-b7fccf6b5-dczzd",
+          "85957b42-4f91-4b58-83d2-cb4e063195c8"
         ],
         [
           "signal-system",
-          "node-exporter-wwdzp",
-          "d0b5222b-4c3a-4142-88f8-fef28162658f"
+          "node-exporter-vlc4d",
+          "00d6b1de-b2b7-4ae2-8f8b-1c4ce9d7d1a0"
         ]
       ],
       "pvc_uids": [
         [
           "alertmanager",
-          "6749323b-97fd-454a-889a-ab45b1009b21"
+          "741d76c8-bcb5-4a67-9328-43c0794c1cd0"
         ],
         [
           "grafana",
-          "b785ad3c-7b8e-4831-9db8-09011ef3873c"
+          "b42bdcbb-3ae8-41da-97f5-a2d2975e62d8"
         ],
         [
           "loki",
-          "08942f7f-645b-4403-8367-16893102e49b"
+          "f339c284-b470-40e8-a069-85e1492fe3ae"
         ],
         [
           "prometheus",
-          "8bd908f0-188a-4d7b-b3a3-391035c39820"
+          "07b2bc58-7341-45f5-8c3b-d6812909c161"
         ]
       ],
-      "storage_job_uid": "ab803555-610a-4a78-8cf5-4dd185a1fa72",
-      "ca_sha256": "3f94ea8de3af134b8ef5663c8d585f1c86218ac529d9d4b2cb1edb10ba5cfdaf",
-      "leaf_sha256": "a23e6ac9dbfaff9b1ae37386836b10585c64092e72107d06c395a11393472d6a"
+      "storage_job_uid": "c1b8577c-4df4-448e-8377-0807f9f30f7f",
+      "ca_sha256": "4954507198c5b193c078306e52288292971c54dd1c1407d9e7a5710865836490",
+      "leaf_sha256": "2a1cb883687934a9d34715794037bec950fdf41978e65771b9e8d5162b08c015"
     }
   },
   "ubuntu_24_04_kubeadm_confirmed": true

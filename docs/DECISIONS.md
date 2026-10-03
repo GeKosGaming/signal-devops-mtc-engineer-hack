@@ -60,7 +60,7 @@ Recovery marker создаётся перед опасным изменение�
 
 ## Статус новых механизмов
 
-Полные green прогоны `efa05ee` и `d24163f` подтверждают предыдущую версию. Новые common lock и signal recovery пока не объявляются прошедшими runtime-проверку. Unit/process-тесты проверяют kernel lock и обработчики; `make operation-check` на Linux с работающим Kubernetes проверяет отказ конкурирующей операции до изменений и восстановление canary после настоящих `SIGINT` / `SIGTERM` с доступным API. SIGINT направляется группе процессов оператора, SIGTERM — PID. Дочерний сценарий обязан сохранить FAIL и сигнал; safety report требует здоровый baseline, удаление marker и освобождение lock. Он не доказывает восстановление Loki после сигнала или canary при отказе API.
+Полные Ubuntu и kind прогоны `f99de235d92b8909b59827021f41d97178e8d07b` подтвердили общий lock и canary signal recovery; reviewed reports опубликованы в evidence/published. Финальный HEAD документов повторно проверяется перед упаковкой. Unit/process-тесты проверяют kernel lock и обработчики; `make operation-check` на Linux с работающим Kubernetes проверяет отказ конкурирующей операции до изменений и восстановление canary после настоящих `SIGINT` / `SIGTERM` с доступным API. SIGINT направляется группе процессов оператора, SIGTERM — PID. Дочерний сценарий обязан сохранить FAIL и сигнал; safety report требует здоровый baseline, удаление marker и освобождение lock. Он не доказывает восстановление Loki после сигнала или canary при отказе API.
 
 Финальная упаковка требует свежие успешные Ubuntu acceptance и operations report для одного чистого HEAD. Сохранение marker при неудачном cleanup проверяется отдельно; ручная инструкция не считается результатом runtime-проверки.
 

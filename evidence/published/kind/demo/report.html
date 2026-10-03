@@ -1,5 +1,5 @@
 <!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Canary failure drill</title><style>body{font:16px system-ui;margin:3% auto;max-width:1200px;background:#111821;color:#e8edf3}h1{font-size:36px}table{width:100%;border-collapse:collapse}td,th{padding:16px;border-bottom:1px solid #425266;text-align:left;vertical-align:top}pre{white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto;font-size:12px}.true{color:#9de5b0}.false{color:#ffaba6}small{color:#aab5c3}</style><h1>SIGNAL / PASS</h1><p>Canary failure drill</p><small>Measured evidence, not a readiness claim based on Pod phase. No external scripts, fonts or telemetry.</small><pre>{
-  &quot;timestamp_utc&quot;: &quot;2026-10-03T17:45:41.208833+00:00&quot;,
+  &quot;timestamp_utc&quot;: &quot;2026-10-03T18:48:22.440485+00:00&quot;,
   &quot;os&quot;: {
     &quot;PRETTY_NAME&quot;: &quot;Ubuntu 24.04.5 LTS&quot;,
     &quot;NAME&quot;: &quot;Ubuntu&quot;,
@@ -15,18 +15,18 @@
     &quot;UBUNTU_CODENAME&quot;: &quot;noble&quot;,
     &quot;LOGO&quot;: &quot;ubuntu-logo&quot;
   },
-  &quot;git_commit&quot;: &quot;efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec&quot;,
+  &quot;git_commit&quot;: &quot;f99de235d92b8909b59827021f41d97178e8d07b&quot;,
   &quot;git_worktree_clean&quot;: true,
   &quot;profile&quot;: &quot;kind&quot;
 }</pre><table><tr><th>Check</th><th>Result</th><th>Evidence</th></tr><tr><td>90/10 weighted routing</td><td class="true">PASS</td><td><pre>{
   &quot;path&quot;: &quot;/&quot;,
   &quot;samples&quot;: 400,
   &quot;counts&quot;: {
-    &quot;stable&quot;: 359,
-    &quot;canary&quot;: 41
+    &quot;stable&quot;: 361,
+    &quot;canary&quot;: 39
   },
   &quot;expected_canary_fraction&quot;: 0.1,
-  &quot;actual_canary_fraction&quot;: 0.1025,
+  &quot;actual_canary_fraction&quot;: 0.0975,
   &quot;tolerance&quot;: 0.060000000000000005,
   &quot;note&quot;: &quot;Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee.&quot;
 }</pre></td></tr><tr><td>injected fault observed through Envoy Gateway</td><td class="true">PASS</td><td><pre>{
@@ -35,38 +35,19 @@
     {
       &quot;attempt&quot;: 1,
       &quot;response&quot;: {
-        &quot;status&quot;: 200,
-        &quot;body&quot;: &quot;Hello World!\n&quot;,
-        &quot;headers&quot;: {
-          &quot;server&quot;: &quot;nginx&quot;,
-          &quot;date&quot;: &quot;Sat, 03 Oct 2026 17:45:55 GMT&quot;,
-          &quot;content-type&quot;: &quot;text/plain&quot;,
-          &quot;content-length&quot;: &quot;13&quot;,
-          &quot;x-release&quot;: &quot;canary&quot;,
-          &quot;x-proof-id&quot;: &quot;0198f84fffd0ac0deea6edc12f77c284&quot;,
-          &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
-          &quot;connection&quot;: &quot;close&quot;
-        },
-        &quot;latency_ms&quot;: 3.959
-      },
-      &quot;error&quot;: &quot;Injected fault has not reached the data plane: {\&quot;status\&quot;: 200, \&quot;body\&quot;: \&quot;Hello World!\\n\&quot;, \&quot;headers\&quot;: {\&quot;server\&quot;: \&quot;nginx\&quot;, \&quot;date\&quot;: \&quot;Sat, 03 Oct 2026 17:45:55 GMT\&quot;, \&quot;content-type\&quot;: \&quot;text/plain\&quot;, \&quot;content-length\&quot;: \&quot;13\&quot;, \&quot;x-release\&quot;: \&quot;canary\&quot;, \&quot;x-proof-id\&quot;: \&quot;0198f84fffd0ac0deea6edc12f77c284\&quot;, \&quot;x-content-type-options\&quot;: \&quot;nosniff\&quot;, \&quot;connection\&quot;: \&quot;close\&quot;}, \&quot;latency_ms\&quot;: 3.959}&quot;
-    },
-    {
-      &quot;attempt&quot;: 2,
-      &quot;response&quot;: {
         &quot;status&quot;: 503,
         &quot;body&quot;: &quot;Injected canary failure\n&quot;,
         &quot;headers&quot;: {
           &quot;server&quot;: &quot;nginx&quot;,
-          &quot;date&quot;: &quot;Sat, 03 Oct 2026 17:45:56 GMT&quot;,
+          &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:39 GMT&quot;,
           &quot;content-type&quot;: &quot;text/plain&quot;,
           &quot;content-length&quot;: &quot;24&quot;,
           &quot;x-release&quot;: &quot;canary&quot;,
-          &quot;x-proof-id&quot;: &quot;ba68f098a2d356dfaaa3cd9ec07cb4f8&quot;,
+          &quot;x-proof-id&quot;: &quot;751043ba5cd5150335554ae03226f366&quot;,
           &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
           &quot;connection&quot;: &quot;close&quot;
         },
-        &quot;latency_ms&quot;: 3.605
+        &quot;latency_ms&quot;: 4.01
       }
     }
   ],
@@ -75,35 +56,35 @@
     &quot;body&quot;: &quot;Injected canary failure\n&quot;,
     &quot;headers&quot;: {
       &quot;server&quot;: &quot;nginx&quot;,
-      &quot;date&quot;: &quot;Sat, 03 Oct 2026 17:45:56 GMT&quot;,
+      &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:48:39 GMT&quot;,
       &quot;content-type&quot;: &quot;text/plain&quot;,
       &quot;content-length&quot;: &quot;24&quot;,
       &quot;x-release&quot;: &quot;canary&quot;,
-      &quot;x-proof-id&quot;: &quot;ba68f098a2d356dfaaa3cd9ec07cb4f8&quot;,
+      &quot;x-proof-id&quot;: &quot;751043ba5cd5150335554ae03226f366&quot;,
       &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
       &quot;connection&quot;: &quot;close&quot;
     },
-    &quot;latency_ms&quot;: 3.605
+    &quot;latency_ms&quot;: 4.01
   },
   &quot;passed&quot;: true,
-  &quot;elapsed_seconds&quot;: 1.041
+  &quot;elapsed_seconds&quot;: 0.035
 }</pre></td></tr><tr><td>rollback to stable 100%</td><td class="true">PASS</td><td><pre>{
   &quot;web-main&quot;: [
     {
       &quot;listener&quot;: &quot;http&quot;,
       &quot;conditions&quot;: {
         &quot;Accepted&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:46:02Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
           &quot;message&quot;: &quot;Route is accepted&quot;,
-          &quot;observedGeneration&quot;: 5,
+          &quot;observedGeneration&quot;: 9,
           &quot;reason&quot;: &quot;Accepted&quot;,
           &quot;status&quot;: &quot;True&quot;,
           &quot;type&quot;: &quot;Accepted&quot;
         },
         &quot;ResolvedRefs&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:46:02Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
           &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
-          &quot;observedGeneration&quot;: 5,
+          &quot;observedGeneration&quot;: 9,
           &quot;reason&quot;: &quot;ResolvedRefs&quot;,
           &quot;status&quot;: &quot;True&quot;,
           &quot;type&quot;: &quot;ResolvedRefs&quot;
@@ -114,17 +95,17 @@
       &quot;listener&quot;: &quot;https&quot;,
       &quot;conditions&quot;: {
         &quot;Accepted&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:46:02Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
           &quot;message&quot;: &quot;Route is accepted&quot;,
-          &quot;observedGeneration&quot;: 5,
+          &quot;observedGeneration&quot;: 9,
           &quot;reason&quot;: &quot;Accepted&quot;,
           &quot;status&quot;: &quot;True&quot;,
           &quot;type&quot;: &quot;Accepted&quot;
         },
         &quot;ResolvedRefs&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:46:02Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
           &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
-          &quot;observedGeneration&quot;: 5,
+          &quot;observedGeneration&quot;: 9,
           &quot;reason&quot;: &quot;ResolvedRefs&quot;,
           &quot;status&quot;: &quot;True&quot;,
           &quot;type&quot;: &quot;ResolvedRefs&quot;
@@ -137,7 +118,7 @@
       &quot;listener&quot;: &quot;http&quot;,
       &quot;conditions&quot;: {
         &quot;Accepted&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:44:30Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
           &quot;message&quot;: &quot;Route is accepted&quot;,
           &quot;observedGeneration&quot;: 1,
           &quot;reason&quot;: &quot;Accepted&quot;,
@@ -145,7 +126,7 @@
           &quot;type&quot;: &quot;Accepted&quot;
         },
         &quot;ResolvedRefs&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:44:30Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
           &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
           &quot;observedGeneration&quot;: 1,
           &quot;reason&quot;: &quot;ResolvedRefs&quot;,
@@ -158,7 +139,7 @@
       &quot;listener&quot;: &quot;https&quot;,
       &quot;conditions&quot;: {
         &quot;Accepted&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:44:30Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
           &quot;message&quot;: &quot;Route is accepted&quot;,
           &quot;observedGeneration&quot;: 1,
           &quot;reason&quot;: &quot;Accepted&quot;,
@@ -166,7 +147,7 @@
           &quot;type&quot;: &quot;Accepted&quot;
         },
         &quot;ResolvedRefs&quot;: {
-          &quot;lastTransitionTime&quot;: &quot;2026-10-03T17:44:30Z&quot;,
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
           &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
           &quot;observedGeneration&quot;: 1,
           &quot;reason&quot;: &quot;ResolvedRefs&quot;,
@@ -187,44 +168,127 @@
   &quot;actual_canary_fraction&quot;: 0.0,
   &quot;tolerance&quot;: 0,
   &quot;note&quot;: &quot;Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee.&quot;
-}</pre></td></tr><tr><td>bad canary was rejected</td><td class="true">PASS</td><td><pre>null</pre></td></tr><tr><td>canary configuration restored</td><td class="true">PASS</td><td><pre>{
+}</pre></td></tr><tr><td>bad canary was rejected</td><td class="true">PASS</td><td><pre>null</pre></td></tr><tr><td>restore healthy canary manifests</td><td class="true">PASS</td><td><pre>{
+  &quot;configuration&quot;: &quot;healthy&quot;
+}</pre></td></tr><tr><td>rollback to stable 100%</td><td class="true">PASS</td><td><pre>{
+  &quot;web-main&quot;: [
+    {
+      &quot;listener&quot;: &quot;http&quot;,
+      &quot;conditions&quot;: {
+        &quot;Accepted&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
+          &quot;message&quot;: &quot;Route is accepted&quot;,
+          &quot;observedGeneration&quot;: 9,
+          &quot;reason&quot;: &quot;Accepted&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;Accepted&quot;
+        },
+        &quot;ResolvedRefs&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
+          &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
+          &quot;observedGeneration&quot;: 9,
+          &quot;reason&quot;: &quot;ResolvedRefs&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;ResolvedRefs&quot;
+        }
+      }
+    },
+    {
+      &quot;listener&quot;: &quot;https&quot;,
+      &quot;conditions&quot;: {
+        &quot;Accepted&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
+          &quot;message&quot;: &quot;Route is accepted&quot;,
+          &quot;observedGeneration&quot;: 9,
+          &quot;reason&quot;: &quot;Accepted&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;Accepted&quot;
+        },
+        &quot;ResolvedRefs&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:48:52Z&quot;,
+          &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
+          &quot;observedGeneration&quot;: 9,
+          &quot;reason&quot;: &quot;ResolvedRefs&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;ResolvedRefs&quot;
+        }
+      }
+    }
+  ],
+  &quot;web-preview&quot;: [
+    {
+      &quot;listener&quot;: &quot;http&quot;,
+      &quot;conditions&quot;: {
+        &quot;Accepted&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
+          &quot;message&quot;: &quot;Route is accepted&quot;,
+          &quot;observedGeneration&quot;: 1,
+          &quot;reason&quot;: &quot;Accepted&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;Accepted&quot;
+        },
+        &quot;ResolvedRefs&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
+          &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
+          &quot;observedGeneration&quot;: 1,
+          &quot;reason&quot;: &quot;ResolvedRefs&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;ResolvedRefs&quot;
+        }
+      }
+    },
+    {
+      &quot;listener&quot;: &quot;https&quot;,
+      &quot;conditions&quot;: {
+        &quot;Accepted&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
+          &quot;message&quot;: &quot;Route is accepted&quot;,
+          &quot;observedGeneration&quot;: 1,
+          &quot;reason&quot;: &quot;Accepted&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;Accepted&quot;
+        },
+        &quot;ResolvedRefs&quot;: {
+          &quot;lastTransitionTime&quot;: &quot;2026-10-03T18:46:22Z&quot;,
+          &quot;message&quot;: &quot;Resolved all the Object references for the Route&quot;,
+          &quot;observedGeneration&quot;: 1,
+          &quot;reason&quot;: &quot;ResolvedRefs&quot;,
+          &quot;status&quot;: &quot;True&quot;,
+          &quot;type&quot;: &quot;ResolvedRefs&quot;
+        }
+      }
+    }
+  ]
+}</pre></td></tr><tr><td>stable root traffic after rollback</td><td class="true">PASS</td><td><pre>{
+  &quot;path&quot;: &quot;/&quot;,
+  &quot;samples&quot;: 40,
+  &quot;counts&quot;: {
+    &quot;stable&quot;: 40,
+    &quot;canary&quot;: 0
+  },
+  &quot;expected_canary_fraction&quot;: 0.0,
+  &quot;actual_canary_fraction&quot;: 0.0,
+  &quot;tolerance&quot;: 0,
+  &quot;note&quot;: &quot;Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee.&quot;
+}</pre></td></tr><tr><td>canary configuration restored</td><td class="true">PASS</td><td><pre>{
   &quot;expected&quot;: &quot;healthy canary&quot;,
   &quot;attempts&quot;: [
     {
       &quot;attempt&quot;: 1,
       &quot;response&quot;: {
-        &quot;status&quot;: 503,
-        &quot;body&quot;: &quot;Injected canary failure\n&quot;,
-        &quot;headers&quot;: {
-          &quot;server&quot;: &quot;nginx&quot;,
-          &quot;date&quot;: &quot;Sat, 03 Oct 2026 17:46:09 GMT&quot;,
-          &quot;content-type&quot;: &quot;text/plain&quot;,
-          &quot;content-length&quot;: &quot;24&quot;,
-          &quot;x-release&quot;: &quot;canary&quot;,
-          &quot;x-proof-id&quot;: &quot;31fced5076f70d85d95b144b05bc6fcb&quot;,
-          &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
-          &quot;connection&quot;: &quot;close&quot;
-        },
-        &quot;latency_ms&quot;: 2.624
-      },
-      &quot;error&quot;: &quot;Unexpected HTTP response: {&#x27;status&#x27;: 503, &#x27;body&#x27;: &#x27;Injected canary failure\\n&#x27;, &#x27;headers&#x27;: {&#x27;server&#x27;: &#x27;nginx&#x27;, &#x27;date&#x27;: &#x27;Sat, 03 Oct 2026 17:46:09 GMT&#x27;, &#x27;content-type&#x27;: &#x27;text/plain&#x27;, &#x27;content-length&#x27;: &#x27;24&#x27;, &#x27;x-release&#x27;: &#x27;canary&#x27;, &#x27;x-proof-id&#x27;: &#x27;31fced5076f70d85d95b144b05bc6fcb&#x27;, &#x27;x-content-type-options&#x27;: &#x27;nosniff&#x27;, &#x27;connection&#x27;: &#x27;close&#x27;}, &#x27;latency_ms&#x27;: 2.624}&quot;
-    },
-    {
-      &quot;attempt&quot;: 2,
-      &quot;response&quot;: {
         &quot;status&quot;: 200,
         &quot;body&quot;: &quot;Hello World!\n&quot;,
         &quot;headers&quot;: {
           &quot;server&quot;: &quot;nginx&quot;,
-          &quot;date&quot;: &quot;Sat, 03 Oct 2026 17:46:10 GMT&quot;,
+          &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:49:00 GMT&quot;,
           &quot;content-type&quot;: &quot;text/plain&quot;,
           &quot;content-length&quot;: &quot;13&quot;,
           &quot;x-release&quot;: &quot;canary&quot;,
-          &quot;x-proof-id&quot;: &quot;78960105d610b6be657ad8c15d84b7e7&quot;,
+          &quot;x-proof-id&quot;: &quot;dfe24f21456f038b726f0a8a1ca31196&quot;,
           &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
           &quot;connection&quot;: &quot;close&quot;
         },
-        &quot;latency_ms&quot;: 3.195
+        &quot;latency_ms&quot;: 4.803
       }
     }
   ],
@@ -233,22 +297,25 @@
     &quot;body&quot;: &quot;Hello World!\n&quot;,
     &quot;headers&quot;: {
       &quot;server&quot;: &quot;nginx&quot;,
-      &quot;date&quot;: &quot;Sat, 03 Oct 2026 17:46:10 GMT&quot;,
+      &quot;date&quot;: &quot;Sat, 03 Oct 2026 18:49:00 GMT&quot;,
       &quot;content-type&quot;: &quot;text/plain&quot;,
       &quot;content-length&quot;: &quot;13&quot;,
       &quot;x-release&quot;: &quot;canary&quot;,
-      &quot;x-proof-id&quot;: &quot;78960105d610b6be657ad8c15d84b7e7&quot;,
+      &quot;x-proof-id&quot;: &quot;dfe24f21456f038b726f0a8a1ca31196&quot;,
       &quot;x-content-type-options&quot;: &quot;nosniff&quot;,
       &quot;connection&quot;: &quot;close&quot;
     },
-    &quot;latency_ms&quot;: 3.195
+    &quot;latency_ms&quot;: 4.803
   },
   &quot;passed&quot;: true,
-  &quot;elapsed_seconds&quot;: 1.032
+  &quot;elapsed_seconds&quot;: 0.026
+}</pre></td></tr><tr><td>recovery marker cleared</td><td class="true">PASS</td><td><pre>{
+  &quot;path&quot;: &quot;/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json&quot;,
+  &quot;removed&quot;: true
 }</pre></td></tr><tr><td>single-Pod recovery measured</td><td class="true">PASS</td><td><pre>{
-  &quot;deleted_pod&quot;: &quot;web-stable-7488f7cd6b-k72bk&quot;,
+  &quot;deleted_pod&quot;: &quot;web-stable-7488f7cd6b-8rm2x&quot;,
   &quot;requests&quot;: 50,
   &quot;failed_requests&quot;: 0,
-  &quot;elapsed_seconds&quot;: 6.008,
+  &quot;elapsed_seconds&quot;: 6.596,
   &quot;interpretation&quot;: &quot;Measured recovery on one node, not node-level high availability.&quot;
 }</pre></td></tr></table></html>

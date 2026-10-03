@@ -1,7 +1,7 @@
 {
   "ubuntu": {
-    "run_url": "https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141476784",
-    "source_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "run_url": "https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37145316744",
+    "source_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "files": [
       "acceptance/after/report.html",
       "acceptance/after/report.json",
@@ -15,12 +15,14 @@
       "demo/report.html",
       "demo/report.json",
       "log-delivery/report.html",
-      "log-delivery/report.json"
+      "log-delivery/report.json",
+      "operations/report.html",
+      "operations/report.json"
     ]
   },
   "kind": {
-    "run_url": "https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37141475487",
-    "source_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "run_url": "https://github.com/GeKosGaming/signal-devops-mtc-engineer-hack/actions/runs/37145307254",
+    "source_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "files": [
       "canary/report.html",
       "canary/report.json",
@@ -34,6 +36,8 @@
       "demo/report.json",
       "log-delivery/report.html",
       "log-delivery/report.json",
+      "operations/report.html",
+      "operations/report.json",
       "runtime/report.html",
       "runtime/report.json"
     ]

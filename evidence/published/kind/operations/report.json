@@ -1,0 +1,247 @@
+{
+  "name": "Actual operation contention and canary signal recovery",
+  "environment": {
+    "timestamp_utc": "2026-10-03T18:47:44.652065+00:00",
+    "os": {
+      "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+      "NAME": "Ubuntu",
+      "VERSION_ID": "24.04",
+      "VERSION": "24.04.5 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "UBUNTU_CODENAME": "noble",
+      "LOGO": "ubuntu-logo"
+    },
+    "git_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
+    "git_worktree_clean": true,
+    "profile": "kind"
+  },
+  "checks": [
+    {
+      "name": "safe baseline before operation probes",
+      "passed": true,
+      "evidence": {
+        "stable": {
+          "status": 200,
+          "body": "Hello World!\n",
+          "headers": {
+            "server": "nginx",
+            "date": "Sat, 03 Oct 2026 18:47:45 GMT",
+            "content-type": "text/plain",
+            "content-length": "13",
+            "x-release": "stable",
+            "x-proof-id": "19c0345e4fc49c3a75f115b21ef17089",
+            "x-content-type-options": "nosniff",
+            "connection": "close"
+          },
+          "latency_ms": 6.18
+        },
+        "canary": {
+          "status": 200,
+          "body": "Hello World!\n",
+          "headers": {
+            "server": "nginx",
+            "date": "Sat, 03 Oct 2026 18:47:45 GMT",
+            "content-type": "text/plain",
+            "content-length": "13",
+            "x-release": "canary",
+            "x-proof-id": "3ea7c431def4477c9c75ea99f6cc0a83",
+            "x-content-type-options": "nosniff",
+            "connection": "close"
+          },
+          "latency_ms": 3.584
+        }
+      },
+      "duration_seconds": 0.135
+    },
+    {
+      "name": "concurrent mutations rejected before cluster changes",
+      "passed": true,
+      "evidence": {
+        "commands": [
+          {
+            "command": [
+              "bash",
+              "scripts/deploy.sh"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.009,
+            "output": "\n\n[SIGNAL ERROR] Another SIGNAL operation is running.\n"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "scripts/canary.py",
+              "--demo"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.08,
+            "output": "\nAnother SIGNAL operation is running.\n"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "scripts/log_delivery.py",
+              "--run"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.068,
+            "output": "\nAnother SIGNAL operation is running.\n"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "scripts/acceptance.py"
+            ],
+            "returncode": 1,
+            "elapsed_seconds": 0.071,
+            "output": "\nAnother SIGNAL operation is running.\n"
+          }
+        ],
+        "configuration_unchanged": true
+      },
+      "duration_seconds": 0.526
+    },
+    {
+      "name": "SIGTERM after actual faulty canary injection restores baseline",
+      "passed": true,
+      "evidence": {
+        "signal": "SIGTERM",
+        "signal_scope": "operator PID",
+        "mode": "fault demo",
+        "mutation_observed_before_signal": true,
+        "returncode": 1,
+        "saved_report_passed": false,
+        "recovery_marker_removed": true,
+        "lock_released": true,
+        "restored": {
+          "stable": {
+            "status": 200,
+            "body": "Hello World!\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 18:48:10 GMT",
+              "content-type": "text/plain",
+              "content-length": "13",
+              "x-release": "stable",
+              "x-proof-id": "be4946ce32d9988382445a64e06559c4",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 3.742
+          },
+          "canary": {
+            "status": 200,
+            "body": "Hello World!\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 18:48:10 GMT",
+              "content-type": "text/plain",
+              "content-length": "13",
+              "x-release": "canary",
+              "x-proof-id": "2e824869de3367bb44efb1f36a2acef2",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 3.477
+          }
+        },
+        "elapsed_seconds": 25.045,
+        "process_output": "PASS 90/10 weighted routing\nPASS restore healthy canary manifests\nPASS rollback to stable 100%\nPASS stable root traffic after rollback\nPASS canary configuration restored\nPASS recovery marker cleared\nFAIL canary execution: SIGTERM received; attempting canary restoration\nFAIL controlled interruption: Canary operation interrupted: [{\"signal_number\": 15, \"signal_name\": \"SIGTERM\", \"during_cleanup\": false}]\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/demo/report.html\n"
+      },
+      "duration_seconds": 25.144
+    },
+    {
+      "name": "SIGINT during healthy promotion restores baseline",
+      "passed": true,
+      "evidence": {
+        "signal": "SIGINT",
+        "signal_scope": "operator process group",
+        "mode": "healthy promotion",
+        "mutation_observed_before_signal": true,
+        "returncode": 1,
+        "saved_report_passed": false,
+        "recovery_marker_removed": true,
+        "lock_released": true,
+        "restored": {
+          "stable": {
+            "status": 200,
+            "body": "Hello World!\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 18:48:22 GMT",
+              "content-type": "text/plain",
+              "content-length": "13",
+              "x-release": "stable",
+              "x-proof-id": "50d22f60684ff9c21f8995f5684f7bd9",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 3.619
+          },
+          "canary": {
+            "status": 200,
+            "body": "Hello World!\n",
+            "headers": {
+              "server": "nginx",
+              "date": "Sat, 03 Oct 2026 18:48:22 GMT",
+              "content-type": "text/plain",
+              "content-length": "13",
+              "x-release": "canary",
+              "x-proof-id": "add5cd8480f1c99edc6730163f153ce2",
+              "x-content-type-options": "nosniff",
+              "connection": "close"
+            },
+            "latency_ms": 3.75
+          }
+        },
+        "elapsed_seconds": 11.356,
+        "process_output": "PASS rollback to stable 100%\nPASS stable root traffic after rollback\nPASS recovery marker cleared\nFAIL canary execution: SIGINT received; attempting canary restoration\nFAIL controlled interruption: Canary operation interrupted: [{\"signal_number\": 2, \"signal_name\": \"SIGINT\", \"during_cleanup\": false}]\nReport: /home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/evidence/canary/report.html\n"
+      },
+      "duration_seconds": 11.463
+    },
+    {
+      "name": "stable baseline after operation probes",
+      "passed": true,
+      "evidence": {
+        "stable": {
+          "status": 200,
+          "body": "Hello World!\n",
+          "headers": {
+            "server": "nginx",
+            "date": "Sat, 03 Oct 2026 18:48:22 GMT",
+            "content-type": "text/plain",
+            "content-length": "13",
+            "x-release": "stable",
+            "x-proof-id": "2946a60743fe7786e224d3742ba49b78",
+            "x-content-type-options": "nosniff",
+            "connection": "close"
+          },
+          "latency_ms": 4.003
+        },
+        "canary": {
+          "status": 200,
+          "body": "Hello World!\n",
+          "headers": {
+            "server": "nginx",
+            "date": "Sat, 03 Oct 2026 18:48:22 GMT",
+            "content-type": "text/plain",
+            "content-length": "13",
+            "x-release": "canary",
+            "x-proof-id": "2e64e1d4aebd4fc6be0fcbac5a210cf8",
+            "x-content-type-options": "nosniff",
+            "connection": "close"
+          },
+          "latency_ms": 3.653
+        }
+      },
+      "duration_seconds": 0.102
+    }
+  ],
+  "passed": true
+}

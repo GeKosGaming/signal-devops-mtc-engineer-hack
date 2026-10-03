@@ -1,7 +1,7 @@
 {
   "name": "Canary promotion",
   "environment": {
-    "timestamp_utc": "2026-10-03T17:46:16.383833+00:00",
+    "timestamp_utc": "2026-10-03T18:49:07.582532+00:00",
     "os": {
       "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
       "NAME": "Ubuntu",
@@ -17,7 +17,7 @@
       "UBUNTU_CODENAME": "noble",
       "LOGO": "ubuntu-logo"
     },
-    "git_commit": "efa05ee18b02717f7ff6a54b9cf8bfa22ac9daec",
+    "git_commit": "f99de235d92b8909b59827021f41d97178e8d07b",
     "git_worktree_clean": true,
     "profile": "kind"
   },
@@ -29,32 +29,32 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 2.23,
+        "p95_ms": 5.502,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-4f86cc58c9ed4755a30778aa72204205",
+        "cohort_proof_id": "canary-1e1c74132e624f86b19b9b172e9bbfaf",
         "weighted_root_route": {
           "path": "/",
           "samples": 200,
           "counts": {
-            "stable": 181,
-            "canary": 19
+            "stable": 180,
+            "canary": 20
           },
           "expected_canary_fraction": 0.1,
-          "actual_canary_fraction": 0.095,
+          "actual_canary_fraction": 0.1,
           "tolerance": 0.08485281374238571,
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049586.62232,
+          "after_unix": 1791053352.2281363,
           "targets": {
             "counts": {
-              "loki": 1,
-              "gateway-probe": 1,
+              "node": 1,
               "nginx": 3,
               "envoy": 2,
               "prometheus": 1,
-              "node": 1
+              "gateway-probe": 1,
+              "loki": 1
             },
             "releases": {
               "stable": 2,
@@ -63,29 +63,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.173:19001",
+                  "instance": "10.244.0.23:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-rhmv8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-78zcj"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:22.951915128Z",
+                "lastScrape": "2026-10-03T18:49:20.776151305Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.173:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.23:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.250:19001",
+                  "instance": "10.244.0.114:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-skgz9"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-95s85"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:27.358200413Z",
+                "lastScrape": "2026-10-03T18:49:26.980386067Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.250:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.114:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -93,7 +93,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:32.074546197Z",
+                "lastScrape": "2026-10-03T18:49:17.016243492Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -103,64 +103,64 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:29.39727185Z",
+                "lastScrape": "2026-10-03T18:49:25.323206877Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.121:9113",
+                  "instance": "10.244.0.225:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "signal-control-plane",
-                  "pod": "web-canary-7b8f84874d-gdbn8",
+                  "pod": "web-stable-7488f7cd6b-txdkj",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:24.143393564Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.225:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.113:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-stable-7488f7cd6b-trtn6",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:16.09142946Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.113:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.184:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-canary-7b8f84874d-zvnkz",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:37.507037884Z",
+                "lastScrape": "2026-10-03T18:49:25.35275867Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.121:9113/metrics"
+                "scrapeUrl": "http://10.244.0.184:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.105:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-xsjpb",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:26.51110637Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.105:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.16:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-vhv2f",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:25.682662263Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.16:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.187:9100",
+                  "instance": "10.244.0.160:9100",
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "signal-control-plane",
-                  "pod": "node-exporter-8nmf4"
+                  "pod": "node-exporter-rp6dw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:27.715863864Z",
+                "lastScrape": "2026-10-03T18:49:12.807614743Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.187:9100/metrics"
+                "scrapeUrl": "http://10.244.0.160:9100/metrics"
               },
               {
                 "labels": {
@@ -168,7 +168,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:25.427145435Z",
+                "lastScrape": "2026-10-03T18:49:25.764582575Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -182,15 +182,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049597.688,
+                    1791053367.178,
                     "1"
                   ]
                 }
@@ -204,16 +204,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049597.703,
-                    "1791049597.507"
+                    1791053367.2,
+                    "1791053365.352"
                   ]
                 }
               ]
@@ -229,32 +229,32 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 2.658,
+        "p95_ms": 5.139,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-dc93376241e144938f7a4417bfe2aa7f",
+        "cohort_proof_id": "canary-f423d140ed33406caa31a5132a9e075c",
         "weighted_root_route": {
           "path": "/",
           "samples": 200,
           "counts": {
-            "stable": 149,
-            "canary": 51
+            "stable": 151,
+            "canary": 49
           },
           "expected_canary_fraction": 0.25,
-          "actual_canary_fraction": 0.255,
+          "actual_canary_fraction": 0.245,
           "tolerance": 0.1224744871391589,
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049598.3774347,
+          "after_unix": 1791053368.1252532,
           "targets": {
             "counts": {
-              "loki": 1,
-              "gateway-probe": 1,
+              "node": 1,
               "nginx": 3,
               "envoy": 2,
               "prometheus": 1,
-              "node": 1
+              "gateway-probe": 1,
+              "loki": 1
             },
             "releases": {
               "stable": 2,
@@ -263,29 +263,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.173:19001",
+                  "instance": "10.244.0.23:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-rhmv8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-78zcj"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:52.951915128Z",
+                "lastScrape": "2026-10-03T18:49:35.776151305Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.173:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.23:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.250:19001",
+                  "instance": "10.244.0.114:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-skgz9"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-95s85"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:42.358200413Z",
+                "lastScrape": "2026-10-03T18:49:26.980386067Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.250:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.114:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -293,7 +293,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:47.074546197Z",
+                "lastScrape": "2026-10-03T18:49:32.016243492Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -303,64 +303,64 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:44.39727185Z",
+                "lastScrape": "2026-10-03T18:49:40.323206877Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.121:9113",
+                  "instance": "10.244.0.225:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "signal-control-plane",
-                  "pod": "web-canary-7b8f84874d-gdbn8",
+                  "pod": "web-stable-7488f7cd6b-txdkj",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:39.143393564Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.225:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.113:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-stable-7488f7cd6b-trtn6",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:31.09142946Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.113:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.184:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-canary-7b8f84874d-zvnkz",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:52.507037884Z",
+                "lastScrape": "2026-10-03T18:49:40.35275867Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.121:9113/metrics"
+                "scrapeUrl": "http://10.244.0.184:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.105:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-xsjpb",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:41.51110637Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.105:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.16:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-vhv2f",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:40.682662263Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.16:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.187:9100",
+                  "instance": "10.244.0.160:9100",
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "signal-control-plane",
-                  "pod": "node-exporter-8nmf4"
+                  "pod": "node-exporter-rp6dw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:42.715863864Z",
+                "lastScrape": "2026-10-03T18:49:27.807614743Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.187:9100/metrics"
+                "scrapeUrl": "http://10.244.0.160:9100/metrics"
               },
               {
                 "labels": {
@@ -368,7 +368,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:40.427145435Z",
+                "lastScrape": "2026-10-03T18:49:40.764582575Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -382,15 +382,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049613.791,
+                    1791053380.977,
                     "1"
                   ]
                 }
@@ -404,16 +404,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049613.808,
-                    "1791049612.507"
+                    1791053380.998,
+                    "1791053380.352"
                   ]
                 }
               ]
@@ -429,32 +429,32 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 2.999,
+        "p95_ms": 4.181,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-aa405c7485b541a3b021acfba2bc7096",
+        "cohort_proof_id": "canary-3b2acaa32738483b930cee249f055994",
         "weighted_root_route": {
           "path": "/",
           "samples": 200,
           "counts": {
-            "stable": 98,
-            "canary": 102
+            "stable": 101,
+            "canary": 99
           },
           "expected_canary_fraction": 0.5,
-          "actual_canary_fraction": 0.51,
+          "actual_canary_fraction": 0.495,
           "tolerance": 0.1414213562373095,
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049614.4816122,
+          "after_unix": 1791053381.8878832,
           "targets": {
             "counts": {
-              "loki": 1,
-              "gateway-probe": 1,
+              "node": 1,
               "nginx": 3,
               "envoy": 2,
               "prometheus": 1,
-              "node": 1
+              "gateway-probe": 1,
+              "loki": 1
             },
             "releases": {
               "stable": 2,
@@ -463,29 +463,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.173:19001",
+                  "instance": "10.244.0.23:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-rhmv8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-78zcj"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:52.951915128Z",
+                "lastScrape": "2026-10-03T18:49:50.776151305Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.173:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.23:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.250:19001",
+                  "instance": "10.244.0.114:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-skgz9"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-95s85"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:57.358200413Z",
+                "lastScrape": "2026-10-03T18:49:41.980386067Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.250:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.114:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -493,7 +493,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:02.074546197Z",
+                "lastScrape": "2026-10-03T18:49:47.016243492Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -503,64 +503,64 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:59.39727185Z",
+                "lastScrape": "2026-10-03T18:49:55.323206877Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.121:9113",
+                  "instance": "10.244.0.225:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "signal-control-plane",
-                  "pod": "web-canary-7b8f84874d-gdbn8",
+                  "pod": "web-stable-7488f7cd6b-txdkj",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:54.143393564Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.225:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.113:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-stable-7488f7cd6b-trtn6",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:49:46.09142946Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.113:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.184:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-canary-7b8f84874d-zvnkz",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:07.507037884Z",
+                "lastScrape": "2026-10-03T18:49:55.35275867Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.121:9113/metrics"
+                "scrapeUrl": "http://10.244.0.184:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.105:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-xsjpb",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:56.51110637Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.105:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.16:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-vhv2f",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:46:55.682662263Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.16:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.187:9100",
+                  "instance": "10.244.0.160:9100",
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "signal-control-plane",
-                  "pod": "node-exporter-8nmf4"
+                  "pod": "node-exporter-rp6dw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:57.715863864Z",
+                "lastScrape": "2026-10-03T18:49:42.807614743Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.187:9100/metrics"
+                "scrapeUrl": "http://10.244.0.160:9100/metrics"
               },
               {
                 "labels": {
@@ -568,7 +568,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:46:55.427145435Z",
+                "lastScrape": "2026-10-03T18:49:55.764582575Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -582,15 +582,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049627.599,
+                    1791053396.802,
                     "1"
                   ]
                 }
@@ -604,16 +604,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049627.614,
-                    "1791049627.507"
+                    1791053396.825,
+                    "1791053395.352"
                   ]
                 }
               ]
@@ -629,10 +629,10 @@
         "samples": 30,
         "errors": 0,
         "error_rate": 0.0,
-        "p95_ms": 3.004,
+        "p95_ms": 5.425,
         "max_error_rate": 0.01,
         "max_p95_ms": 500,
-        "cohort_proof_id": "canary-bc5dff43fd034c7090035d0947127845",
+        "cohort_proof_id": "canary-0f9ba641b028448c931afdd39a097da1",
         "weighted_root_route": {
           "path": "/",
           "samples": 40,
@@ -646,15 +646,15 @@
           "note": "Finite independent-request smoke sample; four-sigma tolerance is not a distribution guarantee."
         },
         "fresh_canary_metrics": {
-          "after_unix": 1791049628.2044759,
+          "after_unix": 1791053397.7188585,
           "targets": {
             "counts": {
-              "loki": 1,
-              "gateway-probe": 1,
+              "node": 1,
               "nginx": 3,
               "envoy": 2,
               "prometheus": 1,
-              "node": 1
+              "gateway-probe": 1,
+              "loki": 1
             },
             "releases": {
               "stable": 2,
@@ -663,29 +663,29 @@
             "targets": [
               {
                 "labels": {
-                  "instance": "10.244.0.173:19001",
+                  "instance": "10.244.0.23:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-rhmv8"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-78zcj"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:07.951915128Z",
+                "lastScrape": "2026-10-03T18:50:05.776151305Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.173:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.23:19001/stats/prometheus"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.250:19001",
+                  "instance": "10.244.0.114:19001",
                   "job": "envoy",
                   "namespace": "envoy-gateway-system",
                   "node": "signal-control-plane",
-                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-skgz9"
+                  "pod": "envoy-signal-signal-abdcf5a2-688b98f8c7-95s85"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:12.358200413Z",
+                "lastScrape": "2026-10-03T18:49:56.980386067Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.250:19001/stats/prometheus"
+                "scrapeUrl": "http://10.244.0.114:19001/stats/prometheus"
               },
               {
                 "labels": {
@@ -693,7 +693,7 @@
                   "job": "gateway-probe"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:17.074546197Z",
+                "lastScrape": "2026-10-03T18:50:02.016243492Z",
                 "lastError": "",
                 "scrapeUrl": "http://blackbox:9115/probe?module=http_hello&target=http%3A%2F%2Fsignal-gateway.envoy-gateway-system.svc.cluster.local%2F"
               },
@@ -703,64 +703,64 @@
                   "job": "loki"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:14.39727185Z",
+                "lastScrape": "2026-10-03T18:50:10.323206877Z",
                 "lastError": "",
                 "scrapeUrl": "http://loki:3100/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.105:9113",
+                  "instance": "10.244.0.184:9113",
                   "job": "nginx",
                   "namespace": "signal",
                   "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-xsjpb",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:47:11.51110637Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.105:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.16:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-stable-7488f7cd6b-vhv2f",
-                  "release": "stable"
-                },
-                "health": "up",
-                "lastScrape": "2026-10-03T17:47:10.682662263Z",
-                "lastError": "",
-                "scrapeUrl": "http://10.244.0.16:9113/metrics"
-              },
-              {
-                "labels": {
-                  "instance": "10.244.0.121:9113",
-                  "job": "nginx",
-                  "namespace": "signal",
-                  "node": "signal-control-plane",
-                  "pod": "web-canary-7b8f84874d-gdbn8",
+                  "pod": "web-canary-7b8f84874d-zvnkz",
                   "release": "canary"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:22.507037884Z",
+                "lastScrape": "2026-10-03T18:50:10.35275867Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.121:9113/metrics"
+                "scrapeUrl": "http://10.244.0.184:9113/metrics"
               },
               {
                 "labels": {
-                  "instance": "10.244.0.187:9100",
+                  "instance": "10.244.0.225:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-stable-7488f7cd6b-txdkj",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:50:09.143393564Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.225:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.113:9113",
+                  "job": "nginx",
+                  "namespace": "signal",
+                  "node": "signal-control-plane",
+                  "pod": "web-stable-7488f7cd6b-trtn6",
+                  "release": "stable"
+                },
+                "health": "up",
+                "lastScrape": "2026-10-03T18:50:01.09142946Z",
+                "lastError": "",
+                "scrapeUrl": "http://10.244.0.113:9113/metrics"
+              },
+              {
+                "labels": {
+                  "instance": "10.244.0.160:9100",
                   "job": "node",
                   "namespace": "signal-system",
                   "node": "signal-control-plane",
-                  "pod": "node-exporter-8nmf4"
+                  "pod": "node-exporter-rp6dw"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:12.715863864Z",
+                "lastScrape": "2026-10-03T18:49:57.807614743Z",
                 "lastError": "",
-                "scrapeUrl": "http://10.244.0.187:9100/metrics"
+                "scrapeUrl": "http://10.244.0.160:9100/metrics"
               },
               {
                 "labels": {
@@ -768,7 +768,7 @@
                   "job": "prometheus"
                 },
                 "health": "up",
-                "lastScrape": "2026-10-03T17:47:10.427145435Z",
+                "lastScrape": "2026-10-03T18:50:10.764582575Z",
                 "lastError": "",
                 "scrapeUrl": "http://localhost:9090/metrics"
               }
@@ -782,15 +782,15 @@
                 {
                   "metric": {
                     "__name__": "nginx_up",
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049642.96,
+                    1791053410.88,
                     "1"
                   ]
                 }
@@ -804,16 +804,16 @@
               "result": [
                 {
                   "metric": {
-                    "instance": "10.244.0.121:9113",
+                    "instance": "10.244.0.184:9113",
                     "job": "nginx",
                     "namespace": "signal",
                     "node": "signal-control-plane",
-                    "pod": "web-canary-7b8f84874d-gdbn8",
+                    "pod": "web-canary-7b8f84874d-zvnkz",
                     "release": "canary"
                   },
                   "value": [
-                    1791049642.975,
-                    "1791049642.507"
+                    1791053410.901,
+                    "1791053410.352"
                   ]
                 }
               ]
@@ -827,7 +827,20 @@
       "passed": true,
       "evidence": null,
       "duration_seconds": 0.0
+    },
+    {
+      "name": "recovery marker cleared",
+      "passed": true,
+      "evidence": {
+        "path": "/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json",
+        "removed": true
+      },
+      "duration_seconds": 0.0
     }
   ],
-  "passed": true
+  "passed": true,
+  "recovery_marker": {
+    "path": "/home/runner/work/signal-devops-mtc-engineer-hack/signal-devops-mtc-engineer-hack/.state/canary-restore.json",
+    "removed": true
+  }
 }
